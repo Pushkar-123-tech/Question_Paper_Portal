@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Generated Question Paper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<!-- For PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* Adopted styles from `newquestionpaper.html` so the template matches that layout */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background-color:#2C2C2C;font-family:"Times New Roman", serif;display:flex;justify-content:center;padding-top:20px}
+.a4{background-color:white;position:relative;top:38px;width:794px;height:1123px;border:2px solid black;padding:40px}
+header{display:flex;justify-content:space-between;margin-bottom:24px}
+.left-header{position:relative;top:23px;left:14px;display:flex}
+.right-header{position:relative;left:16px;top:23px}
+.box{border:1px solid black;height:31px;width:131px;display:flex;align-items:center;font-size:14px;padding-left:5px}
+.box1{border:1px solid black;height:31px;width:160px;display:flex;align-items:center;font-size:15px;padding-left:5px}
+.box-center{justify-content:center;padding-left:0}
+.college{text-align:center;margin-bottom:28px}
+.college h2:first-child{font-size:16.5px;position:relative;top:11px;left:20px;font-weight:550}
+.college h2:nth-child(2){position:relative;left:3px;top:11px;font-size:16px;font-weight:600}
+.college h3{font-size:13.5px;font-weight:600;margin-top:2px;position:relative;top:13px;left:16px}
+.exam-title{text-align:center;font-size:10.5px;font-weight:500;margin-bottom:22px;position:relative;left:18px;top:6px}
+.mid-row{position:relative;top:6px;left:-17px;display:flex;justify-content:center;font-size:16.5px;font-weight:600;margin-bottom:18px}
+.center-text{text-align:center;font-size:16.5px;font-weight:700;margin:20px 0}
+.bottom-row{display:flex;justify-content:space-between;text-align:center;font-size:16.5px;font-weight:700}
+.outcome-box{border:1.5px solid black;width:97%;font-weight:bold;position:relative;top:-23px}
+.instruction-box{border-left:1.5px solid black;border-right:1.5px solid black;border-bottom:1.5px solid black;font-size:16px;padding:2px 0px;position:relative;top:-23px;left:16px;width:97%}
+.ins-title{font-weight:bold;padding:0px 6px}
+.int-list-item{list-style-type:none;border-top:1px solid black;padding:2px 6px}
+.co-list-items{position:relative;left:28px;font-size:17px;font-weight:normal;margin-left:12px;margin-bottom:12px}
+.co-list{font-weight:bold;margin-right:6px}
+table{border:2px solid black;border-collapse:collapse}
+td,th{border:1.5px solid black}
+.question-no{text-align:center;width:50px}
+.subquestion-no{width:40px}
+.question{width:auto}
+.marks{width:50px;font-weight:bold}
+.bl{width:40px}
+.co{width:60px}
+/* small tweaks for pdf screenshot consistency */
+.a4 .box .value{font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="a4" id="pdfContent">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div><img id="jspmLogo" src="" style="max-height:70px"></div>
+    <div><img id="rscoeLogo" src="" style="max-height:70px"></div>
+  </div>
+
+  <header>
+    <div class="left-header">
+      <div class="box"><label style="position: relative; top: -6px;">PRN No.</label>&nbsp;<span id="pPRN" class="value"></span></div>
+      <div class="box box-center" style="line-height:0.85;"><label style="position: relative; left: 6px;">Total No. of Questions: <span id="pTotalQ">0</span></label></div>
+    </div>
+    <div class="box1 right-header">QP Code: <span id="pQPCode" class="value" style="margin-left:6px"></span></div>
+  </header>
+
+  <section class="college">
+    <h2>JSPM’s</h2>
+    <h2>Rajarshi Shahu College of Engineering, Tathawade, Pune – 411033</h2>
+    <h3>(An autonomous institute affiliated to Savitribai Phule Pune University)</h3>
+  </section>
+
+  <section class="exam-title"><h2 id="pExam">Examination: End Semester Examination (ESE)</h2></section>
+
+  <section class="mid-row">
+    <div>Semester: <span id="pSemester"></span></div>
+    <div style="position: relative;left: 105px;">Academic Year: <span id="pYear"></span></div>
+  </section>
+
+  <section class="center-text"><div>Programme: <span id="pProgram"></span></div></section>
+
+  <section class="center-text"><div style="position:relative;top:-17px;">Examination Class: <span id="pExamClass"></span></div></section>
+
+  <section class="center-text" style="display:flex;">
+    <div class="courcecode" style="position: relative;top: -36px;left: 47px;font-size: 16px;">Course Code: <span id="pCourseCode"></span></div>
+    <div style="position: relative;top: -36px;left: 130px;font-size: 16px;">Course Name and Pattern: <span id="pCourseName"></span></div>
+  </section>
+
+  <section class="bottom-row">
+    <div style="position: relative;top: -37px;left: 13px;">Duration: <span id="pDuration"></span></div>
+    <div style="position: relative;top: -37px;left: -10px;">Max. Marks: <span id="pMarks"></span></div>
+  </section>
+
+  <section class="outcome-box" style="position: relative; left: 16px;">
+    <div class="box-title">Course Outcomes:</div>
+    <div id="pCOList" class="co-list-items" style="position: relative;left: 10px;"></div>
+  </section>
+
+  <section class="instruction-box">
+    <div class="ins-title">Instruction to the Candidates</div>
+    <div id="pInstructionList" class="inst-list" style="margin-top:6px"></div>
+  </section>
+
+  <section id="pSectionsContainer" style="width: 97%; position: relative; left: 16px; top: -10px;"></section>
+
+  <div style="margin-top:10px;text-align:center"><button class="btn" onclick="downloadPDF()"><i class="fa-solid fa-download"></i> Download PDF</button></div>
+
+</div>
+
+<script>
+let paper = {};
+
+function renderPaper(){
+  // Insert values
+  const setText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = (val ?? '')+''; };
+  setText('pPRN', paper.prnNo || '');
+  setText('pQPCode', paper.qpCode || '');
+  setText('pExam', paper.examination || '');
+  setText('pSemester', paper.semester || '');
+  setText('pYear', paper.academicYear || '');
+  setText('pProgram', paper.program || '');
+  setText('pCourseCode', paper.courseCode || '');
+  setText('pCourseName', paper.courseName || '');
+  setText('pDuration', paper.duration || '');
+  setText('pMarks', paper.maxMarks || '');
+  setText('pTotalQ', paper.totalQuestions || '');
+  setText('pTitle', paper.paperTitle || '');
+
+  // Render COs as styled items
+  const coList = document.getElementById('pCOList');
+  coList.innerHTML = '';
+  (paper.courseOutcomes || []).forEach(co => { coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; });
+
+  // Render Instructions
+  const insList = document.getElementById('pInstructionList');
+  insList.innerHTML = '';
+  (paper.instructions || []).forEach(ins => { insList.innerHTML += `<div class="int-list-item">${ins}</div>`; });
+
+  // Render Sections & Questions (match newquestionpaper table layout)
+  const secContainer = document.getElementById('pSectionsContainer');
+  secContainer.innerHTML = '';
+  (paper.sections || []).forEach((sec) => {
+    const secHtml = document.createElement('div');
+    secHtml.innerHTML = `<h3 style="width: 100%;display: flex;justify-content: center;">SECTION-${sec.title}</h3>`;
+    const tbl = document.createElement('table'); tbl.style.width = '100%'; tbl.style.marginTop = '10px';
+    // header
+    tbl.innerHTML = `
+      <tr>
+        <th class="question-no">Q. No.</th>
+        <th class="subquestion-no"></th>
+        <th class="question" style="text-align:center;">Question</th>
+        <th class="marks">Marks</th>
+        <th class="bl">BL</th>
+        <th class="co">CO</th>
+      </tr>
+    `;
+
+    (sec.questions || []).forEach(q => {
+      if(q.subQuestions && q.subQuestions.length){
+        // main question row
+        const mainRow = document.createElement('tr');
+        mainRow.innerHTML = `<td>${q.qno}</td><td></td><td></td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+        tbl.appendChild(mainRow);
+        q.subQuestions.forEach(sq => {
+          const r = document.createElement('tr');
+          r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
+          tbl.appendChild(r);
+        });
+      } else {
+        const r = document.createElement('tr');
+        r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+        tbl.appendChild(r);
+      }
+    });
+
+    secHtml.appendChild(tbl);
+    secContainer.appendChild(secHtml);
+  });
+
+  // Insert logos (optional)
+  const jspm = document.getElementById('jspmLogo');
+  const rscoe = document.getElementById('rscoeLogo');
+  if(jspm) jspm.src = paper.jspmLogo || '';
+  if(rscoe) rscoe.src = paper.rscoeLogo || '';
+}
+
+// Try reading preview from sessionStorage (set by form page) to avoid popup/postMessage
+try{
+  const stored = sessionStorage.getItem('previewPaper');
+  if(stored){
+    paper = JSON.parse(stored);
+    sessionStorage.removeItem('previewPaper');
+    renderPaper();
+  }
+}catch(e){/* ignore */}
+
+// Fallback to message-based transport
+window.addEventListener("message", (event) => {
+  paper = event.data || {};
+  renderPaper();
+});
+
+// Auto-download if requested via query param (e.g. ?download=1)
+try{
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('download') === '1'){
+    // wait for DOM and a microtask for render to complete
+    setTimeout(()=>{
+      try{ downloadPDF(); }catch(e){}
+    }, 350);
+  }
+}catch(e){/* ignore */}
+
+// PDF Download
+async function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const content = document.getElementById("pdfContent");
+
+  const canvas = await html2canvas(content);
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
+  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+  pdf.save("Generated_Question_Paper.pdf");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Teacher Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- Icons CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="/public/ui.css">
+
+<style>
+:root {
+  --primary:#7b0000;
+  --sidebar:#1f2937;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:8px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:var(--bg);color:var(--text);}
+
+/* HEADER */
+.college-header {
+  background:white;
+  border-bottom:4px solid var(--primary);
+  padding:12px 30px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+.header-row {
+  display:grid;
+  grid-template-columns:120px 1fr 120px;
+  align-items:center;
+}
+.header-logo img {
+  max-height:80px;
+}
+.header-center {
+  text-align:center;
+  color:var(--primary);
+}
+.header-center h1 {
+  font-family:"Times New Roman", serif;
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+.header-center p {
+  font-size:13px;
+  opacity:0.8;
+}
+
+/* LAYOUT */
+.dashboard-container {
+  display:flex;
+  height:calc(100vh - 110px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  width:260px;
+  background:var(--sidebar);
+  color:white;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sidebar h3 {
+  font-size:12px;
+  color:#d1d5db;
+  text-transform:uppercase;
+  margin-top:14px;
+  margin-bottom:4px;
+}
+.nav-btn {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border:none;
+  border-radius:6px;
+  background:transparent;
+  color:white;
+  text-align:left;
+  font-size:14px;
+  cursor:pointer;
+  border-left:3px solid transparent;
+  transition:0.3s;
+}
+.nav-btn:hover {
+  background:rgba(255,255,255,0.12);
+  transform:translateX(4px);
+  border-left:3px solid #ffb3b3;
+}
+.nav-btn.primary {
+  background:var(--primary);
+  color:white;
+  justify-content:center;
+  font-weight:600;
+  box-shadow:0 2px 10px rgba(123,0,0,0.3);
+}
+.nav-btn.primary:hover {
+  transform:scale(1.04);
+  opacity:0.9;
+}
+
+/* MAIN */
+.main {
+  flex:1;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  overflow-y:auto;
+}
+.card {
+  background:white;
+  padding:18px 22px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.04);
+  width:100%;
+  max-width:1100px;
+  transition:0.3s;
+}
+.card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 8px 18px rgba(0,0,0,0.12);
+}
+.card .muted {
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* STATS */
+.stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  gap:14px;
+  width:100%;
+  max-width:1100px;
+}
+.stat-card {
+  background:white;
+  padding:16px;
+  border-radius:var(--radius);
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  transition:0.25s;
+}
+.stat-card:hover {
+  transform:scale(1.03);
+}
+.stat-card h3 {
+  font-size:24px;
+  color:var(--primary);
+  margin-bottom:2px;
+}
+.stat-card p {
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* BUTTONS */
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:6px;
+}
+.btn {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 14px;
+  border:none;
+  border-radius:6px;
+  background:#e5e7eb;
+  color:black;
+  font-size:13px;
+  cursor:pointer;
+  transition:0.3s;
+}
+.btn:hover {
+  transform:scale(1.06);
+  opacity:0.9;
+}
+.btn.primary {
+  background:var(--primary);
+  color:white;
+  font-weight:600;
+}
+
+/* ACTIVITY */
+.activity {
+  list-style:none;
+  font-size:13px;
+}
+.activity li {
+  padding:8px 6px;
+  border-bottom:1px solid #e5e7eb;
+  transition:0.3s;
+}
+.activity li:hover {
+  background:rgba(123,0,0,0.05);
+  padding-left:12px;
+  border-radius:4px;
+}
+.activity li:last-child {
+  border-bottom:none;
+}
+</style>
+</head>
+<body>
+
+<header class="college-header">
+  <div class="header-row">
+    <div class="header-logo"><img src="/public/image1.png" id="jspmLogo" alt="JSPM Logo"></div>
+    <div class="header-center">
+      <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+      <p>
+        Empowered Autonomous Institute • Affiliated to SPPU • Approved by AICTE<br/>
+        NBA (UG) • NAAC “A” Grade • NIRF 151–200
+      </p>
+    </div>
+    <div class="header-logo"><img src="/public/image2.png" id="rscoeLogo" alt="RSCOE Logo"></div>
+  </div>
+</header>
+
+<div class="dashboard-container">
+
+  <aside class="sidebar">
+    <h3>Teacher Panel</h3>
+    <button class="nav-btn" onclick="dashboardView()"><i class="fa-solid fa-gauge"></i> Dashboard</button>
+    <button class="nav-btn" onclick="createPaper()"><i class="fa-solid fa-file-circle-plus"></i> Create Question Paper</button>
+    <button class="nav-btn" onclick="myPapers()"><i class="fa-solid fa-clipboard-list"></i> My Question Papers</button>
+    <button class="nav-btn" onclick="receivedPapers()"><i class="fa-solid fa-inbox"></i> Received Papers</button>
+    <button class="nav-btn" onclick="pdfDownloads()"><i class="fa-solid fa-download"></i> PDF Downloads</button>
+    <button class="nav-btn" onclick="notifications()"><i class="fa-solid fa-bell"></i> Notifications <span id="notifBadge" style="background:#ef4444;color:white;padding:3px 6px;border-radius:999px;font-size:12px;margin-left:8px;display:none">0</span></button>
+    <button class="nav-btn" onclick="openTemplate()"><i class="fa-solid fa-file-lines"></i> Paper Template</button>
+    <button class="nav-btn" onclick="openProfile()"><i class="fa-solid fa-user"></i> Profile</button>
+    <button class="nav-btn" onclick="openSecurity()"><i class="fa-solid fa-gear"></i> Security Settings</button>
+    <button class="nav-btn primary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>Welcome, Teacher 👋</h2>
+      <p class="muted">Create, manage & share question papers securely.</p>
+      <div style="margin-top:10px;">
+        <strong id="userName">Teacher</strong>
+        <div style="font-size:12px;color:#6b7280;" id="userEmail">example@mail.com</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><h3 id="totalPapers">0</h3><p>Total Papers</p></div>
+      <div class="stat-card"><h3 id="draftPapers">0</h3><p>Draft Papers</p></div>
+      <div class="stat-card"><h3 id="sharedPapers">0</h3><p>Shared Papers</p></div>
+      <div class="stat-card"><h3 id="receivedPapers">0</h3><p>Received Papers</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Quick Actions</h2>
+      <div class="actions">
+        <button id="createPaperBtn" class="btn primary"><i class="fa-solid fa-file-circle-plus"></i> Create Paper</button>
+        <button id="myPapersBtn" class="btn"><i class="fa-solid fa-files"></i> My Papers</button>
+        <!-- <button class="btn"><i class="fa-solid fa-download"></i> Download PDFs</button>
+        <button class="btn"><i class="fa-solid fa-bell"></i> Alerts</button> -->
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>My Saved Papers</h2>
+      <p class="muted">Recently saved question papers.</p>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn" onclick="loadMyPapersDashboard()">Refresh</button>
+        <button class="btn" onclick="clearMyPapersDashboard()">Clear</button>
+      </div>
+      <div id="myPapersContainerDashboard" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Recent Activity</h2>
+      <ul class="activity" id="recentActivity"></ul>
+      <div style="margin-top:8px;"><button class="btn" onclick="clearActivity()">Clear Activity</button></div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// show user info
+const token = localStorage.getItem('token');
+const userName = localStorage.getItem('userName') || 'Teacher';
+document.getElementById('userName').innerText = userName;
+
+async function fetchMyPapers(){
+  if(!token) { showToast('Not logged in', 'error'); return; }
+  const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer '+token } });
+  if(res.status===401){ localStorage.removeItem('token'); window.location.href='/login.html'; return; }
+  if(!res.ok){ showToast('Failed to fetch papers', 'error'); return; }
+  const data = await res.json();
+  document.getElementById('totalPapers').innerText = data.papers.length;
+  // show list in a small modal for convenience
+  const list = data.papers.map(p=>`${p.paperTitle || p.courseName || 'Untitled'}`).join('\n') || 'No papers';
+  showModal(`<h3>My Papers</h3><pre style="white-space:pre-wrap;">${list}</pre>`);
+}
+
+document.getElementById('createPaperBtn').addEventListener('click', ()=>{
+  if(!token) return window.location.href = '/login.html';
+  window.location.href = '/questionpaperform.html';
+});
+
+// show papers in UI
+document.getElementById('myPapersBtn').addEventListener('click', ()=>{
+  if(!token) return window.location.href = '/login.html';
+  loadMyPapersDashboard();
+});
+
+// Dashboard My Papers functions
+async function loadMyPapersDashboard(){
+  const container = document.getElementById('myPapersContainerDashboard');
+  container.innerHTML = 'Loading...';
+  if(!token){ container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.'; return; }
+  try{
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer '+token } });
+    if(res.status===401){ localStorage.removeItem('token'); window.location.href='/login.html'; return; }
+    const data = await res.json();
+    if(!res.ok) { container.innerHTML = 'Failed to load papers'; return; }
+    // If a recent paper was just saved in another tab, show it immediately if it's not present yet
+    try{
+      const last = JSON.parse(localStorage.getItem('lastSavedPaper')||'null');
+      if(last && Array.isArray(data.papers)){
+        const exists = data.papers.some(p=>String(p._id) === String(last._id));
+        if(!exists) data.papers.unshift(last);
+      }
+    }catch(e){}
+    renderMyPapersDashboard(data.papers || []);
+  }catch(e){ console.error(e); container.innerHTML = 'Network error'; }
+}
+
+function clearMyPapersDashboard(){ document.getElementById('myPapersContainerDashboard').innerHTML = ''; }
+
+function renderMyPapersDashboard(papers){
+  const container = document.getElementById('myPapersContainerDashboard');
+  if(!papers || papers.length===0){ container.innerHTML = '<div class="muted">No saved papers yet.</div>'; return; }
+  container.innerHTML = '';
+  papers.forEach(p => {
+    const d = document.createElement('div'); d.className='card';
+    const date = new Date(p.createdAt||Date.now()).toLocaleString();
+    const title = p.paperTitle && p.paperTitle.trim().length ? p.paperTitle : (p.courseName && p.courseName.trim().length ? p.courseName : 'Untitled');
+    const meta = '';
+    d.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+          <strong>${title}</strong> <span class="muted">${meta}</span>
+          <div class="muted" style="font-size:12px">${p.program||''} • ${date}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn" onclick="viewPaperDashboard('${p._id}')">View</button>
+          <button class="btn" onclick="downloadPaperDashboard('${p._id}')">Download</button>
+          <button class="btn" onclick="openSendModal('${p._id}')">Send</button>
+          <button class="btn" onclick="editPaperDashboard('${p._id}')">Edit</button>
+          <button class="btn" onclick="deletePaperDashboard('${p._id}')">Delete</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(d);
+  });
+}
+
+function logout(){
+  localStorage.removeItem('token');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  showToast('Logged out', 'success');
+  window.location.href = '/login.html';
+}
+
+// Sidebar actions
+function dashboardView(){
+  setHeader('Dashboard');
+  // scroll or refresh dashboard list
+  loadMyPapersDashboard();
+}
+function createPaper(){ if(!token) return window.location.href = '/login.html'; window.location.href = '/questionpaperform.html'; }
+function myPapers(){ if(!token) return window.location.href = '/login.html'; loadMyPapersDashboard(); }
+async function receivedPapers(){
+  if(!token) return window.location.href = '/login.html';
+  try{
+    const res = await fetch('/api/share/received', { headers: { 'Authorization': 'Bearer '+localStorage.getItem('token') } });
+    if(!res.ok) { showToast('Failed to load received items', 'error'); return; }
+    const d = await res.json();
+    const rows = d.list.map(it=>{
+      const dt = new Date(it.createdAt).toLocaleString();
+      const title = (it.paperSnapshot && (it.paperSnapshot.paperTitle || it.paperSnapshot.courseName)) || 'Untitled';
+      return `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.senderName} &lt;${it.senderEmail}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it._id}')">View</button><button class="btn" onclick="downloadReceived('${it._id}')">Download</button></div></div>`;
+    }).join('') || '<div class="muted">No items</div>';
+    showModal(`<h3>Received Papers</h3><div>${rows}</div>`);
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+
+async function viewReceived(id){
+  try{
+    const res = await fetch('/api/share/'+id, { headers: { 'Authorization': 'Bearer '+localStorage.getItem('token') } });
+    if(!res.ok) return showToast('Unable to load item', 'error');
+    const d = await res.json();
+    const paper = d.shared.paperSnapshot;
+    sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+    showToast('Opening received paper', 'info');
+    window.open('/template.html?preview=1','_blank');
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+async function downloadReceived(id){
+  try{
+    const res = await fetch('/api/share/'+id, { headers: { 'Authorization': 'Bearer '+localStorage.getItem('token') } });
+    if(!res.ok) return showToast('Unable to load item', 'error');
+    const d = await res.json();
+    const paper = d.shared.paperSnapshot;
+    sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+    showToast('Downloading received paper', 'info');
+    window.open('/template.html?preview=1&download=1','_blank');
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+function pdfDownloads(){ window.location.href = '/template.html'; }
+async function notifications(){
+  if(!token) return window.location.href = '/login.html';
+  try{
+    const res = await fetch('/api/share/received', { headers: { 'Authorization': 'Bearer '+token } });
+    if(!res.ok) return showToast('Failed to load notifications', 'error');
+    const d = await res.json();
+    const list = d.list || [];
+    if(!list.length) return showModal('<h3>Notifications</h3><p class="muted">No notifications</p>');
+    let rows = '';
+    list.forEach(it => {
+      const dt = new Date(it.createdAt).toLocaleString();
+      const title = (it.paperSnapshot && (it.paperSnapshot.paperTitle || it.paperSnapshot.courseName)) || 'Shared Paper';
+      rows += `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.senderName} &lt;${it.senderEmail}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it._id}')">View</button><button class="btn" onclick="downloadReceived('${it._id}')">Download</button></div></div>`;
+    });
+    showModal(`<h3>Notifications</h3><div>${rows}</div>`);
+    // mark notifications as seen up to the latest received
+    try{
+      const latestFromList = list && list.length? list[0].createdAt : new Date().toISOString();
+      localStorage.setItem('notifSeenAt', latestFromList);
+      const b = document.getElementById('notifBadge'); if(b) b.style.display='none';
+      // notify other tabs that notifications were seen
+      try{ localStorage.setItem('notifSeenAtUpdated', Date.now()); }catch(e){}
+    }catch(e){}
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+function openTemplate(){ window.location.href = '/template.html'; }
+function openProfile(){ showToast('Profile page not implemented.', 'info'); }
+function openSecurity(){ showToast('Security settings not implemented.', 'info'); }
+
+// Activity helpers (shared via localStorage)
+function addActivity(text){
+  try{
+    const key = 'recentActivity';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.unshift({ text, time: Date.now() });
+    if(list.length>50) list.length = 50;
+    localStorage.setItem(key, JSON.stringify(list));
+    renderActivity();
+  }catch(e){console.error(e)}
+}
+function renderActivity(){
+  const ul = document.getElementById('recentActivity');
+  if(!ul) return;
+  const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+  if(list.length===0){ ul.innerHTML = '<li class="muted">No recent activity</li>'; return; }
+  ul.innerHTML = '';
+  list.slice(0,20).forEach(it => {
+    const li = document.createElement('li');
+    const dt = new Date(it.time).toLocaleString();
+    li.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="max-width:75%">${it.text}</div>
+        <div class="muted" style="font-size:11px">${dt}</div>
+      </div>`;
+    ul.appendChild(li);
+  });
+}
+function clearActivity(){ localStorage.removeItem('recentActivity'); renderActivity(); }
+
+// Saved-paper helpers for dashboard
+async function fetchPaperByIdDashboard(id){
+  const token = localStorage.getItem('token');
+  if(!token) return null;
+  const r = await fetch('/api/papers/'+id, { headers: { 'Authorization': 'Bearer '+token } });
+  if(!r.ok) return null;
+  const d = await r.json();
+  return d.paper;
+}
+async function viewPaperDashboard(id){
+  const paper = await fetchPaperByIdDashboard(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  addActivity(`Viewed paper: ${paper.paperTitle || paper.courseName || 'Untitled'}`);
+  window.open('/template.html?preview=1','_blank');
+}
+async function downloadPaperDashboard(id){
+  const paper = await fetchPaperByIdDashboard(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  addActivity(`Downloaded paper: ${paper.paperTitle || paper.courseName || 'Untitled'}`);
+  window.open('/template.html?preview=1&download=1','_blank');
+}
+async function editPaperDashboard(id){
+  addActivity(`Opened for edit: ${id}`);
+  window.location.href = '/questionpaperform.html?edit='+id;
+}
+async function deletePaperDashboard(id){
+  const ok = await showConfirm('Delete this paper?');
+  if(!ok) return;
+  const token = localStorage.getItem('token');
+  if(!token) { showToast('Not logged in', 'error'); return; }
+  try{
+    const r = await fetch('/api/papers/'+id, { method:'DELETE', headers: { 'Authorization': 'Bearer '+token } });
+    if(!r.ok){ const dd = await r.json(); showToast(dd.message || 'Delete failed', 'error'); return; }
+    showToast('Deleted', 'success');
+    addActivity(`Deleted paper: ${id}`);
+    loadMyPapersDashboard();
+    try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+    if(typeof loadStats === 'function') loadStats();
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+
+// Send modal
+async function openSendModal(paperId){
+  const fromEmail = localStorage.getItem('userEmail') || '';
+  const fromName = localStorage.getItem('userName') || '';
+  const html = `<h3>Send Paper</h3>
+    <div class="muted">From (your email)</div>
+    <input id="sendFromEmail" value="${fromEmail}" readonly>
+    <div class="muted">From (name)</div>
+    <input id="sendFromName" value="${fromName}" readonly>
+    <div class="muted">Recipient email</div>
+    <input id="sendToEmail" placeholder="recipient@example.com">
+    <div class="muted">Message (optional)</div>
+    <textarea id="sendMessage" rows="4" placeholder="Add a short message"></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="sendCancel">Cancel</button><button class="btn primary" id="sendSend">Send</button></div>`;
+  const overlay = showModal(html);
+  overlay.querySelector('#sendCancel').addEventListener('click', ()=>overlay.remove());
+  overlay.querySelector('#sendSend').addEventListener('click', async ()=>{
+    const to = overlay.querySelector('#sendToEmail').value.trim();
+    const msg = overlay.querySelector('#sendMessage').value.trim();
+    if(!to) return showToast('Enter recipient email', 'warn');
+    try{
+      const token = localStorage.getItem('token');
+      if(!token) return window.location.href='/login.html';
+      const r = await fetch('/api/share/send', { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+token }, body: JSON.stringify({ paperId, recipientEmail: to, message: msg }) });
+      const d = await r.json();
+      if(!r.ok) { showToast(d.message || 'Send failed', 'error'); return; }
+      showToast('Shared successfully', 'success');
+      addActivity(`Shared paper to ${to}`);
+      overlay.remove();      try{ localStorage.setItem('sharedUpdated', Date.now()); }catch(e){}      if(typeof loadStats === 'function') loadStats();
+    }catch(e){ console.error(e); showToast('Network error', 'error'); }
+  });
+}
+async function loadStats(){
+  if(!token) return;
+  try{
+    const r = await fetch('/api/papers/stats', { headers: { 'Authorization': 'Bearer '+token } });
+    if(!r.ok) return;
+    const d = await r.json();
+    document.getElementById('totalPapers').innerText = d.total || 0;
+    document.getElementById('draftPapers').innerText = d.drafts || 0;
+    document.getElementById('sharedPapers').innerText = d.shared || 0;
+    document.getElementById('receivedPapers').innerText = d.received || 0;
+    // update notif badge (hide if user already saw latest)
+    try{
+      const b = document.getElementById('notifBadge');
+      if(b){
+        const latest = d.latestReceivedAt ? Date.parse(d.latestReceivedAt) : 0;
+        const seen = localStorage.getItem('notifSeenAt') ? Date.parse(localStorage.getItem('notifSeenAt')) : 0;
+        if(d.received && d.received>0 && latest > seen){ b.style.display = 'inline-block'; b.innerText = d.received; }
+        else { b.style.display = 'none'; }
+      }
+    }catch(e){}
+  }catch(e){ console.error(e); }
+}
+
+async function openProfile(){
+  if(!token) return window.location.href='/login.html';
+  try{
+    const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer '+token } });
+    if(!r.ok) return showToast('Failed to load profile','error');
+    const d = await r.json(); const u = d.user;
+    const html = `<h3>Profile</h3><div class="muted">Name</div><input id="pfName" value="${u.name}"><div class="muted">Email</div><input id="pfEmail" value="${u.email}"><div class="modal-actions"><button class="btn ghost" id="pfCancel">Cancel</button><button class="btn primary" id="pfSave">Save</button></div>`;
+    const overlay = showModal(html);
+    overlay.querySelector('#pfCancel').addEventListener('click', ()=>overlay.remove());
+    overlay.querySelector('#pfSave').addEventListener('click', async ()=>{
+      const name = overlay.querySelector('#pfName').value.trim();
+      const email = overlay.querySelector('#pfEmail').value.trim();
+      try{
+        const r2 = await fetch('/api/auth/me', { method:'PUT', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+token }, body: JSON.stringify({ name, email }) });
+        const d2 = await r2.json();
+        if(!r2.ok) { showToast(d2.message || 'Update failed', 'error'); return; }
+        showToast('Profile updated', 'success');
+        localStorage.setItem('userName', d2.user.name); localStorage.setItem('userEmail', d2.user.email);
+        document.getElementById('userName').innerText = d2.user.name;
+        overlay.remove();
+      }catch(e){ console.error(e); showToast('Network error', 'error'); }
+    });
+  }catch(e){ console.error(e); showToast('Network error','error'); }
+}
+
+async function openSecurity(){
+  if(!token) return window.location.href='/login.html';
+  const html = `<h3>Security Settings</h3><div class="muted">Change Password</div><input id="curPwd" type="password" placeholder="Current password"><input id="newPwd" type="password" placeholder="New password"><div class="modal-actions"><button class="btn ghost" id="secCancel">Cancel</button><button class="btn primary" id="secSave">Change</button></div>`;
+  const overlay = showModal(html);
+  overlay.querySelector('#secCancel').addEventListener('click', ()=>overlay.remove());
+  overlay.querySelector('#secSave').addEventListener('click', async ()=>{
+    const cur = overlay.querySelector('#curPwd').value; const np = overlay.querySelector('#newPwd').value;
+    if(!cur||!np) return showToast('Enter both fields','warn');
+    try{
+      const r = await fetch('/api/auth/me/password', { method:'PUT', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+token }, body: JSON.stringify({ currentPassword:cur, newPassword:np }) });
+      const d = await r.json(); if(!r.ok) return showToast(d.message||'Change failed','error');
+      showToast('Password changed','success'); overlay.remove();
+    }catch(e){ console.error(e); showToast('Network error','error'); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{ renderActivity(); if(token) { loadMyPapersDashboard(); loadStats(); } });
+
+// Listen for changes made in other tabs (save/delete/share)
+window.addEventListener('storage', (e) => {
+  try{
+    if(e.key === 'papersUpdated' || e.key === 'sharedUpdated'){
+      if(token){
+        loadMyPapersDashboard();
+        if(typeof loadStats === 'function') loadStats();
+        renderActivity();
+      }
+    }
+    if(e.key === 'notifSeenAtUpdated'){
+      // when notifications are seen in another tab, refresh stats and hide badge
+      if(token){ if(typeof loadStats === 'function') loadStats(); }
+    }
+  }catch(err){ console.error(err); }
+});
+</script>
+<script src="/public/ui.js"></script>
+
+</body>
+</html>

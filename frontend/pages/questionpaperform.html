@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Teacher Dashboard | Question Paper Form</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="/public/ui.css">
+
+<style>
+:root{
+  --primary:#7b0000;
+  --sidebar:#1f2937;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:8px;
+  --border:#d1d5db;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif;}
+body{background:var(--bg);color:var(--text);display:flex;height:100vh;}
+
+/* Sidebar (UNCHANGED) */
+.sidebar{
+  width:260px;background:var(--sidebar);color:white;padding:20px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.sidebar h2{font-size:18px;margin-bottom:10px;color:white;}
+.sidebar h3{
+  font-size:12px;color:#d1d5db;text-transform:uppercase;margin-top:14px;margin-bottom:6px;letter-spacing:0.5px;
+}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;border-radius:6px;
+  background:transparent;color:white;text-align:left;font-size:14px;cursor:pointer;border-left:3px solid transparent;
+  transition:0.25s ease;
+}
+.nav-btn:hover{
+  background:rgba(255,255,255,0.12);transform:translateX(3px);border-left:3px solid #ffb3b3;
+}
+.nav-btn.active{
+  background:rgba(255,255,255,0.18);border-left:3px solid #ffb3b3;font-weight:600;
+}
+
+/* Main */
+.main{flex:1;padding:28px;overflow-y:auto;}
+
+/* Card */
+.card{
+  background:white;padding:18px 22px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.04);
+  width:100%;max-width:1100px;margin-bottom:18px;transition:0.3s;border:1px solid var(--border);
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,0.12);}
+.card .muted{font-size:14px;color:var(--muted);}
+
+/* Question Boxes */
+.question-item{
+  border:1px dashed var(--border);padding:14px;border-radius:6px;background:#fafafa;margin-bottom:14px;
+}
+.flex-row{display:flex;gap:16px;flex-wrap:wrap;}
+.flex-row > div{flex:1;min-width:240px;}
+
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+.row input, .row select{flex:1;min-width:180px;}
+
+input,select,textarea{
+  width:100%;padding:10px 12px;margin-bottom:14px;border:1px solid var(--border);border-radius:6px;font-size:14px;transition:0.2s;
+}
+textarea{height:56px;resize:none;}
+
+.delete-btn{background:#dc2626;color:white;font-size:13px;padding:6px 10px;border-radius:4px;border:none;cursor:pointer;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;background:#e5e7eb;color:black;font-size:13px;cursor:pointer;transition:0.3s;border:none;}
+.btn.primary{background:var(--primary);color:white;font-weight:600;}
+.btn.secondary{background:#6b7280;color:white;}
+.btn:hover{transform:scale(1.05);opacity:0.9;}
+
+.sub-container{
+  margin-top:14px;
+  padding-left:18px;
+  border-left:2px solid var(--primary);
+  margin-left:6px;
+}
+</style>
+</head>
+<body>
+
+
+<main class="main">
+
+<section id="dashboardSection" >
+  <div class="card">
+    <h2>My Saved Papers</h2>
+    <p class="muted">Recently saved or downloaded question papers.</p>
+    <div style="margin-top:10px; display:flex; gap:8px;">
+      <button class="btn" onclick="loadMyPapers()">Refresh</button>
+      <button class="btn" onclick="clearMyPapers()">Clear Cache</button>
+    </div>
+    <div id="myPapersContainer" style="margin-top:12px;"></div>
+  </div>
+</section>
+
+<section id="formSection" style="display:none">
+
+  <div class="card">
+    <button class="btn secondary" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <div class="card">
+    <h2>Examination Form</h2>
+    <div class="flex-row">
+      <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
+      <div><label>Semester</label>
+        <select id="semester"><option value="">Select</option><option>I</option><option>II</option></select>
+      </div>
+    </div>
+    <div class="flex-row">
+      <div><label>Academic Year</label>
+        <select id="academicYear"><option value="">Select</option><option>2024-25</option><option>2025-26</option><option>2026-27</option><option>2027-28</option></select>
+      </div>
+      <div><label>Program</label>
+        <select id="program">
+          <option value="">Select</option>
+          <option>B.Tech Computer Engineering</option>
+          <option>B.Tech Information Technology</option>
+          <option>B.Tech Computer Science & Business Systems</option>
+          <option>B.Tech Automation & Robotics</option>
+          <option>B.Tech Electronics & Telecommunication Engineering</option>
+          <option>B.Tech Mechanical Engineering</option>
+          <option>B.Tech Civil Engineering</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex-row">
+      <div><label>Course Code</label><input id="courseCode" placeholder="CS2203T"/></div>
+      <div><label>Course Name</label><input id="courseName" placeholder="Data Structures [2023 Pattern]"/></div>
+      <div><label>PRN No.</label><input id="prnNo" placeholder="PRN No."/></div>
+      <div><label>QP Code</label><input id="qpCode" placeholder="QP Code"/></div>
+    </div>
+    <div class="flex-row">
+      <div><label>Duration</label>
+        <select id="duration"><option value="">Select</option><option>1.5 Hours</option><option>2 Hours</option><option>2.5 Hours</option><option>3 Hours</option></select>
+      </div>
+      <div><label>Max Marks</label>
+        <select id="maxMarks"><option value="">Select</option><option>30</option><option>50</option></select>
+      </div>
+      <div><label>Total Questions</label>
+        <select id="totalQuestions"><option value="">Select</option>
+          <option>6</option>
+          <option>7</option>
+          <option>8</option>
+          <option>9</option>
+          <option>10</option>
+          <option>11</option>
+          <option>12</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:6px;">
+      <strong class="muted">Preset Instructions</strong>
+      <div id="presetInstructions" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <label><input type="checkbox" value="Answer all questions" /> Answer all questions</label>
+        <label><input type="checkbox" value="Each question carries equal marks" /> Each question carries equal marks</label>
+        <label><input type="checkbox" value="Use of non-programmable calculator allowed" /> Use of non-programmable calculator allowed</label>
+        <label><input type="checkbox" value="Write your answers clearly" /> Write your answers clearly</label>
+        <label><input type="checkbox" value="Time management is essential" /> Time management is essential</label>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;"><button class="btn" onclick="addSelectedInstructions()">+ Add Selected Instructions</button> <button class="btn small secondary" onclick="addInstruction()">+ Add Custom Instruction</button></div>
+    </div>
+  </div> 
+
+  <div class="card"><h2>Course Outcomes</h2><div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button></div>
+  <div class="card"><h2>Instructions</h2><div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add Instruction</button></div>
+  <div class="card"><h2>Question Sections</h2><div id="sectionContainer"></div></div>
+  <div class="card"><button class="btn primary" onclick="savePaper()">Save Question Paper</button> <button class="btn" onclick="previewPaper()">Preview & Download</button></div>
+
+</section>
+
+</main>
+
+<script>
+const CO_OPTIONS = ["CO1","CO2","CO3","CO4","CO5","CO6"];
+let paperData = { paperTitle:'', semester:'', academicYear:'', program:'', courseCode:'', courseName:'', duration:'', maxMarks:0, totalQuestions:0, courseOutcomes:[], instructions:[], sections:[{title:"A",questions:[]},{title:"B",questions:[]},{title:"C",questions:[]}]};
+
+/* Sidebar active */
+function setActive(btn){
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Require auth
+const token = localStorage.getItem('token');
+if(!token){
+  showToast('Please login to create papers', 'warn');
+  window.location.href = '/login.html';
+}
+
+// show logged in user
+const name = localStorage.getItem('userName');
+if(name){
+  // place the name in sidebar header if needed
+  const h = document.querySelector('.sidebar h2');
+  if(h) h.innerHTML = `<i class="fa-solid fa-chalkboard-user"></i> ${name}`;
+}
+
+/* Navigation */
+function navigate(sec){
+  document.getElementById("dashboardSection").style.display = sec==="dashboard"?"block":"none";
+  document.getElementById("formSection").style.display = sec==="form"?"block":"none";
+  if(sec === 'dashboard') loadMyPapers(); // refresh list when user navigates to dashboard
+}
+// Redirect to dashboard page (full page) when user clicks Back
+function backToDashboard(){
+  window.location.href = '/dashboard.html';
+}
+
+/* CO */
+function addCO(){
+  const next = paperData.courseOutcomes.length+1;
+  if(next>6) return;
+  paperData.courseOutcomes.push(`CO${next}: `);
+  renderCO();
+}
+function renderCO(){
+  const c=document.getElementById("coContainer");c.innerHTML="";
+  paperData.courseOutcomes.forEach((co,i)=>{
+    c.innerHTML+=`<div class='question-box'><textarea oninput='paperData.courseOutcomes[${i}]=this.value'>${co}</textarea>
+    <button class='delete-btn' onclick='deleteCO(${i})'>Delete CO</button></div>`;
+  });
+}
+function deleteCO(i){paperData.courseOutcomes.splice(i,1);renderCO();}
+
+/* Instructions */
+function addInstruction(){paperData.instructions.push('');renderInstructions();}
+function addSelectedInstructions(){
+  const boxes = document.querySelectorAll('#presetInstructions input[type="checkbox"]:checked');
+  boxes.forEach(b => { paperData.instructions.push(b.value); b.checked = false; });
+  renderInstructions();
+}
+function renderInstructions(){
+  const c=document.getElementById("instructionContainer");c.innerHTML="";
+  paperData.instructions.forEach((ins,i)=>{
+    c.innerHTML+=`<div class='question-box'><div style="font-weight:600;margin-bottom:6px">Instruction ${i+1}</div><textarea oninput='paperData.instructions[${i}]=this.value'>${ins}</textarea>
+    <button class='delete-btn' onclick='deleteInstruction(${i})'>Delete</button></div>`;
+  });
+}
+function deleteInstruction(i){paperData.instructions.splice(i,1);renderInstructions();} 
+
+/* Sections & Questions */
+function renderSections(){
+  const c=document.getElementById("sectionContainer");c.innerHTML="";
+  paperData.sections.forEach((sec,i)=>{
+    c.innerHTML+=`<div class='card'><h3>Section ${sec.title}</h3><button class='btn small secondary' onclick='addMainQuestion(${i})'>+ Add Question</button><div id='qSec${i}'></div></div>`;
+  });
+}
+function addMainQuestion(sIdx){
+  const sec = paperData.sections[sIdx];
+  const qno = sec.questions.length+1;
+  sec.questions.push({ qno, text:"", marks:"", bl:"", co:"", subQuestions:[] });
+  renderMainQuestions(sIdx);
+}
+function renderMainQuestions(sIdx){
+  const sec = paperData.sections[sIdx];
+  const c = document.getElementById(`qSec${sIdx}`);c.innerHTML="";
+  sec.questions.forEach((q,qIdx)=>{
+    c.innerHTML+=`<div class='question-item'><label>Q${q.qno}</label><textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value'>${q.text}</textarea><div class='row'><input type='number' placeholder='Marks' oninput='paperData.sections[${sIdx}].questions[${qIdx}].marks=this.value'/><input placeholder='BL Level' oninput='paperData.sections[${sIdx}].questions[${qIdx}].bl=this.value'/><select onchange='paperData.sections[${sIdx}].questions[${qIdx}].co=this.value'><option value=''>CO</option>${CO_OPTIONS.map(co=>`<option>${co}</option>`).join("")}</select></div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><label class="muted">SubQuestions:</label><select onchange='setSubOptions(${sIdx},${qIdx},this.value)'><option value="">None</option><option value="A">A</option><option value="B">B</option></select></div>
+    <button class='delete-btn' onclick='paperData.sections[${sIdx}].questions.splice(${qIdx},1);renderMainQuestions(${sIdx})'>Delete</button><div id='subQ${sIdx}-${qIdx}' class='sub-container'></div></div>`; 
+  });
+}
+function setSubOptions(sIdx,qIdx,val){              
+  const parts = (val||"").split(',').filter(Boolean);
+  const subs = [];
+  parts.forEach((p,i)=>{ subs.push({ label: p.trim(), text:'', marks:'', bl:'', co:'' }); });
+  paperData.sections[sIdx].questions[qIdx].subQuestions = subs;
+  renderSubQuestions(sIdx,qIdx);
+}
+function renderSubQuestions(sIdx,qIdx){
+  const subs = paperData.sections[sIdx].questions[qIdx].subQuestions || [];
+  const c = document.getElementById(`subQ${sIdx}-${qIdx}`);c.innerHTML="";
+  subs.forEach((sq,i)=>{
+    c.innerHTML+=`<div class='question-box'><label>${sq.label})</label><textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].text=this.value'>${sq.text||''}</textarea><div class='row'><input type='number' placeholder='Marks' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].marks=this.value' value='${sq.marks||""}'/><input placeholder='BL Level' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].bl=this.value' value='${sq.bl||""}'/><select onchange='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].co=this.value'><option value=''>CO</option>${CO_OPTIONS.map(co=>`<option>${co}</option>`).join("")}</select></div><button class='delete-btn' onclick='deleteSubQuestion(${sIdx},${qIdx},${i})'>Delete</button></div>`;
+  });
+}
+function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestions.splice(sq,1);renderSubQuestions(s,q);}
+async function savePaper(){
+  // gather fields
+  const token = localStorage.getItem('token');
+  if(!token) { showToast('Please login first', 'error'); window.location.href='/login.html'; return; }
+
+  paperData.paperTitle = document.getElementById('paperTitle').value;
+  paperData.examination = '';
+  paperData.semester = document.getElementById('semester').value;
+  paperData.academicYear = document.getElementById('academicYear').value;
+  paperData.program = document.getElementById('program').value;
+  paperData.courseCode = document.getElementById('courseCode').value;
+  paperData.courseName = document.getElementById('courseName').value;
+  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+  paperData.duration = document.getElementById('duration').value;
+  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+  // ensure logos are present when saving so previews are consistent
+  paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
+  paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+
+  try{
+    const res = await fetch('/api/papers', {
+      method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer '+token },
+      body: JSON.stringify(paperData)
+    });
+    const data = await res.json();
+    if(!res.ok) { showToast(data.message || 'Failed to save', 'error'); return; }
+    showToast('Saved!', 'success');
+    try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+    try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
+    console.log('Saved paper', data.paper);
+    try{ // add activity entry
+      const name = paperData.paperTitle || paperData.courseName || 'Untitled';
+      const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+      list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
+      if(list.length>50) list.length = 50;
+      localStorage.setItem('recentActivity', JSON.stringify(list));
+      // If dashboard is open in another tab, it can pick it up when refreshed; also try to call renderActivity if present
+      if(typeof renderActivity === 'function') renderActivity();
+    }catch(e){/* ignore */}
+  }catch(err){ console.error(err); showToast('Network error', 'error'); }
+}
+
+function previewPaper(){
+  // populate current fields before preview
+  paperData.paperTitle = document.getElementById('paperTitle').value;
+  paperData.examination = '';
+  paperData.semester = document.getElementById('semester').value;
+  paperData.academicYear = document.getElementById('academicYear').value;
+  paperData.program = document.getElementById('program').value;
+  paperData.courseCode = document.getElementById('courseCode').value;
+  paperData.courseName = document.getElementById('courseName').value;
+  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+  paperData.duration = document.getElementById('duration').value;
+  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+
+  // minimal logos — allow user to choose files later; using placeholders
+  paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
+  paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+
+  // Use sessionStorage and navigate to template page to avoid popup/permission prompts
+  try{
+    sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
+    window.location.href = '/template.html?preview=1';
+  }catch(e){
+    // fallback to old behaviour if sessionStorage not available
+    const w = window.open('/template.html','_blank');
+    const send = () => w.postMessage(paperData, window.location.origin);
+    const t = setInterval(()=>{ try{ send(); clearInterval(t);}catch(e){} },200);
+  }
+}
+
+
+renderSections();
+renderInstructions();
+renderCO();
+
+// If this page is opened directly, show the form section by default
+if (window.location.pathname && window.location.pathname.endsWith('questionpaperform.html')) {
+  // if query includes ?list=1 then show papers list (dashboard), otherwise show form
+  if (window.location.search.includes('list=1')) navigate('dashboard');
+  else navigate('form');
+  // support ?edit=<id>
+  const qp = new URLSearchParams(window.location.search);
+  const editId = qp.get('edit');
+  if (editId) {
+    // wait a tick so functions are defined
+    setTimeout(()=>editPaper(editId), 200);
+  }
+}
+
+// ------- My Papers: load & render -------
+async function loadMyPapers(){
+  const container = document.getElementById('myPapersContainer');
+  if(!container) return; // page might not include the dashboard section
+  container.innerHTML = 'Loading...';
+  const token = localStorage.getItem('token');
+  if(!token){ container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.'; return; }
+  try{
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer '+token } });
+    if (res.status === 401){ localStorage.removeItem('token'); window.location.href = '/login.html'; return; }
+    const data = await res.json();
+    if(!res.ok) { container.innerHTML = 'Failed to load papers'; return; }
+    renderMyPapers(data.papers || []);
+  }catch(err){ console.error(err); container.innerHTML = 'Network error'; }
+}
+
+function clearMyPapers(){
+  const c = document.getElementById('myPapersContainer');
+  if(c) c.innerHTML = '';
+}
+
+function renderMyPapers(papers){
+  const container = document.getElementById('myPapersContainer');
+  if(!container) return;
+  if(!papers || papers.length===0){ container.innerHTML = '<div class="muted">No saved papers yet.</div>'; return; }
+  container.innerHTML = '';
+  papers.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    const date = new Date(p.createdAt || p.updatedAt || Date.now()).toLocaleString();
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+          <strong>${p.paperTitle || p.courseName || 'Untitled'}</strong>
+          <div class="muted" style="font-size:12px">${p.program || ''} • ${date}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn" onclick="viewPaper('${p._id}')">View</button>
+          <button class="btn" onclick="downloadPaper('${p._id}')">Download</button>
+          <button class="btn" onclick="openSendModal('${p._id}')">Send</button>
+          <button class="btn" onclick="editPaper('${p._id}')">Edit</button>
+          <button class="btn" onclick="deletePaper('${p._id}')">Delete</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function fetchPaperById(id){
+  const token = localStorage.getItem('token');
+  if(!token) return null;
+  const r = await fetch('/api/papers/'+id, { headers: { 'Authorization': 'Bearer '+token } });
+  if(!r.ok) return null;
+  const d = await r.json();
+  return d.paper;
+}
+
+async function viewPaper(id){
+  const paper = await fetchPaperById(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  try{ const name = paper.paperTitle || paper.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Viewed paper: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+  // open in new tab for preview
+  window.open('/template.html?preview=1','_blank');
+}
+
+async function downloadPaper(id){
+  const paper = await fetchPaperById(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  try{ const name = paper.paperTitle || paper.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Downloaded paper: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+  // open template which will auto-download when it sees download=1
+  window.open('/template.html?preview=1&download=1','_blank');
+}
+
+async function editPaper(id){
+  const paper = await fetchPaperById(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  // load into form
+  paperData = paper;
+  // ensure arrays exist
+  paperData.courseOutcomes = paperData.courseOutcomes || [];
+  paperData.instructions = paperData.instructions || [];
+  paperData.sections = paperData.sections || [{title:'A',questions:[]},{title:'B',questions:[]},{title:'C',questions:[]}];
+  // populate fields
+  document.getElementById('paperTitle').value = paperData.paperTitle || '';
+  document.getElementById('semester').value = paperData.semester || '';
+  document.getElementById('academicYear').value = paperData.academicYear || '';
+  document.getElementById('program').value = paperData.program || '';
+  document.getElementById('courseCode').value = paperData.courseCode || '';
+  document.getElementById('courseName').value = paperData.courseName || '';
+  document.getElementById('prnNo') && (document.getElementById('prnNo').value = paperData.prnNo || '');
+  document.getElementById('qpCode') && (document.getElementById('qpCode').value = paperData.qpCode || '');
+  document.getElementById('duration').value = paperData.duration || '';
+  document.getElementById('maxMarks').value = paperData.maxMarks || '';
+  document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
+  renderCO(); renderInstructions(); renderSections();
+  try{ const name = paperData.paperTitle || paperData.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Opened for edit: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+  navigate('form');
+}
+
+async function deletePaper(id){
+  const ok = await showConfirm('Delete this paper?');
+  if(!ok) return;
+  const token = localStorage.getItem('token');
+  if(!token) { showToast('Not logged in', 'error'); return; }
+  try{
+    const r = await fetch('/api/papers/'+id, { method:'DELETE', headers: { 'Authorization': 'Bearer '+token } });
+    if(!r.ok) { const dd = await r.json(); return showToast(dd.message || 'Delete failed', 'error'); }
+    showToast('Deleted', 'success');
+    try{ const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Deleted paper: ${id}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+    loadMyPapers();
+    try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
+}
+
+// Load papers when section loads
+loadMyPapers();
+
+// Send modal (same behavior as dashboard)
+async function openSendModal(paperId){
+  const fromEmail = localStorage.getItem('userEmail') || '';
+  const fromName = localStorage.getItem('userName') || '';
+  const html = `<h3>Send Paper</h3>
+    <div class="muted">From (your email)</div>
+    <input id="sendFromEmail" value="${fromEmail}" readonly>
+    <div class="muted">From (name)</div>
+    <input id="sendFromName" value="${fromName}" readonly>
+    <div class="muted">Recipient email</div>
+    <input id="sendToEmail" placeholder="recipient@example.com">
+    <div class="muted">Message (optional)</div>
+    <textarea id="sendMessage" rows="4" placeholder="Add a short message"></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="sendCancel">Cancel</button><button class="btn primary" id="sendSend">Send</button></div>`;
+  const overlay = showModal(html);
+  overlay.querySelector('#sendCancel').addEventListener('click', ()=>overlay.remove());
+  overlay.querySelector('#sendSend').addEventListener('click', async ()=>{
+    const to = overlay.querySelector('#sendToEmail').value.trim();
+    const msg = overlay.querySelector('#sendMessage').value.trim();
+    if(!to) return showToast('Enter recipient email', 'warn');
+    try{
+      const token = localStorage.getItem('token');
+      if(!token) return window.location.href='/login.html';
+      const r = await fetch('/api/share/send', { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+token }, body: JSON.stringify({ paperId, recipientEmail: to, message: msg }) });
+      const d = await r.json();
+      if(!r.ok) { showToast(d.message || 'Send failed', 'error'); return; }
+      showToast('Shared successfully', 'success');
+      try{ const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Shared paper to ${to}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+      overlay.remove();
+      try{ localStorage.setItem('sharedUpdated', Date.now()); }catch(e){}
+    }catch(e){ console.error(e); showToast('Network error', 'error'); }
+  });
+}
+</script>
+<script src="/public/ui.js"></script>
+
+</body>
+</html>
