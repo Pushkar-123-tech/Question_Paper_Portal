@@ -1,48 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const supabase = require('../supabase');
+const path = require('path');
+const fs = require('fs');
 const { authMiddleware: auth } = require('./auth');
 
-// Using memory storage for multer to pass buffer to Supabase
-const storage = multer.memoryStorage();
+// Store uploads in frontend/public/uploads so they are served via /public
+const uploadsDir = path.join(__dirname, '..', 'frontend', 'public', 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const fileExt = file.originalname.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    cb(null, fileName);
+  }
+});
+
 const upload = multer({ storage });
 
-// POST /api/storage/upload - Upload a file to Supabase Storage
+// POST /api/storage/upload - Upload a file to local public uploads
 router.post('/upload', auth, upload.single('file'), async (req, res) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: 'No file uploaded' });
 
-    const fileExt = file.originalname.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `uploads/${fileName}`;
-
-    // Upload to 'assets' bucket
-    const { data, error } = await supabase.storage
-      .from('assets')
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-        upsert: true
-      });
-
-    if (error) {
-        // If bucket doesn't exist, try to create it or handle error
-        if (error.message.includes('bucket not found')) {
-            return res.status(500).json({ message: 'Supabase storage bucket "assets" not found. Please create it.' });
-        }
-        throw error;
-    }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('assets')
-      .getPublicUrl(filePath);
+    const filePath = `uploads/${file.filename}`; // relative to /public
+    const publicUrl = `${req.protocol}://${req.get('host')}/public/${filePath}`;
 
     res.json({ 
       url: publicUrl, 
       path: filePath,
-      filename: fileName
+      filename: file.filename
     });
   } catch (err) {
     console.error(err);
