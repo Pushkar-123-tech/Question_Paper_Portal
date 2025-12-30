@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const supabase = require('../supabase');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_fallback_secret_key';
 
@@ -12,17 +11,29 @@ router.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: 'User already exists' });
+    // Check if user exists in profiles
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
 
-    user = new User({ name, email, password, role: 'teacher' });
-    await user.save();
+    if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    // Create profile
+    const { data: user, error: insertError } = await supabase
+      .from('profiles')
+      .insert([{ name, email, password, role: 'teacher' }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       token, 
-      user: { id: user._id, name: user.name, email: user.email } 
+      user: { id: user.id, name: user.name, email: user.email } 
     });
   } catch (err) {
     console.error(err);
@@ -36,17 +47,21 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    const { data: user, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user || user.password !== password) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       token, 
-      user: { id: user._id, name: user.name, email: user.email } 
+      user: { id: user.id, name: user.name, email: user.email } 
     });
   } catch (err) {
     console.error(err);
@@ -71,46 +86,14 @@ async function auth(req, res, next) {
 // GET /api/auth/me - get profile
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    const { data: user, error } = await supabase
+      .from('profiles')
+      .select('id, name, email, role')
+      .eq('id', req.userId)
+      .single();
+
     if (!user) return res.status(404).json({ message: 'Not found' });
-    res.json({ user: { id: user._id, name: user.name, email: user.email, role: user.role } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// PUT /api/auth/me - update profile
-router.put('/me', auth, async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ message: 'Not found' });
-
-    if (name) user.name = name;
-    if (email) user.email = email;
-
-    await user.save();
-    res.json({ user: { id: user._id, name: user.name, email: user.email, role: user.role } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// PUT /api/auth/me/password - change password
-router.put('/me/password', auth, async (req, res) => {
-  try {
-    const { newPassword } = req.body;
-    if (!newPassword) return res.status(400).json({ message: 'Missing fields' });
-    
-    const user = await User.findById(req.userId);
-    if (!user) return res.status(404).json({ message: 'Not found' });
-
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: 'Password updated' });
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

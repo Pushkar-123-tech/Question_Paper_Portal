@@ -1,16 +1,13 @@
 // Load .env
-require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+const path = require('path');
+require('dotenv').config(); // Load from root
+require('dotenv').config({ path: path.join(__dirname, '.env') }); // Load from backend folder as fallback
+
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const mongoose = require('mongoose');
+const supabase = require('./supabase');
 
 const app = express();
-
-// Connect to MongoDB Atlas
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('MongoDB connection error:', err));
 
 // Prevent caching issues
 app.use((req, res, next) => {
@@ -44,7 +41,7 @@ app.get('/', (req, res) => {
 });
 
 // Health
-app.get('/api/health', (req, res) => res.json({ ok: true, database: 'mongodb' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, database: 'supabase' }));
 
 // Fallback for client-side routes or unknown GETs (serve login page)
 app.get(/^\/(?!api).*/, (req, res) => {
@@ -58,11 +55,9 @@ module.exports = app;
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`\n🚀 Server Running with MongoDB Atlas!`);
+    console.log(`\n🚀 Server Running with Supabase!`);
     console.log(`🌐 http://localhost:${PORT}`);
     console.log(`🔐 http://localhost:${PORT}/login.html`);
     console.log(`📝 http://localhost:${PORT}/dashboard.html`);
-    console.log(`📄 http://localhost:${PORT}/questionpaperform.html`);
-    console.log(`📑 http://localhost:${PORT}/template.html\n`);
   });
 }
