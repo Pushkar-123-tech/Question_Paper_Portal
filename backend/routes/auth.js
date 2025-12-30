@@ -2,45 +2,27 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const supabase = require('../supabase');
+const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_fallback_secret_key';
 
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    // Check if user exists
-    const { data: existingUser } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-
+    const existingUser = await User.findOne({ email }).lean();
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password, role: 'teacher' });
+    await user.save();
 
-    // Create profile
-    const { data: user, error: insertError } = await supabase
-      .from('profiles')
-      .insert([{ name, email, password: hashedPassword, role: 'teacher' }])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error('Signup Insert Error:', insertError);
-      throw insertError;
-    }
-
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       token, 
-      user: { id: user.id, name: user.name, email: user.email } 
+      user: { id: user._id.toString(), name: user.name, email: user.email } 
     });
   } catch (err) {
     console.error('Signup Exception:', err);
@@ -51,38 +33,20 @@ router.post('/signup', async (req, res) => {
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
     if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    const { data: user, error: fetchError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Handle legacy plain text or null passwords if any, but prefer bcrypt
-    let isMatch = false;
-    if (user.password) {
-      if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
-        isMatch = await bcrypt.compare(password, user.password);
-      } else {
-        isMatch = (user.password === password);
-      }
-    }
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ 
       token, 
-      user: { id: user.id, name: user.name, email: user.email } 
+      user: { id: user._id.toString(), name: user.name, email: user.email } 
     });
   } catch (err) {
     console.error('Login Exception:', err);
@@ -107,14 +71,9 @@ async function auth(req, res, next) {
 // GET /api/auth/me - get profile
 router.get('/me', auth, async (req, res) => {
   try {
-    const { data: user, error } = await supabase
-      .from('profiles')
-      .select('id, name, email, role')
-      .eq('id', req.userId)
-      .single();
-
+    const user = await User.findById(req.userId).select('name email role').lean();
     if (!user) return res.status(404).json({ message: 'Not found' });
-    res.json({ user });
+    res.json({ user: { id: String(user._id), name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

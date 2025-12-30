@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('../supabase');
-const { authMiddleware: auth } = require('./auth');
 const nodemailer = require('nodemailer');
+const { authMiddleware: auth } = require('./auth');
+const User = require('../models/User');
+const Paper = require('../models/Paper');
+const Shared = require('../models/Shared');
 
 // POST /api/share/send
 router.post('/send', auth, async (req, res) => {
