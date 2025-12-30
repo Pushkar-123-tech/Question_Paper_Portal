@@ -6,6 +6,17 @@ Local full-stack app (teacher question paper builder).
 
 1. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` and `JWT_SECRET`.
 
+   - To use MongoDB Atlas (recommended for deploy):
+     1. Create a free cluster at https://www.mongodb.com/cloud/atlas.
+     2. Create a database user and note the username/password.
+     3. From Atlas: "Connect" -> "Connect your application" -> copy the connection string.
+     4. Replace <username>, <password> and <dbname> in the connection string and set it as `MONGO_URI` in `backend/.env`.
+     5. Do NOT commit `.env` or your credentials to source control — keep secrets out of the repo.
+
+   - For local development only, you can also run a local MongoDB and leave `MONGO_URI` blank to use the fallback local DB.
+
+   - When deploying (e.g., Heroku, Render, Vercel server-side), set the `MONGO_URI` environment variable in the hosting provider's settings instead of committing it to the repo.
+
 2. (Optional) To enable email sending for the "Send" feature, add SMTP env vars to `backend/.env`:
 
    Required:
