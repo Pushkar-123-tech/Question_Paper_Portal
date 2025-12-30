@@ -1,10 +1,16 @@
-// Load .env from backend directory so local backend/.env is picked up even when starting the app from project root
+// Load .env
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
+
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Prevent caching issues
 app.use((req, res, next) => {
@@ -38,7 +44,7 @@ app.get('/', (req, res) => {
 });
 
 // Health
-app.get('/api/health', (req, res) => res.json({ ok: true, database: 'supabase' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, database: 'mongodb' }));
 
 // Fallback for client-side routes or unknown GETs (serve login page)
 app.get(/^\/(?!api).*/, (req, res) => {
@@ -48,7 +54,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
 // Start Server (default port set to 3000)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server Running with Supabase!`);
+  console.log(`\n🚀 Server Running with MongoDB Atlas!`);
   console.log(`🌐 http://localhost:${PORT}`);
   console.log(`🔐 http://localhost:${PORT}/login.html`);
   console.log(`📝 http://localhost:${PORT}/dashboard.html`);
