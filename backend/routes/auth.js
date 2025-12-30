@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const supabase = require('../supabase');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_fallback_secret_key';
@@ -11,8 +12,8 @@ router.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    // Check if user exists in profiles
-    const { data: existingUser, error: fetchError } = await supabase
+    // Check if user exists
+    const { data: existingUser } = await supabase
       .from('profiles')
       .select('*')
       .eq('email', email)
@@ -20,14 +21,20 @@ router.post('/signup', async (req, res) => {
 
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create profile
     const { data: user, error: insertError } = await supabase
       .from('profiles')
-      .insert([{ name, email, password, role: 'teacher' }])
+      .insert([{ name, email, password: hashedPassword, role: 'teacher' }])
       .select()
       .single();
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('Signup Insert Error:', insertError);
+      throw insertError;
+    }
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -36,7 +43,7 @@ router.post('/signup', async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email } 
     });
   } catch (err) {
-    console.error(err);
+    console.error('Signup Exception:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -53,7 +60,21 @@ router.post('/login', async (req, res) => {
       .eq('email', email)
       .maybeSingle();
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Handle legacy plain text or null passwords if any, but prefer bcrypt
+    let isMatch = false;
+    if (user.password) {
+      if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+        isMatch = await bcrypt.compare(password, user.password);
+      } else {
+        isMatch = (user.password === password);
+      }
+    }
+
+    if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
@@ -64,7 +85,7 @@ router.post('/login', async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email } 
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login Exception:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
