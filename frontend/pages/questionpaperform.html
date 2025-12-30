@@ -105,11 +105,15 @@ textarea{height:56px;resize:none;}
     <button class="btn secondary" onclick="backToDashboard()">← Back to Dashboard</button>
   </div>
 
-  <div class="card">
-    <h2>Examination Form</h2>
-    <div class="flex-row">
-      <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
-      <div><label>Semester</label>
+    <div class="card">
+      <h2>Examination Form</h2>
+      <div class="flex-row">
+        <div><label>JSPM/Left Logo</label><input type="file" id="jspmLogoInput" accept="image/*"/></div>
+        <div><label>RSCOE/Right Logo</label><input type="file" id="rscoeLogoInput" accept="image/*"/></div>
+      </div>
+      <div class="flex-row">
+        <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
+        <div><label>Semester</label>
         <select id="semester"><option value="">Select</option><option>I</option><option>II</option></select>
       </div>
     </div>
@@ -283,80 +287,135 @@ function renderSubQuestions(sIdx,qIdx){
   });
 }
 function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestions.splice(sq,1);renderSubQuestions(s,q);}
-async function savePaper(){
-  // gather fields
-  const token = localStorage.getItem('token');
-  if(!token) { showToast('Please login first', 'error'); window.location.href='/login.html'; return; }
-
-  paperData.paperTitle = document.getElementById('paperTitle').value;
-  paperData.examination = '';
-  paperData.semester = document.getElementById('semester').value;
-  paperData.academicYear = document.getElementById('academicYear').value;
-  paperData.program = document.getElementById('program').value;
-  paperData.courseCode = document.getElementById('courseCode').value;
-  paperData.courseName = document.getElementById('courseName').value;
-  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-  paperData.duration = document.getElementById('duration').value;
-  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
-  // ensure logos are present when saving so previews are consistent
-  paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
-  paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
-
-  try{
-    const res = await fetch('/api/papers', {
-      method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer '+token },
-      body: JSON.stringify(paperData)
+  async function uploadLogo(file, bucket = 'logos') {
+    if (!file) return null;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('bucket', bucket);
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/storage/upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: formData
     });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.message || 'Upload failed');
+    }
     const data = await res.json();
-    if(!res.ok) { showToast(data.message || 'Failed to save', 'error'); return; }
-    showToast('Saved!', 'success');
-    try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
-    try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
-    console.log('Saved paper', data.paper);
-    try{ // add activity entry
-      const name = paperData.paperTitle || paperData.courseName || 'Untitled';
-      const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
-      list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
-      if(list.length>50) list.length = 50;
-      localStorage.setItem('recentActivity', JSON.stringify(list));
-      // If dashboard is open in another tab, it can pick it up when refreshed; also try to call renderActivity if present
-      if(typeof renderActivity === 'function') renderActivity();
-    }catch(e){/* ignore */}
-  }catch(err){ console.error(err); showToast('Network error', 'error'); }
-}
-
-function previewPaper(){
-  // populate current fields before preview
-  paperData.paperTitle = document.getElementById('paperTitle').value;
-  paperData.examination = '';
-  paperData.semester = document.getElementById('semester').value;
-  paperData.academicYear = document.getElementById('academicYear').value;
-  paperData.program = document.getElementById('program').value;
-  paperData.courseCode = document.getElementById('courseCode').value;
-  paperData.courseName = document.getElementById('courseName').value;
-  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-  paperData.duration = document.getElementById('duration').value;
-  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
-
-  // minimal logos — allow user to choose files later; using placeholders
-  paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
-  paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
-
-  // Use sessionStorage and navigate to template page to avoid popup/permission prompts
-  try{
-    sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
-    window.location.href = '/template.html?preview=1';
-  }catch(e){
-    // fallback to old behaviour if sessionStorage not available
-    const w = window.open('/template.html','_blank');
-    const send = () => w.postMessage(paperData, window.location.origin);
-    const t = setInterval(()=>{ try{ send(); clearInterval(t);}catch(e){} },200);
+    return data.url;
   }
-}
+
+  async function savePaper(){
+    // gather fields
+    const token = localStorage.getItem('token');
+    if(!token) { showToast('Please login first', 'error'); window.location.href='/login.html'; return; }
+
+    try {
+      // Upload logos if selected
+      const jspmInput = document.getElementById('jspmLogoInput');
+      const rscoeInput = document.getElementById('rscoeLogoInput');
+      
+      if (jspmInput.files[0]) {
+        showToast('Uploading Left Logo...', 'info');
+        paperData.jspmLogo = await uploadLogo(jspmInput.files[0]);
+      }
+      if (rscoeInput.files[0]) {
+        showToast('Uploading Right Logo...', 'info');
+        paperData.rscoeLogo = await uploadLogo(rscoeInput.files[0]);
+      }
+    } catch (err) {
+      showToast('Logo upload failed: ' + err.message, 'error');
+      return;
+    }
+
+    paperData.paperTitle = document.getElementById('paperTitle').value;
+    paperData.examination = '';
+    paperData.semester = document.getElementById('semester').value;
+    paperData.academicYear = document.getElementById('academicYear').value;
+    paperData.program = document.getElementById('program').value;
+    paperData.courseCode = document.getElementById('courseCode').value;
+    paperData.courseName = document.getElementById('courseName').value;
+    paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+    paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+    paperData.duration = document.getElementById('duration').value;
+    paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+    paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+    // ensure logos are present when saving so previews are consistent
+    paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
+    paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+
+    try{
+      const res = await fetch('/api/papers', {
+        method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer '+token },
+        body: JSON.stringify(paperData)
+      });
+      const data = await res.json();
+      if(!res.ok) { showToast(data.message || 'Failed to save', 'error'); return; }
+      showToast('Saved!', 'success');
+      try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+      try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
+      console.log('Saved paper', data.paper);
+      try{ // add activity entry
+        const name = paperData.paperTitle || paperData.courseName || 'Untitled';
+        const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+        list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
+        if(list.length>50) list.length = 50;
+        localStorage.setItem('recentActivity', JSON.stringify(list));
+        // If dashboard is open in another tab, it can pick it up when refreshed; also try to call renderActivity if present
+        if(typeof renderActivity === 'function') renderActivity();
+      }catch(e){/* ignore */}
+    }catch(err){ console.error(err); showToast('Network error', 'error'); }
+  }
+
+  async function previewPaper(){
+    // populate current fields before preview
+    paperData.paperTitle = document.getElementById('paperTitle').value;
+    paperData.examination = '';
+    paperData.semester = document.getElementById('semester').value;
+    paperData.academicYear = document.getElementById('academicYear').value;
+    paperData.program = document.getElementById('program').value;
+    paperData.courseCode = document.getElementById('courseCode').value;
+    paperData.courseName = document.getElementById('courseName').value;
+    paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+    paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+    paperData.duration = document.getElementById('duration').value;
+    paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+    paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+
+    try {
+      // Upload logos if selected
+      const jspmInput = document.getElementById('jspmLogoInput');
+      const rscoeInput = document.getElementById('rscoeLogoInput');
+      
+      if (jspmInput.files[0]) {
+        showToast('Uploading Left Logo for preview...', 'info');
+        paperData.jspmLogo = await uploadLogo(jspmInput.files[0]);
+      }
+      if (rscoeInput.files[0]) {
+        showToast('Uploading Right Logo for preview...', 'info');
+        paperData.rscoeLogo = await uploadLogo(rscoeInput.files[0]);
+      }
+    } catch (err) {
+      showToast('Logo upload failed: ' + err.message, 'error');
+      // continue anyway with placeholders
+    }
+
+    // minimal logos — allow user to choose files later; using placeholders
+    paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
+    paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+
+    // Use sessionStorage and navigate to template page to avoid popup/permission prompts
+    try{
+      sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
+      window.location.href = '/template.html?preview=1';
+    }catch(e){
+      // fallback to old behaviour if sessionStorage not available
+      const w = window.open('/template.html','_blank');
+      const send = () => w.postMessage(paperData, window.location.origin);
+      const t = setInterval(()=>{ try{ send(); clearInterval(t);}catch(e){} },200);
+    }
+  }
 
 
 renderSections();

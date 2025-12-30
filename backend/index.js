@@ -19,6 +19,7 @@ app.use(express.json({ limit: '5mb' }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/papers', require('./routes/papers'));
 app.use('/api/share', require('./routes/share'));
+app.use('/api/storage', require('./routes/storage'));
 
 // Serve ALL frontend HTML + public assets
 const pagesPath = path.join(__dirname, '..', 'frontend', 'pages');

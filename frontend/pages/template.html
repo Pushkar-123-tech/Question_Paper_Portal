@@ -213,18 +213,35 @@ try{
   }
 }catch(e){/* ignore */}
 
-// PDF Download
-async function downloadPDF(){
-  const { jsPDF } = window.jspdf;
-  const content = document.getElementById("pdfContent");
+  // PDF Download
+  async function downloadPDF(){
+    const { jsPDF } = window.jspdf;
+    const content = document.getElementById("pdfContent");
 
-  const canvas = await html2canvas(content);
-  const imgData = canvas.toDataURL("image/png");
+    const canvas = await html2canvas(content);
+    const imgData = canvas.toDataURL("image/png");
 
-  const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
-  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
-  pdf.save("Generated_Question_Paper.pdf");
-}
+    const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
+    pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+    
+    // Save to storage (optional but satisfies user's "no storage data" comment)
+    try {
+      const blob = pdf.output('blob');
+      const formData = new FormData();
+      formData.append('file', blob, `Paper_${paper.id || Date.now()}.pdf`);
+      formData.append('bucket', 'papers');
+      const token = localStorage.getItem('token');
+      if (token) {
+        fetch('/api/storage/upload', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        }).then(r => r.json()).then(d => console.log('PDF saved to storage:', d.url));
+      }
+    } catch (e) { console.error('Failed to save PDF to storage', e); }
+
+    pdf.save("Generated_Question_Paper.pdf");
+  }
 </script>
 
 </body>
