@@ -1,26 +1,15 @@
 const mongoose = require('mongoose');
 
-const subQuestionSchema = new mongoose.Schema({
-  label: String,
-  text: String,
-  marks: Number,
-  bl: String,
-  co: String
-}, { _id:false });
-
-const questionSchema = new mongoose.Schema({
-  qno: Number,
-  text: String,
-  marks: Number,
-  bl: String,
-  co: String,
-  subQuestions: [subQuestionSchema]
-}, { _id:false });
-
 const sectionSchema = new mongoose.Schema({
   title: String,
-  questions: [questionSchema]
-}, { _id:false });
+  marks: Number,
+  questions: [{
+    text: String,
+    marks: Number,
+    co: String,
+    btl: String
+  }]
+});
 
 const paperSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
