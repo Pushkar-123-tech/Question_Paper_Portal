@@ -3,17 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node backend/index.js",
-    "dev": "nodemon backend/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "scripts": {
+      "start": "node backend/index.js",
+      "dev": "nodemon backend/index.js",
+      "build": "echo 'No build needed'",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
+    "dependencies": {
+      "next": "latest",
+      "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
