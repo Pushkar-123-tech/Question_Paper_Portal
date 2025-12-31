@@ -373,11 +373,11 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
     paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
     paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
 
-    // Use sessionStorage and navigate to template page to avoid popup/permission prompts
-    try{
-      sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
-      window.location.href = '/template.html?preview=1';
-    }catch(e){
+      // Use sessionStorage and navigate to template page to avoid popup/permission prompts
+      try{
+        sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
+        window.location.href = '/template.html?preview=1&download=1';
+      }catch(e){
       // fallback to old behaviour if sessionStorage not available
       const w = window.open('/template.html','_blank');
       const send = () => w.postMessage(paperData, window.location.origin);

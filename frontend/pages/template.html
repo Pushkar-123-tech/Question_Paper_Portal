@@ -16,7 +16,8 @@
 /* Adopted styles from `newquestionpaper.html` so the template matches that layout */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background-color:#2C2C2C;font-family:"Times New Roman", serif;display:flex;justify-content:center;padding-top:20px}
-.a4{background-color:white;position:relative;top:38px;width:794px;height:1123px;border:2px solid black;padding:40px}
+.a4{background-color:white;width:794px;min-height:1123px;border:2px solid black;padding:40px;margin: 20px auto;box-shadow: 0 0 10px rgba(0,0,0,0.5);}
+.no-print{display:none !important;}
 header{display:flex;justify-content:space-between;margin-bottom:24px}
 .left-header{position:relative;top:23px;left:14px;display:flex}
 .right-header{position:relative;left:16px;top:23px}
@@ -103,7 +104,7 @@ td,th{border:1.5px solid black}
 
   <section id="pSectionsContainer" style="width: 97%; position: relative; left: 16px; top: -10px;"></section>
 
-  <div style="margin-top:10px;text-align:center"><button class="btn" onclick="downloadPDF()"><i class="fa-solid fa-download"></i> Download PDF</button></div>
+  <div style="margin-top:10px;text-align:center" id="downloadBtnContainer"><button class="btn" onclick="downloadPDF()"><i class="fa-solid fa-download"></i> Download PDF</button></div>
 
 </div>
 
@@ -128,56 +129,102 @@ function renderPaper(){
 
   // Render COs as styled items
   const coList = document.getElementById('pCOList');
-  coList.innerHTML = '';
-  (paper.courseOutcomes || []).forEach(co => { coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; });
+  if(coList) {
+    coList.innerHTML = '';
+    (paper.courseOutcomes || []).forEach(co => { 
+      coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; 
+    });
+  }
 
   // Render Instructions
   const insList = document.getElementById('pInstructionList');
-  insList.innerHTML = '';
-  (paper.instructions || []).forEach(ins => { insList.innerHTML += `<div class="int-list-item">${ins}</div>`; });
+  if(insList) {
+    insList.innerHTML = '';
+    (paper.instructions || []).forEach(ins => { 
+      insList.innerHTML += `<div class="int-list-item">${ins}</div>`; 
+    });
+  }
 
   // Render Sections & Questions (match newquestionpaper table layout)
   const secContainer = document.getElementById('pSectionsContainer');
-  secContainer.innerHTML = '';
-  (paper.sections || []).forEach((sec) => {
-    const secHtml = document.createElement('div');
-    secHtml.innerHTML = `<h3 style="width: 100%;display: flex;justify-content: center;">SECTION-${sec.title}</h3>`;
-    const tbl = document.createElement('table'); tbl.style.width = '100%'; tbl.style.marginTop = '10px';
-    // header
-    tbl.innerHTML = `
-      <tr>
-        <th class="question-no">Q. No.</th>
-        <th class="subquestion-no"></th>
-        <th class="question" style="text-align:center;">Question</th>
-        <th class="marks">Marks</th>
-        <th class="bl">BL</th>
-        <th class="co">CO</th>
-      </tr>
-    `;
+  if(secContainer) {
+    secContainer.innerHTML = '';
+    (paper.sections || []).forEach((sec) => {
+      const secHtml = document.createElement('div');
+      secHtml.innerHTML = `<h3 style="width: 100%;display: flex;justify-content: center;">SECTION-${sec.title}</h3>`;
+      const tbl = document.createElement('table'); tbl.style.width = '100%'; tbl.style.marginTop = '10px';
+      // header
+      tbl.innerHTML = `
+        <tr>
+          <th class="question-no">Q. No.</th>
+          <th class="subquestion-no"></th>
+          <th class="question" style="text-align:center;">Question</th>
+          <th class="marks">Marks</th>
+          <th class="bl">BL</th>
+          <th class="co">CO</th>
+        </tr>
+      `;
 
-    (sec.questions || []).forEach(q => {
-      if(q.subQuestions && q.subQuestions.length){
-        // main question row
-        const mainRow = document.createElement('tr');
-        mainRow.innerHTML = `<td>${q.qno}</td><td></td><td></td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
-        tbl.appendChild(mainRow);
-        q.subQuestions.forEach(sq => {
+      (sec.questions || []).forEach(q => {
+        if(q.subQuestions && q.subQuestions.length){
+          // main question row
+          const mainRow = document.createElement('tr');
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td></td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          tbl.appendChild(mainRow);
+          q.subQuestions.forEach(sq => {
+            const r = document.createElement('tr');
+            r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
+            tbl.appendChild(r);
+          });
+        } else {
           const r = document.createElement('tr');
-          r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
+          r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
           tbl.appendChild(r);
-        });
-      } else {
-        const r = document.createElement('tr');
-        r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
-        tbl.appendChild(r);
-      }
+        }
+      });
+
+      secHtml.appendChild(tbl);
+      secContainer.appendChild(secHtml);
     });
+  }
+}
 
-    secHtml.appendChild(tbl);
-    secContainer.appendChild(secHtml);
-  });
+// PDF Download
+async function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const content = document.getElementById("pdfContent");
+  const btnContainer = document.getElementById("downloadBtnContainer");
 
-  // Logos removed: no logo elements or data to set.
+  // Hide download button from PDF
+  if(btnContainer) btnContainer.classList.add('no-print');
+
+  try {
+    const canvas = await html2canvas(content, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff"
+    });
+    
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    // Add image
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    
+    const fileName = `Question_Paper_${paper.paperTitle || paper.courseName || Date.now()}.pdf`.replace(/[^a-z0-9_.-]/gi, '_');
+    pdf.save(fileName);
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    if(typeof showToast === 'function') showToast('Download failed', 'error');
+    else alert('Download failed: ' + err.message);
+  } finally {
+    if(btnContainer) btnContainer.classList.remove('no-print');
+  }
 }
 
 // Try reading preview from sessionStorage (set by form page) to avoid popup/postMessage
@@ -203,39 +250,9 @@ try{
     // wait for DOM and a microtask for render to complete
     setTimeout(()=>{
       try{ downloadPDF(); }catch(e){}
-    }, 350);
+    }, 500);
   }
 }catch(e){/* ignore */}
-
-  // PDF Download
-  async function downloadPDF(){
-    const { jsPDF } = window.jspdf;
-    const content = document.getElementById("pdfContent");
-
-    const canvas = await html2canvas(content);
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
-    pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
-    
-    // Save to storage (optional but satisfies user's "no storage data" comment)
-    try {
-      const blob = pdf.output('blob');
-      const formData = new FormData();
-      formData.append('file', blob, `Paper_${paper.id || Date.now()}.pdf`);
-      formData.append('bucket', 'papers');
-      const token = localStorage.getItem('token');
-      if (token) {
-        fetch('/api/storage/upload', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
-          body: formData
-        }).then(r => r.json()).then(d => console.log('PDF saved to storage:', d.url));
-      }
-    } catch (e) { console.error('Failed to save PDF to storage', e); }
-
-    pdf.save("Generated_Question_Paper.pdf");
-  }
 </script>
 
 </body>
