@@ -107,10 +107,10 @@ textarea{height:56px;resize:none;}
 
     <div class="card">
       <h2>Examination Form</h2>
-      <div class="flex-row">
+      <!-- <div class="flex-row">
         <div><label>JSPM/Left Logo</label><input type="file" id="jspmLogoInput" accept="image/*"/></div>
         <div><label>RSCOE/Right Logo</label><input type="file" id="rscoeLogoInput" accept="image/*"/></div>
-      </div>
+      </div> -->
       <div class="flex-row">
         <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
         <div><label>Semester</label>
@@ -287,47 +287,15 @@ function renderSubQuestions(sIdx,qIdx){
   });
 }
 function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestions.splice(sq,1);renderSubQuestions(s,q);}
-  async function uploadLogo(file, bucket = 'logos') {
-    if (!file) return null;
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('bucket', bucket);
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/storage/upload', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
-      body: formData
-    });
-    if (!res.ok) {
-      const d = await res.json();
-      throw new Error(d.message || 'Upload failed');
-    }
-    const data = await res.json();
-    return data.url;
-  }
+  // Logos have been removed from the app by request — upload function disabled intentionally.
+  async function uploadLogo(){ return null; }
 
   async function savePaper(){
     // gather fields
     const token = localStorage.getItem('token');
     if(!token) { showToast('Please login first', 'error'); window.location.href='/login.html'; return; }
 
-    try {
-      // Upload logos if selected
-      const jspmInput = document.getElementById('jspmLogoInput');
-      const rscoeInput = document.getElementById('rscoeLogoInput');
-      
-      if (jspmInput.files[0]) {
-        showToast('Uploading Left Logo...', 'info');
-        paperData.jspmLogo = await uploadLogo(jspmInput.files[0]);
-      }
-      if (rscoeInput.files[0]) {
-        showToast('Uploading Right Logo...', 'info');
-        paperData.rscoeLogo = await uploadLogo(rscoeInput.files[0]);
-      }
-    } catch (err) {
-      showToast('Logo upload failed: ' + err.message, 'error');
-      return;
-    }
+    // Logos removed: skip any logo upload or processing
 
     paperData.paperTitle = document.getElementById('paperTitle').value;
     paperData.examination = '';
@@ -341,9 +309,9 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
     paperData.duration = document.getElementById('duration').value;
     paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
     paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
-    // ensure logos are present when saving so previews are consistent
-    paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
-    paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+    // Logos removed: ensure we don't include logo fields
+    if(paperData.jspmLogo) delete paperData.jspmLogo;
+    if(paperData.rscoeLogo) delete paperData.rscoeLogo;
 
     try{
       const res = await fetch('/api/papers', {

@@ -53,10 +53,8 @@ td,th{border:1.5px solid black}
 
 <div class="a4" id="pdfContent">
 
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-    <div><img id="jspmLogo" src="" style="max-height:70px"></div>
-    <div><img id="rscoeLogo" src="" style="max-height:70px"></div>
-  </div>
+  <!-- Logos removed by request -->
+  <div style="height:6px;margin-bottom:18px"></div>
 
   <header>
     <div class="left-header">
@@ -179,11 +177,7 @@ function renderPaper(){
     secContainer.appendChild(secHtml);
   });
 
-  // Insert logos (optional)
-  const jspm = document.getElementById('jspmLogo');
-  const rscoe = document.getElementById('rscoeLogo');
-  if(jspm) jspm.src = paper.jspmLogo || '';
-  if(rscoe) rscoe.src = paper.rscoeLogo || '';
+  // Logos removed: no logo elements or data to set.
 }
 
 // Try reading preview from sessionStorage (set by form page) to avoid popup/postMessage
