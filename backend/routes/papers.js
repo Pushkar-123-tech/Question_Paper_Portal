@@ -5,19 +5,7 @@ const Shared = require('../models/Shared');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// simple auth middleware
-function auth(req, res, next){
-  const header = req.headers.authorization;
-  if (!header) return res.status(401).json({ message: 'Unauthorized' });
-  const token = header.split(' ')[1];
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    req.userId = payload.id;
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-}
+const { authMiddleware: auth } = require('./auth');
 
 // POST /api/papers - create
 router.post('/', auth, async (req, res) => {
@@ -59,14 +47,14 @@ router.get('/stats', auth, async (req, res) => {
     };
     let drafts = 0;
     for(const p of all) if(!isComplete(p)) drafts++;
-    const shared = await Shared.countDocuments({ senderId: req.userId });
+    const shared = await Shared.countDocuments({ sender_id: req.userId });
     const user = await User.findById(req.userId).lean();
-    const received = user && user.email ? await Shared.countDocuments({ recipientEmail: user.email }) : 0;
+    const received = user && user.email ? await Shared.countDocuments({ recipient_email: user.email }) : 0;
     // include latest received timestamp for notification seen logic
     let latestReceivedAt = null;
     if(user && user.email){
-      const latest = await Shared.findOne({ recipientEmail: user.email }).sort({ createdAt: -1 }).lean();
-      if(latest && latest.createdAt) latestReceivedAt = latest.createdAt;
+      const latest = await Shared.findOne({ recipient_email: user.email }).sort({ created_at: -1 }).lean();
+      if(latest && latest.created_at) latestReceivedAt = latest.created_at;
     }
     res.json({ total, drafts, shared, received, latestReceivedAt });
   }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }
