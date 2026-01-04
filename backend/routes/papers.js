@@ -6,6 +6,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 const { authMiddleware: auth } = require('./auth');
+const roleAuth = require('../middleware/roleAuth');
+const Notification = require('../models/Notification');
 
 // POST /api/papers - create
 router.post('/', auth, async (req, res) => {
@@ -15,6 +17,7 @@ router.post('/', auth, async (req, res) => {
     if (data.jspmLogo) delete data.jspmLogo;
     if (data.rscoeLogo) delete data.rscoeLogo;
     data.owner = req.userId;
+    data.status = 'draft';
     const paper = new Paper(data);
     await paper.save();
     res.json({ paper });
@@ -24,13 +27,171 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// GET /api/papers - list for current user
+// GET /api/papers - list based on role
 router.get('/', auth, async (req, res) => {
   try {
-    const papers = await Paper.find({ owner: req.userId }).sort({ createdAt: -1 });
+    const user = await User.findById(req.userId);
+    let query = {};
+
+    if (user.role === 'teacher' || user.role === 'faculty') {
+      query = { owner: req.userId };
+    } else if (user.role === 'chairman') {
+      query = { status: { $in: ['submitted_to_chairman', 'pending_coordinator', 'finalized'] } };
+    } else if (user.role === 'module_coordinator') {
+      query = { status: { $in: ['pending_coordinator', 'finalized'] } };
+    } else if (user.role === 'admin') {
+      query = {};
+    }
+
+    const papers = await Paper.find(query).populate('owner', 'name email').sort({ createdAt: -1 });
     res.json({ papers });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/papers/:id/submit - Teacher -> Chairman
+router.post('/:id/submit', auth, async (req, res) => {
+  try {
+    const paper = await Paper.findById(req.params.id);
+    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+    if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+
+    paper.status = 'submitted_to_chairman';
+    paper.workflowHistory.push({
+      action: 'submitted',
+      from: req.userId
+    });
+    await paper.save();
+
+    // Notify Chairmen
+    const chairmen = await User.find({ role: 'chairman' });
+    for (const chairman of chairmen) {
+      await new Notification({
+        recipient: chairman._id,
+        sender: req.userId,
+        paper: paper._id,
+        type: 'workflow_update',
+        message: `New question paper submitted: ${paper.paperTitle || paper.courseName}`
+      }).save();
+    }
+
+    res.json({ message: 'Submitted to Chairman', paper });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/papers/:id/forward - Chairman -> Coordinator
+router.post('/:id/forward', auth, roleAuth(['chairman']), async (req, res) => {
+  try {
+    const paper = await Paper.findById(req.params.id);
+    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+
+    paper.status = 'pending_coordinator';
+    paper.workflowHistory.push({
+      action: 'forwarded',
+      from: req.userId
+    });
+    await paper.save();
+
+    // Notify Coordinators
+    const coordinators = await User.find({ role: 'module_coordinator' });
+    for (const coordinator of coordinators) {
+      await new Notification({
+        recipient: coordinator._id,
+        sender: req.userId,
+        paper: paper._id,
+        type: 'workflow_update',
+        message: `Paper forwarded for coordination: ${paper.paperTitle || paper.courseName}`
+      }).save();
+    }
+
+    res.json({ message: 'Forwarded to Module Coordinator', paper });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/papers/:id/finalize - Coordinator -> Teacher
+router.post('/:id/finalize', auth, roleAuth(['module_coordinator']), async (req, res) => {
+  try {
+    const paper = await Paper.findById(req.params.id);
+    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+
+    paper.status = 'finalized';
+    paper.workflowHistory.push({
+      action: 'finalized',
+      from: req.userId,
+      to: paper.owner
+    });
+    await paper.save();
+
+    // Notify Teacher
+    await new Notification({
+      recipient: paper.owner,
+      sender: req.userId,
+      paper: paper._id,
+      type: 'finalized',
+      message: `Your paper has been finalized: ${paper.paperTitle || paper.courseName}`
+    }).save();
+
+    res.json({ message: 'Paper finalized and teacher notified', paper });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/papers/:id/comment
+router.post('/:id/comment', auth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    const paper = await Paper.findById(req.params.id);
+    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+
+    const user = await User.findById(req.userId);
+    paper.comments.push({
+      user: req.userId,
+      userName: user.name,
+      role: user.role,
+      text
+    });
+    
+    paper.workflowHistory.push({
+      action: 'commented',
+      from: req.userId
+    });
+
+    await paper.save();
+
+    // Notify owner if not the owner
+    if (String(paper.owner) !== String(req.userId)) {
+      await new Notification({
+        recipient: paper.owner,
+        sender: req.userId,
+        paper: paper._id,
+        type: 'comment',
+        message: `New comment on your paper from ${user.role}: ${text.substring(0, 50)}...`
+      }).save();
+    }
+
+    res.json({ message: 'Comment added', paper });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/papers/notifications
+router.get('/notifications/all', auth, async (req, res) => {
+  try {
+    const notifications = await Notification.find({ recipient: req.userId })
+      .populate('sender', 'name role')
+      .populate('paper', 'paperTitle courseName')
+      .sort({ createdAt: -1 })
+      .limit(20);
+    res.json({ notifications });
+  } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -63,9 +224,20 @@ router.get('/stats', auth, async (req, res) => {
 // GET /api/papers/:id - get single
 router.get('/:id', auth, async (req, res) => {
   try {
-    const p = await Paper.findById(req.params.id);
+    const p = await Paper.findById(req.params.id).populate('owner', 'name email');
     if (!p) return res.status(404).json({ message: 'Not found' });
-    if (String(p.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+    
+    const user = await User.findById(req.userId);
+    // Access control: owner OR (Chairman if submitted+) OR (Coordinator if pending+) OR Admin
+    const isOwner = String(p.owner._id) === String(req.userId);
+    const isChairman = user.role === 'chairman' && ['submitted_to_chairman', 'pending_coordinator', 'finalized'].includes(p.status);
+    const isCoordinator = user.role === 'module_coordinator' && ['pending_coordinator', 'finalized'].includes(p.status);
+    const isAdmin = user.role === 'admin';
+
+    if (!isOwner && !isChairman && !isCoordinator && !isAdmin) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    
     res.json({ paper: p });
   } catch (err) {
     console.error(err);

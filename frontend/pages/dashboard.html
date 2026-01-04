@@ -295,8 +295,55 @@ body{background:var(--bg);color:var(--text);}
 <script>
 // show user info
 const token = localStorage.getItem('token');
-const userName = localStorage.getItem('userName') || 'Teacher';
-document.getElementById('userName').innerText = userName;
+let currentUser = null;
+
+async function initDashboard() {
+  if (!token) { window.location.href = '/login.html'; return; }
+  
+  try {
+    const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) { logout(); return; }
+    const data = await res.json();
+    currentUser = data.user;
+    
+    document.getElementById('userName').innerText = currentUser.name;
+    document.getElementById('userEmail').innerText = currentUser.email;
+    
+    updateUIForRole(currentUser.role);
+    loadMyPapersDashboard();
+    loadStats();
+    renderActivity();
+  } catch (err) {
+    console.error(err);
+    showToast('Session expired', 'error');
+    logout();
+  }
+}
+
+function updateUIForRole(role) {
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarTitle = sidebar.querySelector('h3');
+  const mainTitle = document.querySelector('.main h2');
+  
+  sidebarTitle.innerText = role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ') + ' Panel';
+  mainTitle.innerText = `Welcome, ${role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ')} 👋`;
+
+  // Hide/Show role specific buttons
+  if (role === 'admin') {
+    const adminBtn = document.createElement('button');
+    adminBtn.className = 'nav-btn';
+    adminBtn.innerHTML = '<i class="fa-solid fa-users-gear"></i> Admin Panel';
+    adminBtn.onclick = () => window.location.href = '/admin.html';
+    sidebar.insertBefore(adminBtn, sidebar.querySelector('button[onclick="logout()"]'));
+  }
+  
+  const createBtn = document.getElementById('createPaperBtn');
+  if (role !== 'teacher' && role !== 'faculty' && role !== 'admin') {
+    if (createBtn) createBtn.style.display = 'none';
+    const sidebarCreate = sidebar.querySelector('button[onclick="createPaper()"]');
+    if (sidebarCreate) sidebarCreate.style.display = 'none';
+  }
+}
 
 async function fetchMyPapers(){
   if(!token) { showToast('Not logged in', 'error'); return; }
@@ -347,30 +394,103 @@ function clearMyPapersDashboard(){ document.getElementById('myPapersContainerDas
 
 function renderMyPapersDashboard(papers){
   const container = document.getElementById('myPapersContainerDashboard');
-  if(!papers || papers.length===0){ container.innerHTML = '<div class="muted">No saved papers yet.</div>'; return; }
+  if(!papers || papers.length===0){ container.innerHTML = '<div class="muted">No papers found in your workflow.</div>'; return; }
   container.innerHTML = '';
   papers.forEach(p => {
     const d = document.createElement('div'); d.className='card';
     const date = new Date(p.createdAt||Date.now()).toLocaleString();
     const title = p.paperTitle && p.paperTitle.trim().length ? p.paperTitle : (p.courseName && p.courseName.trim().length ? p.courseName : 'Untitled');
-    const meta = '';
+    const statusText = p.status.toUpperCase().replace(/_/g, ' ');
+    const ownerName = p.owner ? p.owner.name : 'Unknown';
+    
+    let actionsHtml = `
+      <button class="btn" onclick="viewPaperDashboard('${p._id}')">View</button>
+      <button class="btn" onclick="downloadPaperDashboard('${p._id}')">Download</button>
+      <button class="btn" onclick="openCommentModal('${p._id}')">Comment</button>
+    `;
+
+    // Workflow actions
+    if (currentUser.role === 'teacher' || currentUser.role === 'faculty') {
+      if (p.status === 'draft') {
+        actionsHtml += `<button class="btn primary" onclick="submitPaper('${p._id}')">Submit to Chairman</button>`;
+        actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p._id}')">Edit</button>`;
+        actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p._id}')">Delete</button>`;
+      }
+    } else if (currentUser.role === 'chairman') {
+      if (p.status === 'submitted_to_chairman') {
+        actionsHtml += `<button class="btn primary" onclick="forwardPaper('${p._id}')">Forward to Coordinator</button>`;
+      }
+    } else if (currentUser.role === 'module_coordinator') {
+      if (p.status === 'pending_coordinator') {
+        actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p._id}')">Finalize & Notify</button>`;
+      }
+    }
+
     d.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <div>
-          <strong>${title}</strong> <span class="muted">${meta}</span>
-          <div class="muted" style="font-size:12px">${p.program||''} • ${date}</div>
+          <strong>${title}</strong> <span class="muted" style="background:#e5e7eb; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:8px;">${statusText}</span>
+          <div class="muted" style="font-size:12px">${p.program||''} • By: ${ownerName} • ${date}</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn" onclick="viewPaperDashboard('${p._id}')">View</button>
-          <button class="btn" onclick="downloadPaperDashboard('${p._id}')">Download</button>
-          <button class="btn" onclick="openSendModal('${p._id}')">Send</button>
-          <button class="btn" onclick="editPaperDashboard('${p._id}')">Edit</button>
-          <button class="btn" onclick="deletePaperDashboard('${p._id}')">Delete</button>
+          ${actionsHtml}
         </div>
       </div>
     `;
     container.appendChild(d);
   });
+}
+
+async function submitPaper(id) {
+  if (!confirm('Submit this paper to Chairman?')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Submit failed');
+    showToast('Submitted to Chairman', 'success');
+    loadMyPapersDashboard();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function forwardPaper(id) {
+  if (!confirm('Forward this paper to Module Coordinator?')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/forward`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Forward failed');
+    showToast('Forwarded to Coordinator', 'success');
+    loadMyPapersDashboard();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function finalizePaper(id) {
+  if (!confirm('Finalize this paper and notify teacher?')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/finalize`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Finalize failed');
+    showToast('Paper finalized', 'success');
+    loadMyPapersDashboard();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function openCommentModal(id) {
+  const html = `<h3>Add Comment</h3>
+    <textarea id="commentText" rows="4" style="width:100%; padding:10px; margin-top:10px;" placeholder="Suggest changes..."></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="commentCancel">Cancel</button><button class="btn primary" id="commentSave">Post Comment</button></div>`;
+  const overlay = showModal(html);
+  overlay.querySelector('#commentCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#commentSave').onclick = async () => {
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return showToast('Enter comment', 'warn');
+    try {
+      const res = await fetch(`/api/papers/${id}/comment`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ text })
+      });
+      if (!res.ok) throw new Error('Comment failed');
+      showToast('Comment added', 'success');
+      overlay.remove();
+      loadMyPapersDashboard();
+    } catch (err) { showToast(err.message, 'error'); }
+  };
 }
 
 function logout(){
@@ -625,7 +745,10 @@ async function openSecurity(){
   });
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{ renderActivity(); if(token) { loadMyPapersDashboard(); loadStats(); } });
+document.addEventListener('DOMContentLoaded', ()=>{ 
+  renderActivity(); 
+  initDashboard(); 
+});
 
 // Listen for changes made in other tabs (save/delete/share)
 window.addEventListener('storage', (e) => {

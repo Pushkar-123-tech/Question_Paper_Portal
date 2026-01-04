@@ -176,7 +176,12 @@ textarea{height:56px;resize:none;}
   <div class="card"><h2>Course Outcomes</h2><div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button></div>
   <div class="card"><h2>Instructions</h2><div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add Instruction</button></div>
   <div class="card"><h2>Question Sections</h2><div id="sectionContainer"></div></div>
-  <div class="card"><button class="btn primary" onclick="savePaper()">Save Question Paper</button> <button class="btn" onclick="previewPaper()">Preview & Download</button></div>
+    <div class="card">
+      <div id="paperStatusContainer" style="margin-bottom:10px; font-weight:bold; color:var(--primary);"></div>
+      <button class="btn primary" onclick="savePaper()">Save Draft</button> 
+      <button class="btn primary" id="submitToChairmanBtn" style="display:none;" onclick="submitToChairmanFromForm()">Submit to Chairman</button>
+      <button class="btn" onclick="previewPaper()">Preview & Download</button>
+    </div>
 
 </section>
 
@@ -323,6 +328,12 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
       showToast('Saved!', 'success');
       try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
       try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
+      
+      // Update UI with status and submit button
+      paperData._id = data.paper._id;
+      paperData.status = data.paper.status;
+      updateStatusUI();
+
       console.log('Saved paper', data.paper);
       try{ // add activity entry
         const name = paperData.paperTitle || paperData.courseName || 'Untitled';
@@ -386,9 +397,41 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
   }
 
 
+function updateStatusUI() {
+  const container = document.getElementById('paperStatusContainer');
+  const btn = document.getElementById('submitToChairmanBtn');
+  if (paperData._id && paperData.status) {
+    container.innerText = 'Status: ' + paperData.status.toUpperCase().replace(/_/g, ' ');
+    if (paperData.status === 'draft') {
+      btn.style.display = 'inline-flex';
+    } else {
+      btn.style.display = 'none';
+    }
+  } else {
+    container.innerText = '';
+    btn.style.display = 'none';
+  }
+}
+
+async function submitToChairmanFromForm() {
+  if (!paperData._id) return showToast('Save as draft first', 'warn');
+  if (!confirm('Submit to Chairman?')) return;
+  try {
+    const res = await fetch(`/api/papers/${paperData._id}/submit`, {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error('Submit failed');
+    showToast('Submitted to Chairman!', 'success');
+    paperData.status = 'submitted_to_chairman';
+    updateStatusUI();
+    try { localStorage.setItem('papersUpdated', Date.now()); } catch (e) {}
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
 renderSections();
 renderInstructions();
 renderCO();
+updateStatusUI();
 
 // If this page is opened directly, show the form section by default
 if (window.location.pathname && window.location.pathname.endsWith('questionpaperform.html')) {
@@ -498,10 +541,10 @@ async function editPaper(id){
   document.getElementById('courseName').value = paperData.courseName || '';
   document.getElementById('prnNo') && (document.getElementById('prnNo').value = paperData.prnNo || '');
   document.getElementById('qpCode') && (document.getElementById('qpCode').value = paperData.qpCode || '');
-  document.getElementById('duration').value = paperData.duration || '';
-  document.getElementById('maxMarks').value = paperData.maxMarks || '';
-  document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
-  renderCO(); renderInstructions(); renderSections();
+    document.getElementById('duration').value = paperData.duration || '';
+    document.getElementById('maxMarks').value = paperData.maxMarks || '';
+    document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
+    renderCO(); renderInstructions(); renderSections(); updateStatusUI();
   try{ const name = paperData.paperTitle || paperData.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Opened for edit: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
   navigate('form');
 }

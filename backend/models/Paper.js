@@ -40,6 +40,24 @@ const paperSchema = new mongoose.Schema({
   sections: [sectionSchema],
   qpCode: String,
   prnNo: String,
+  status: { 
+    type: String, 
+    enum: ['draft', 'submitted_to_chairman', 'pending_coordinator', 'finalized'], 
+    default: 'draft' 
+  },
+  comments: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    userName: String,
+    role: String,
+    text: String,
+    createdAt: { type: Date, default: Date.now }
+  }],
+  workflowHistory: [{
+    action: String, // 'submitted', 'forwarded', 'commented', 'finalized'
+    from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    timestamp: { type: Date, default: Date.now }
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 
