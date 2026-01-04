@@ -11,9 +11,10 @@
             box-sizing: border-box;
         }
 
-        body {background-color:#2C2C2C;
+        body {
+            background-color: #2C2C2C;
             font-family: "Times New Roman", serif;
-         
+
             display: flex;
             justify-content: center;
             padding-top: 20px;
@@ -42,6 +43,7 @@
             left: 14px;
             display: flex;
         }
+
         .right-header {
             position: relative;
             left: 16px;
@@ -94,11 +96,11 @@
             top: 11px;
             font-size: 16px;
             font-weight: 600;
-            
+
         }
 
         .college h3 {
-            font-size: 13.5px;    
+            font-size: 13.5px;
             font-weight: 600;
             margin-top: 2px;
             position: relative;
@@ -137,12 +139,101 @@
         .bottom-row {
             display: flex;
             justify-content: space-between;
+            text-align: center;
+            font-size: 16.5px;
+            font-weight: 700;
+        }
+
+
+        .outcome-box {
+            border: 1.5px solid black;
+            width: 97%;
+            font-weight: bold;
+            position: relative;
+            top: -23px;
+
+        }
+
+        .instruction-box {
+            border-left: 1.5px solid black;
+            border-right: 1.5px solid black;
+            border-bottom: 1.5px solid black;
             font-size: 16px;
-            font-weight: 600;
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            right: 40px;
+            padding: 2px 0px;
+            position: relative;
+            top: -23px;
+            left: 16px;
+            width: 97%;
+        }
+
+        .ins-title {
+            font-weight: bold;
+            padding: 0px 6px;
+        }
+
+        .int-list-item {
+            list-style-type: none;
+            border-top: 1px solid black;
+            padding: 2px 6px;
+        }
+
+
+        .co-list-items {
+            position: relative;
+            left: 28px;
+            font-size: 17px;
+            font-weight: normal;
+            /* margin-top: 8px; */
+            margin-left: 12px;
+            margin-bottom: 12px;
+        }
+
+        .co-list {
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+
+
+
+        table {
+            border: 2px solid black;
+            /* outer border */
+            border-collapse: collapse;
+            /* makes all borders single line */
+        }
+
+        td,
+        th {
+            border: 1.5px solid black;
+            /* inner single-line borders */
+        }
+
+        .question-no {
+            text-align: center;
+            width: 50px;
+        }
+
+        .subquestion-no {
+            width: 40px;
+        }
+
+        .question {
+            width: auto;
+        }
+
+        /* fills remaining space */
+        .marks {
+            width: 50px;
+            font-weight: bold;
+        }
+
+        .bl {
+            width: 40px;
+        }
+
+        .co {
+            width: 60px;
         }
     </style>
 </head>
@@ -171,29 +262,286 @@
         </section>
 
         <section class="mid-row">
-            <div >Semester: I</div>
+            <div>Semester: I</div>
             <div style="position: relative;left: 105px; ">Academic Year: 2025–26</div>
         </section>
 
         <section class="center-text">
-            <div  style="position: relative;top: 3px;left: 15px;">Programme: Computer Engineering</div>
+            <div style="position: relative;top: 3px;left: 15px;">Programme: Computer Engineering</div>
         </section>
 
         <section class="center-text">
+
             <div style="position: relative;top: -17px;left: 15px;">Examination Class: S.Y., B. Tech.</div>
         </section>
 
-        <section class="center-text">
-            <div>Course Name and Pattern: Data Structures [2023 Pattern]</div>
+        <section class="center-text" style="display: flex;">
+            <div class="courcecode" style="position: relative;top: -36px;left: 47px;font-size: 16px;">Cource
+                Code:CS2203T</div>
+            <div style="position: relative;top: -36px;left: 130px;font-size: 16px;">Course Name and Pattern: Data
+                Structures [2023 Pattern]</div>
         </section>
 
         <section class="bottom-row">
-            <div>Course Code: CS2203T</div>
-            <div>Duration: 2 Hours</div>
-            <div>Max. Marks: 50 Marks</div>
+            <div style="position: relative;top: -37px;left: 13px;">Duration: 2 Hours</div>
+            <div style="position: relative;top: -37px;left: -10px;">Max. Marks: 50 Marks</div>
         </section>
 
+
+
+        <section class="outcome-box" style="position: relative; left: 16px;">
+            <div class="box-title">Course Outcomes:</div>
+            <div class="co-list-items" style="position: relative;left: 10px;">
+                <div class="co-list-item"><span class="co-list">CO1:</span> Define and explain the basic concepts of
+                    algorithms and data structures.</div>
+                <div class="co-list-item"><span class="co-list">CO2:</span> Implement and perform operations on linear
+                    data structures (array and linked list).</div>
+                <div class="co-list-item"><span class="co-list">CO3:</span> Apply stack and queue data structures in
+                    problem-solving.</div>
+                <div class="co-list-item"><span class="co-list">CO4:</span> Analyze time and space complexity using
+                    asymptotic notations.</div>
+                <div class="co-list-item"><span class="co-list">CO5:</span> Evaluate efficiency of sorting and searching
+                    algorithms.</div>
+                <div class="co-list-item"><span class="co-list">CO6:</span> Demonstrate file organization and perform
+                    basic file operations.</div>
+            </div>
+        </section>
+
+        <section class="instruction-box">
+            <div class="ins-title">Instruction to the Candidates</div>
+            <div class="inst-list">
+                <li class="int-list-item">1. All questions are compulsory.</li>
+                <li class="int-list-item">2. Figures to the right indicate full marks.</li>
+                <li class="int-list-item">3. Assume suitable data if necessary.</li>
+            </div>
+
+        </section>
+
+        <section style="width: 97%; position: relative; left: 16px; top: -10px;">
+            <h3 style="width: 100%;display: flex;justify-content: center;">SECTION-A</h3>
+            <div class="section-A">
+                <table style="width:100%; margin-top:10px;">
+                    <tr>
+                        <th class="question-no">Q. No.</th>
+                        <th class="subquestion-no"></th>
+                        <th class="question" style="text-align:center;">Question</th>
+                        <th class="marks">Marks</th>
+                        <th class="bl">BL</th>
+                        <th class="co">CO</th>
+                    </tr>
+
+
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO1</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO2</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>2</td>
+                        <td>CO3</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO6</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">SECTION-B</td>
+                        <!-- <td colspan="3"></td> -->
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">OR</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO5</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">OR</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>3</td>
+                        <td>CO4</td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+        </section>
+
+
+
     </div>
+    <script src="html2canvas"></script>
+<script src="jspdf"></script>
+
+<script>
+let paperData = {};
+
+// Fill static template with dynamic data
+function fillPaper() {
+  document.getElementById("pTitle").innerText = paperData.paperTitle || "";
+  document.getElementById("pExam").innerText = paperData.examination || "";
+  document.getElementById("pSemester").innerText = paperData.semester || "";
+  document.getElementById("pYear").innerText = paperData.academicYear || "";
+  document.getElementById("pProgram").innerText = paperData.program || "";
+  document.getElementById("pCourseCode").innerText = paperData.courseCode || "";
+  document.getElementById("pCourseName").innerText = paperData.courseName || "";
+  document.getElementById("pDuration").innerText = paperData.duration || "";
+  document.getElementById("pMarks").innerText = paperData.maxMarks || "";
+  document.getElementById("pTotalQ").innerText = paperData.totalQuestions || "";
+
+  // Render CO list
+  const coList = document.getElementById("pCOList");
+  if (coList) {
+    coList.innerHTML = "";
+    (paperData.courseOutcomes || []).forEach(co => {
+      coList.innerHTML += `<li>${co}</li>`;
+    });
+  }
+
+  // Render instruction list
+  const insList = document.getElementById("pInstructionList");
+  if (insList) {
+    insList.innerHTML = "";
+    (paperData.instructions || []).forEach(ins => {
+      insList.innerHTML += `<li>${ins}</li>`;
+    });
+  }
+
+  // Render question sections in table
+  const secDiv = document.getElementById("pSections");
+  if (secDiv) {
+    secDiv.innerHTML = "";
+    (paperData.sections || []).forEach(sec => {
+      let html = `<div class="section-title">SECTION-${sec.title}</div>`;
+      html += `<table class="preview-table"><tr>`;
+
+      // Add heading cells exactly same order
+      html += `<th class="question-no">Q. No.</th>`;
+      html += `<th class="subquestion-no"></th>`;
+      html += `<th>Question</th>`;
+      html += `<th class="marks">Marks</th>`;
+      html += `<th class="bl">BL</th>`;
+      html += `<th class="co">CO</th>`;
+      html += `</tr>`;
+
+      // Add questions + sub questions
+      (sec.questions || []).forEach(q => {
+        html += `<tr><td>${q.qno}</td><td></td><td>${q.text}</td><td>${q.marks}</td><td>${q.bl}</td><td>${q.co}</td></tr>`;
+        (q.subQuestions || []).forEach(sq => {
+          html += `<tr><td></td><td>${sq.label}) ${sq.text}</td><td>${sq.marks}</td><td>${sq.bl}</td><td>${sq.co}</td></tr>`;
+        });
+      });
+
+      html += `</table><br/>`;
+      secDiv.innerHTML += html;
+    });
+  }
+}
+
+// Listen for form page data
+window.addEventListener("message", (event) => {
+  paperData = event.data;
+  fillPaper();
+});
+
+// PDF Download function
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const content = document.getElementById("pdfContent");
+
+  const canvas = await html2canvas(content);
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+  pdf.save("Generated_Question_Paper.pdf");
+}
+</script>
+
 
 </body>
 
