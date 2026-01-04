@@ -93,6 +93,19 @@
     loginForm.classList.add("active");
   }
 
+  // Handle pre-selected role from landing page
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');
+    if (role) {
+      showSignup();
+      const select = document.getElementById('signupRole');
+      if (select) {
+        select.value = role;
+      }
+    }
+  });
+
   // AUTH
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Question Paper Workflow - Portal</title>
+    <link rel="stylesheet" href="/public/ui.css">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --primary: #7b0000;
+            --accent: #ff4d4d;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #7b0000 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #ff9999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .roles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            width: 90%;
+            max-width: 1400px;
+            padding: 20px;
+            margin-bottom: 60px;
+        }
+
+        .role-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .role-card:hover::before {
+            left: 100%;
+        }
+
+        .role-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .role-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .role-card p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .btn-enter {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .role-card:hover .btn-enter {
+            background: var(--accent);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .roles-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>College Question Paper Portal</h1>
+        <p>Streamlined workflow for creation, review, and finalization</p>
+    </div>
+
+    <div class="roles-container">
+        <!-- Admin -->
+        <div class="role-card" onclick="goToLogin('admin')">
+            <div class="role-icon">🛡️</div>
+            <h3>Admin / Principal</h3>
+            <p>User management, role assignments, and full system activity monitoring.</p>
+            <a href="/login.html?role=admin" class="btn-enter">Enter Portal</a>
+        </div>
+
+        <!-- Chairman -->
+        <div class="role-card" onclick="goToLogin('chairman')">
+            <div class="role-icon">⚖️</div>
+            <h3>Chairman</h3>
+            <p>Review submitted papers, add suggestions, and forward to coordinators.</p>
+            <a href="/login.html?role=chairman" class="btn-enter">Enter Portal</a>
+        </div>
+
+        <!-- Module Coordinator -->
+        <div class="role-card" onclick="goToLogin('module_coordinator')">
+            <div class="role-icon">📋</div>
+            <h3>Module Coordinator</h3>
+            <p>Finalize reviewed papers, confirm completion, and notify assigned teachers.</p>
+            <a href="/login.html?role=module_coordinator" class="btn-enter">Enter Portal</a>
+        </div>
+
+        <!-- Faculty -->
+        <div class="role-card" onclick="goToLogin('faculty')">
+            <div class="role-icon">🏛️</div>
+            <h3>Faculty / Department</h3>
+            <p>Access finalized papers and manage department-level question banks.</p>
+            <a href="/login.html?role=faculty" class="btn-enter">Enter Portal</a>
+        </div>
+
+        <!-- Teacher -->
+        <div class="role-card" onclick="goToLogin('teacher')">
+            <div class="role-icon">👨‍🏫</div>
+            <h3>Teacher</h3>
+            <p>Create question papers, receive notifications, and access shared documents.</p>
+            <a href="/login.html?role=teacher" class="btn-enter">Enter Portal</a>
+        </div>
+    </div>
+
+    <script>
+        function goToLogin(role) {
+            window.location.href = `/login.html?role=${role}`;
+        }
+    </script>
+</body>
+</html>

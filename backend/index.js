@@ -41,18 +41,14 @@ app.use('/assets', express.static(publicPath));
 app.use('/frontend/public', express.static(publicPath));
 app.use('/frontend/pages', express.static(pagesPath));
 
-// Auto open login page on root
+// Auto open landing page on root
 app.get('/', (req, res) => {
-  res.sendFile(path.join(pagesPath, 'login.html'));
+  res.sendFile(path.join(pagesPath, 'index.html'));
 });
 
-// Health
-app.get('/api/health', (req, res) => res.json({ ok: true }));
-
-// Fallback for client-side routes or unknown GETs (serve login page)
-// Use a regex to avoid path-to-regexp parsing issues
+// Fallback for client-side routes or unknown GETs (serve landing page)
 app.get(/^\/(?!api).*/, (req, res) => {
-  return res.sendFile(path.join(pagesPath, 'login.html'));
+  return res.sendFile(path.join(pagesPath, 'index.html'));
 });
 
 // Start Server (default port set to 3000)
