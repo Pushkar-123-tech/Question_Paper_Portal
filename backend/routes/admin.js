@@ -7,6 +7,29 @@ const roleAuth = require('../middleware/roleAuth');
 // All routes here require Admin role
 router.use(auth, roleAuth(['admin']));
 
+// GET /api/admin/stats
+router.get('/stats', async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({});
+    const teachers = await User.countDocuments({ role: 'teacher' });
+    const faculty = await User.countDocuments({ role: 'faculty' });
+    const chairmen = await User.countDocuments({ role: 'chairman' });
+    const coordinators = await User.countDocuments({ role: 'module_coordinator' });
+    const admins = await User.countDocuments({ role: 'admin' });
+
+    res.json({
+      totalUsers,
+      teachers,
+      faculty,
+      chairmen,
+      coordinators,
+      admins
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/admin/users
 router.get('/users', async (req, res) => {
   try {

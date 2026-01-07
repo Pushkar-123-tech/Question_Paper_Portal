@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
 
     res.json({ 
       token, 
-      user: { id: user._id.toString(), name: user.name, email: user.email } 
+      user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role } 
     });
   } catch (err) {
     console.error('Login Exception:', err && err.stack ? err.stack : err);
