@@ -330,7 +330,7 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
       try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
       
       // Update UI with status and submit button
-      paperData._id = data.paper._id;
+      paperData.id = data.paper.id;
       paperData.status = data.paper.status;
       updateStatusUI();
 
@@ -400,7 +400,7 @@ function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestio
 function updateStatusUI() {
   const container = document.getElementById('paperStatusContainer');
   const btn = document.getElementById('submitToChairmanBtn');
-  if (paperData._id && paperData.status) {
+  if (paperData.id && paperData.status) {
     container.innerText = 'Status: ' + paperData.status.toUpperCase().replace(/_/g, ' ');
     if (paperData.status === 'draft') {
       btn.style.display = 'inline-flex';
@@ -414,10 +414,10 @@ function updateStatusUI() {
 }
 
 async function submitToChairmanFromForm() {
-  if (!paperData._id) return showToast('Save as draft first', 'warn');
+  if (!paperData.id) return showToast('Save as draft first', 'warn');
   if (!confirm('Submit to Chairman?')) return;
   try {
-    const res = await fetch(`/api/papers/${paperData._id}/submit`, {
+    const res = await fetch(`/api/papers/${paperData.id}/submit`, {
       method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!res.ok) throw new Error('Submit failed');
@@ -484,11 +484,11 @@ function renderMyPapers(papers){
           <div class="muted" style="font-size:12px">${p.program || ''} • ${date}</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-          <button class="btn" onclick="viewPaper('${p._id}')">View</button>
-          <button class="btn" onclick="downloadPaper('${p._id}')">Download</button>
-          <button class="btn" onclick="openSendModal('${p._id}')">Send</button>
-          <button class="btn" onclick="editPaper('${p._id}')">Edit</button>
-          <button class="btn" onclick="deletePaper('${p._id}')">Delete</button>
+          <button class="btn" onclick="viewPaper('${p.id}')">View</button>
+          <button class="btn" onclick="downloadPaper('${p.id}')">Download</button>
+          <button class="btn" onclick="openSendModal('${p.id}')">Send</button>
+          <button class="btn" onclick="editPaper('${p.id}')">Edit</button>
+          <button class="btn" onclick="deletePaper('${p.id}')">Delete</button>
         </div>
       </div>
     `;

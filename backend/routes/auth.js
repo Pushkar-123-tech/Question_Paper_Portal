@@ -83,7 +83,12 @@ router.post('/login', async (req, res) => {
 
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const isMatch = await bcrypt.compare(String(password), user.password);
+    if (!user.password || typeof user.password !== 'string') {
+      console.error('Password hash missing or invalid for user:', user.email);
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    
+    const isMatch = await bcrypt.compare(String(password), String(user.password));
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });

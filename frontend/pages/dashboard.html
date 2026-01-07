@@ -382,7 +382,7 @@ async function loadMyPapersDashboard(){
     try{
       const last = JSON.parse(localStorage.getItem('lastSavedPaper')||'null');
       if(last && Array.isArray(data.papers)){
-        const exists = data.papers.some(p=>String(p._id) === String(last._id));
+        const exists = data.papers.some(p=>String(p.id) === String(last.id));
         if(!exists) data.papers.unshift(last);
       }
     }catch(e){}
@@ -404,25 +404,25 @@ function renderMyPapersDashboard(papers){
     const ownerName = p.owner ? p.owner.name : 'Unknown';
     
     let actionsHtml = `
-      <button class="btn" onclick="viewPaperDashboard('${p._id}')">View</button>
-      <button class="btn" onclick="downloadPaperDashboard('${p._id}')">Download</button>
-      <button class="btn" onclick="openCommentModal('${p._id}')">Comment</button>
+      <button class="btn" onclick="viewPaperDashboard('${p.id}')">View</button>
+      <button class="btn" onclick="downloadPaperDashboard('${p.id}')">Download</button>
+      <button class="btn" onclick="openCommentModal('${p.id}')">Comment</button>
     `;
 
     // Workflow actions
     if (currentUser.role === 'teacher' || currentUser.role === 'faculty') {
       if (p.status === 'draft') {
-        actionsHtml += `<button class="btn primary" onclick="submitPaper('${p._id}')">Submit to Chairman</button>`;
-        actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p._id}')">Edit</button>`;
-        actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p._id}')">Delete</button>`;
+        actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit to Chairman</button>`;
+        actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p.id}')">Edit</button>`;
+        actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p.id}')">Delete</button>`;
       }
     } else if (currentUser.role === 'chairman') {
       if (p.status === 'submitted_to_chairman') {
-        actionsHtml += `<button class="btn primary" onclick="forwardPaper('${p._id}')">Forward to Coordinator</button>`;
+        actionsHtml += `<button class="btn primary" onclick="forwardPaper('${p.id}')">Forward to Coordinator</button>`;
       }
     } else if (currentUser.role === 'module_coordinator') {
       if (p.status === 'pending_coordinator') {
-        actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p._id}')">Finalize & Notify</button>`;
+        actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p.id}')">Finalize & Notify</button>`;
       }
     }
 
@@ -516,9 +516,9 @@ async function receivedPapers(){
     if(!res.ok) { showToast('Failed to load received items', 'error'); return; }
     const d = await res.json();
     const rows = d.list.map(it=>{
-      const dt = new Date(it.createdAt).toLocaleString();
-      const title = (it.paperSnapshot && (it.paperSnapshot.paperTitle || it.paperSnapshot.courseName)) || 'Untitled';
-      return `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.senderName} &lt;${it.senderEmail}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it._id}')">View</button><button class="btn" onclick="downloadReceived('${it._id}')">Download</button></div></div>`;
+      const dt = new Date(it.created_at).toLocaleString();
+      const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Untitled';
+      return `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
     }).join('') || '<div class="muted">No items</div>';
     showModal(`<h3>Received Papers</h3><div>${rows}</div>`);
   }catch(e){ console.error(e); showToast('Network error', 'error'); }
@@ -529,7 +529,7 @@ async function viewReceived(id){
     const res = await fetch('/api/share/'+id, { headers: { 'Authorization': 'Bearer '+localStorage.getItem('token') } });
     if(!res.ok) return showToast('Unable to load item', 'error');
     const d = await res.json();
-    const paper = d.shared.paperSnapshot;
+    const paper = d.shared.paper_snapshot;
     sessionStorage.setItem('previewPaper', JSON.stringify(paper));
     showToast('Opening received paper', 'info');
     window.open('/template.html?preview=1','_blank');
@@ -540,7 +540,7 @@ async function downloadReceived(id){
     const res = await fetch('/api/share/'+id, { headers: { 'Authorization': 'Bearer '+localStorage.getItem('token') } });
     if(!res.ok) return showToast('Unable to load item', 'error');
     const d = await res.json();
-    const paper = d.shared.paperSnapshot;
+    const paper = d.shared.paper_snapshot;
     sessionStorage.setItem('previewPaper', JSON.stringify(paper));
     showToast('Downloading received paper', 'info');
     window.open('/template.html?preview=1&download=1','_blank');
@@ -557,9 +557,9 @@ async function notifications(){
     if(!list.length) return showModal('<h3>Notifications</h3><p class="muted">No notifications</p>');
     let rows = '';
     list.forEach(it => {
-      const dt = new Date(it.createdAt).toLocaleString();
-      const title = (it.paperSnapshot && (it.paperSnapshot.paperTitle || it.paperSnapshot.courseName)) || 'Shared Paper';
-      rows += `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.senderName} &lt;${it.senderEmail}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it._id}')">View</button><button class="btn" onclick="downloadReceived('${it._id}')">Download</button></div></div>`;
+      const dt = new Date(it.created_at).toLocaleString();
+      const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Shared Paper';
+      rows += `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
     });
     showModal(`<h3>Notifications</h3><div>${rows}</div>`);
     // mark notifications as seen up to the latest received

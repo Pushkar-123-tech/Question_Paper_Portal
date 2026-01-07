@@ -1,268 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<title>Admin Dashboard - JSPM RSCOE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-<link rel="stylesheet" href="/public/ui.css">
-<style>
-:root {
-  --primary:#7b0000;
-  --sidebar:#1f2937;
-  --bg:#f4f6f8;
-  --card:#ffffff;
-  --text:#111827;
-  --muted:#6b7280;
-  --radius:8px;
-}
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - JSPM RSCOE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/public/ui.css">
+  <style>
+    :root {
+      --primary: #7b0000;
+      --sidebar: #1f2937;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 8px;
+    }
 
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{background:var(--bg);color:var(--text);}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-/* HEADER */
-.college-header {
-  background:white;
-  border-bottom:4px solid var(--primary);
-  padding:12px 30px;
-  box-shadow:0 2px 12px rgba(0,0,0,0.06);
-}
-.header-row {
-  display:grid;
-  grid-template-columns:120px 1fr 120px;
-  align-items:center;
-}
-.header-logo img {
-  max-height:80px;
-}
-.header-center {
-  text-align:center;
-  color:var(--primary);
-}
-.header-center h1 {
-  font-family:"Times New Roman", serif;
-  font-size:28px;
-  font-weight:bold;
-  margin-bottom:5px;
-}
-.header-center p {
-  font-size:13px;
-  opacity:0.8;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
 
-/* LAYOUT */
-.dashboard-container {
-  display:flex;
-  height:calc(100vh - 110px);
-}
+    /* HEADER */
+    .college-header {
+      background: white;
+      border-bottom: 4px solid var(--primary);
+      padding: 12px 30px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
 
-/* SIDEBAR */
-.sidebar {
-  width:260px;
-  background:var(--sidebar);
-  color:white;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.sidebar h3 {
-  font-size:12px;
-  color:#d1d5db;
-  text-transform:uppercase;
-  margin-top:14px;
-  margin-bottom:4px;
-}
-.nav-btn {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 14px;
-  border:none;
-  border-radius:6px;
-  background:transparent;
-  color:white;
-  text-align:left;
-  font-size:14px;
-  cursor:pointer;
-  border-left:3px solid transparent;
-  transition:0.3s;
-}
-.nav-btn:hover {
-  background:rgba(255,255,255,0.12);
-  transform:translateX(4px);
-  border-left:3px solid #ffb3b3;
-}
-.nav-btn.active {
-    background:rgba(255,255,255,0.1);
-    border-left:3px solid var(--primary);
-}
-.nav-btn.primary {
-  background:var(--primary);
-  color:white;
-  justify-content:center;
-  font-weight:600;
-  box-shadow:0 2px 10px rgba(123,0,0,0.3);
-}
-.nav-btn.primary:hover {
-  transform:scale(1.04);
-  opacity:0.9;
-}
+    .header-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 120px;
+      align-items: center;
+    }
 
-/* MAIN */
-.main {
-  flex:1;
-  padding:28px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-  overflow-y:auto;
-}
-.card {
-  background:white;
-  padding:18px 22px;
-  border-radius:10px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.04);
-  width:100%;
-  transition:0.3s;
-}
-.card:hover {
-  box-shadow:0 8px 18px rgba(0,0,0,0.08);
-}
-.card h2 { margin-bottom: 15px; font-size: 20px; color: var(--primary); }
-.muted { font-size:14px; color:var(--muted); }
+    .header-logo img {
+      max-height: 80px;
+    }
 
-/* STATS */
-.stats-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-  gap:14px;
-}
-.stat-card {
-  background:white;
-  padding:20px;
-  border-radius:var(--radius);
-  text-align:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-.stat-card h3 { font-size:28px; color:var(--primary); margin-bottom:4px; }
+    .header-center {
+      text-align: center;
+      color: var(--primary);
+    }
 
-/* FORMS */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-input, select {
-    padding: 10px 14px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-    outline: none;
-    transition: 0.2s;
-}
-input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(123,0,0,0.1); }
+    .header-center h1 {
+      font-family: "Times New Roman", serif;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
 
-/* TABLE */
-.table-container { overflow-x: auto; margin-top: 10px; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-th { background: #f9fafb; font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 12px; }
-tr:hover { background: #f9fafb; }
+    .header-center p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
 
-.role-badge {
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-.role-admin { background: #fee2e2; color: #991b1b; }
-.role-teacher { background: #dcfce7; color: #166534; }
-.role-faculty { background: #dbeafe; color: #1e40af; }
-.role-chairman { background: #fef9c3; color: #854d0e; }
-.role-coordinator { background: #f3e8ff; color: #6b21a8; }
+    /* LAYOUT */
+    .dashboard-container {
+      display: flex;
+      height: calc(100vh - 110px);
+    }
 
-.btn {
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  background:#e5e7eb;
-  color:black;
-  font-size:13px;
-  cursor:pointer;
-  transition:0.3s;
-}
-.btn:hover { opacity:0.8; }
-.btn-primary { background:var(--primary); color:white; font-weight:600; }
-.btn-danger { background:#ef4444; color:white; }
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-</style>
+    .sidebar h3 {
+      font-size: 12px;
+      color: #d1d5db;
+      text-transform: uppercase;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: white;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(4px);
+      border-left: 3px solid #ffb3b3;
+    }
+
+    .nav-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid var(--primary);
+    }
+
+    .nav-btn.primary {
+      background: var(--primary);
+      color: white;
+      justify-content: center;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(123, 0, 0, 0.3);
+    }
+
+    .nav-btn.primary:hover {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 18px 22px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      font-size: 20px;
+      color: var(--primary);
+    }
+
+    .muted {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card h3 {
+      font-size: 28px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    /* FORMS */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    input,
+    select {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(123, 0, 0, 0.1);
+    }
+
+    /* TABLE */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .role-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .role-admin {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .role-teacher {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .role-faculty {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .role-chairman {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .role-coordinator {
+      background: #f3e8ff;
+      color: #6b21a8;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #e5e7eb;
+      color: black;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="college-header">
-  <div class="header-row">
-    <div class="header-logo"><img src="/public/image1.png" alt="Logo"></div>
-    <div class="header-center">
-      <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
-      <p>Admin Control Panel • User Management System</p>
-    </div>
-    <div class="header-logo"><img src="/public/image2.png" alt="Logo"></div>
-  </div>
-</header>
-
-<div class="dashboard-container">
-
-  <aside class="sidebar">
-    <h3>Admin Panel</h3>
-    <button class="nav-btn active" onclick="scrollToSection('stats')"><i class="fa-solid fa-gauge"></i> Overview</button>
-    <button class="nav-btn" onclick="scrollToSection('register')"><i class="fa-solid fa-user-plus"></i> Register User</button>
-    <button class="nav-btn" onclick="scrollToSection('manage')"><i class="fa-solid fa-users"></i> Manage Users</button>
-    <button class="nav-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i> Staff Dashboard</button>
-    <div style="flex:1"></div>
-    <button class="nav-btn primary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-  </aside>
-
-  <main class="main">
-    <div class="card" id="stats">
-      <h2>System Overview</h2>
-      <div class="stats-grid">
-        <div class="stat-card"><h3 id="statTotalUsers">0</h3><p>Total Users</p></div>
-        <div class="stat-card"><h3 id="statTeachers">0</h3><p>Teachers</p></div>
-        <div class="stat-card"><h3 id="statFaculty">0</h3><p>Faculty</p></div>
-        <div class="stat-card"><h3 id="statOther">0</h3><p>Other Roles</p></div>
+  <header class="college-header">
+    <div class="header-row">
+      <div class="header-logo"><img src="/public/image1.png" alt="Logo"></div>
+      <div class="header-center">
+        <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+        <p>Admin Control Panel • User Management System</p>
       </div>
+      <div class="header-logo"><img src="/public/image2.png" alt="Logo"></div>
     </div>
+  </header>
 
-    <div class="card" id="register">
-      <h2>Register New Staff</h2>
-      <p class="muted">Add new users to the system. Only admins can perform this action.</p>
-      <div class="form-grid">
-        <input type="text" id="regName" placeholder="Full Name">
-        <input type="email" id="regEmail" placeholder="Official Email (e.g. user@rscoe.in)">
-        <input type="password" id="regPassword" placeholder="Password">
-        <select id="regRole">
-          <option value="teacher">Teacher</option>
-          <option value="faculty">Faculty</option>
-          <option value="chairman">Chairman</option>
-          <option value="module_coordinator">Module Coordinator</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button class="btn btn-primary" onclick="registerUser()">Register User</button>
+  <div class="dashboard-container">
+
+    <aside class="sidebar">
+      <h3>Admin Panel</h3>
+      <button class="nav-btn active" onclick="scrollToSection('stats')"><i class="fa-solid fa-gauge"></i>
+        Overview</button>
+      <button class="nav-btn" onclick="scrollToSection('register')"><i class="fa-solid fa-user-plus"></i> Register
+        User</button>
+      <button class="nav-btn" onclick="scrollToSection('manage')"><i class="fa-solid fa-users"></i> Manage
+        Users</button>
+      <button class="nav-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-arrow-left"></i>
+        Staff Dashboard</button>
+      <div style="flex:1"></div>
+      <button class="nav-btn primary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </aside>
+
+    <main class="main">
+      <div class="card" id="stats">
+        <h2>System Overview</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 id="statTotalUsers">0</h3>
+            <p>Total Users</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="statTeachers">0</h3>
+            <p>Teachers</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="statFaculty">0</h3>
+            <p>Faculty</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="statOther">0</h3>
+            <p>Other Roles</p>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="card" id="manage">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <div class="card" id="register">
+        <h2>Register New Staff</h2>
+        <p class="muted">Add new users to the system. Only admins can perform this action.</p>
+        <div class="form-grid">
+          <input type="text" id="regName" placeholder="Full Name">
+          <input type="email" id="regEmail" placeholder="Official Email (e.g. user@rscoe.in)">
+          <input type="password" id="regPassword" placeholder="Password">
+          <select id="regRole">
+            <option value="teacher">Teacher</option>
+            <option value="faculty">Faculty</option>
+            <option value="chairman">Chairman</option>
+            <option value="module_coordinator">Module Coordinator</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button class="btn btn-primary" onclick="registerUser()">Register User</button>
+        </div>
+      </div>
+
+      <div class="card" id="manage">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
           <h2>Manage Users</h2>
           <button class="btn" onclick="loadUsers()"><i class="fa-solid fa-rotate"></i> Refresh</button>
-      </div>
-      <div class="table-container">
+        </div>
+        <div class="table-container">
           <table>
             <thead>
               <tr>
@@ -273,70 +390,70 @@ tr:hover { background: #f9fafb; }
               </tr>
             </thead>
             <tbody id="usersTableBody">
-                <!-- Data injected here -->
+              <!-- Data injected here -->
             </tbody>
           </table>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
 
-</div>
+  </div>
 
-<script src="/public/ui.js"></script>
-<script>
-const token = localStorage.getItem('token');
-if (!token) window.location.href = '/login.html';
+  <script src="/public/ui.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login.html';
 
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
-}
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+    }
 
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-}
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
 
-async function registerUser() {
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const role = document.getElementById('regRole').value;
+    async function registerUser() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
 
-    if (!name || !email || !password) return showToast('Please fill all fields', 'warn');
+      if (!name || !email || !password) return showToast('Please fill all fields', 'warn');
 
-    try {
+      try {
         const res = await fetch('/api/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ name, email, password, role })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ name, email, password, role })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Registration failed');
-        
+
         showToast('User registered successfully', 'success');
         document.getElementById('regName').value = '';
         document.getElementById('regEmail').value = '';
         document.getElementById('regPassword').value = '';
         loadUsers();
-    } catch (err) {
+      } catch (err) {
         showToast(err.message, 'error');
+      }
     }
-}
 
-async function loadUsers() {
-    try {
+    async function loadUsers() {
+      try {
         const res = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
         if (!res.ok) throw new Error('Failed to load users');
         const data = await res.json();
         renderUsers(data.users);
         loadStats(); // Call separate stats loader
-    } catch (err) {
+      } catch (err) {
         showToast(err.message, 'error');
+      }
     }
-}
 
-async function loadStats() {
-    try {
+    async function loadStats() {
+      try {
         const res = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
         if (!res.ok) throw new Error('Failed to load stats');
         const data = await res.json();
@@ -344,69 +461,70 @@ async function loadStats() {
         document.getElementById('statTeachers').innerText = data.teachers;
         document.getElementById('statFaculty').innerText = data.faculty;
         document.getElementById('statOther').innerText = data.chairmen + data.coordinators + data.admins;
-    } catch (err) { console.error(err); }
-}
+      } catch (err) { console.error(err); }
+    }
 
-function renderUsers(users) {
-    const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '';
-    
-    users.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${u.name}</strong></td>
-            <td>${u.email}</td>
-            <td>
-                <select onchange="updateRole('${u._id}', this.value)" style="padding:4px 8px; font-size:12px;">
-                    <option value="teacher" ${u.role==='teacher'?'selected':''}>Teacher</option>
-                    <option value="faculty" ${u.role==='faculty'?'selected':''}>Faculty</option>
-                    <option value="chairman" ${u.role==='chairman'?'selected':''}>Chairman</option>
-                    <option value="module_coordinator" ${u.role==='module_coordinator'?'selected':''}>Coordinator</option>
-                    <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn btn-danger" onclick="deleteUser('${u._id}')"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+      function renderUsers(users) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
 
-function updateStats(users) {
-    document.getElementById('statTotalUsers').innerText = users.length;
-    document.getElementById('statTeachers').innerText = users.filter(u => u.role === 'teacher').length;
-    document.getElementById('statFaculty').innerText = users.filter(u => u.role === 'faculty').length;
-    document.getElementById('statOther').innerText = users.filter(u => !['teacher', 'faculty'].includes(u.role)).length;
-}
-
-async function updateRole(userId, newRole) {
-    try {
-        const res = await fetch(\`/api/admin/users/\${userId}/role\`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ role: newRole })
+        users.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+              <td><strong>${u.name}</strong></td>
+              <td>${u.email}</td>
+              <td>
+                  <select onchange="updateRole('${u.id}', this.value)" style="padding:4px 8px; font-size:12px;">
+                      <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                      <option value="faculty" ${u.role === 'faculty' ? 'selected' : ''}>Faculty</option>
+                      <option value="chairman" ${u.role === 'chairman' ? 'selected' : ''}>Chairman</option>
+                      <option value="module_coordinator" ${u.role === 'module_coordinator' ? 'selected' : ''}>Coordinator</option>
+                      <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                  </select>
+              </td>
+              <td>
+                  <button class="btn btn-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i></button>
+              </td>
+          `;
+          tbody.appendChild(tr);
         });
-        if (!res.ok) throw new Error('Update failed');
-        showToast('Role updated successfully', 'success');
-        loadUsers();
-    } catch (err) { showToast(err.message, 'error'); }
-}
+      }
 
-async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-    try {
-        const res = await fetch(\`/api/admin/users/\${userId}\`, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (!res.ok) throw new Error('Delete failed');
-        showToast('User deleted', 'success');
-        loadUsers();
-    } catch (err) { showToast(err.message, 'error'); }
-}
+    function updateStats(users) {
+      document.getElementById('statTotalUsers').innerText = users.length;
+      document.getElementById('statTeachers').innerText = users.filter(u => u.role === 'teacher').length;
+      document.getElementById('statFaculty').innerText = users.filter(u => u.role === 'faculty').length;
+      document.getElementById('statOther').innerText = users.filter(u => !['teacher', 'faculty'].includes(u.role)).length;
+    }
+
+      async function updateRole(userId, newRole) {
+        try {
+          const res = await fetch(`/api/admin/users/${userId}/role`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ role: newRole })
+          });
+          if (!res.ok) throw new Error('Update failed');
+          showToast('Role updated successfully', 'success');
+          loadUsers();
+      } catch (err) { showToast(err.message, 'error'); }
+  }
+
+  async function deleteUser(userId) {
+      if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+      try {
+          const res = await fetch(`/api/admin/users/${userId}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!res.ok) throw new Error('Delete failed');
+          showToast('User deleted', 'success');
+          loadUsers();
+      } catch (err) { showToast(err.message, 'error'); }
+  }
 
 loadUsers();
-</script>
-</body>
+  </script>
+  </body>
+
 </html>
