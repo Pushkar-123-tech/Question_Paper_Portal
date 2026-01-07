@@ -15,8 +15,12 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-userSchema.methods.comparePassword = function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password || typeof this.password !== 'string') {
+    console.error('Password hash is missing or not a string for user:', this.email);
+    return false;
+  }
+  return bcrypt.compare(String(candidatePassword), this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

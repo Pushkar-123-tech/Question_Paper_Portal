@@ -37,6 +37,11 @@ async function seedAdmin() {
       });
       await admin.save();
       console.log('👤 Predefined Admin created: admin@rscoe.in / admin123');
+    } else {
+      // Ensure the admin password is correct and hashed
+      adminExists.password = 'admin123';
+      await adminExists.save();
+      console.log('👤 Predefined Admin password reset to default: admin123');
     }
   } catch (err) {
     console.error('Error seeding admin:', err);
