@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const supabase = require('../supabaseClient');
 const { authMiddleware: auth } = require('./auth');
 const roleAuth = require('../middleware/roleAuth');
 
@@ -10,12 +10,12 @@ router.use(auth, roleAuth(['admin']));
 // GET /api/admin/stats
 router.get('/stats', async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({});
-    const teachers = await User.countDocuments({ role: 'teacher' });
-    const faculty = await User.countDocuments({ role: 'faculty' });
-    const chairmen = await User.countDocuments({ role: 'chairman' });
-    const coordinators = await User.countDocuments({ role: 'module_coordinator' });
-    const admins = await User.countDocuments({ role: 'admin' });
+    const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
+    const { count: teachers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'teacher');
+    const { count: faculty } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'faculty');
+    const { count: chairmen } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'chairman');
+    const { count: coordinators } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'module_coordinator');
+    const { count: admins } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'admin');
 
     res.json({
       totalUsers,
@@ -26,6 +26,7 @@ router.get('/stats', async (req, res) => {
       admins
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -33,9 +34,15 @@ router.get('/stats', async (req, res) => {
 // GET /api/admin/users
 router.get('/users', async (req, res) => {
   try {
-    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, name, email, role, createdAt')
+      .order('createdAt', { ascending: false });
+    
+    if (error) throw error;
     res.json({ users });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -44,13 +51,18 @@ router.get('/users', async (req, res) => {
 router.patch('/users/:id/role', async (req, res) => {
   try {
     const { role } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { data: user, error: updateError } = await supabase
+      .from('users')
+      .update({ role })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (!user || updateError) return res.status(404).json({ message: 'User not found' });
     
-    user.role = role;
-    await user.save();
     res.json({ message: 'User role updated', user });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -58,9 +70,11 @@ router.patch('/users/:id/role', async (req, res) => {
 // DELETE /api/admin/users/:id
 router.delete('/users/:id', async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
+    const { error } = await supabase.from('users').delete().eq('id', req.params.id);
+    if (error) throw error;
     res.json({ message: 'User deleted' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });

@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Paper = require('../models/Paper');
-const Shared = require('../models/Shared');
-const User = require('../models/User');
+const supabase = require('../supabaseClient');
 const jwt = require('jsonwebtoken');
 
 const { authMiddleware: auth } = require('./auth');
 const roleAuth = require('../middleware/roleAuth');
-const Notification = require('../models/Notification');
 
 // POST /api/papers - create
 router.post('/', auth, async (req, res) => {
@@ -18,8 +15,15 @@ router.post('/', auth, async (req, res) => {
     if (data.rscoeLogo) delete data.rscoeLogo;
     data.owner = req.userId;
     data.status = 'draft';
-    const paper = new Paper(data);
-    await paper.save();
+    
+    // Mongoose to Supabase field mapping (if any) - here they match because of my SQL update
+    const { data: paper, error } = await supabase
+      .from('papers')
+      .insert([data])
+      .select()
+      .single();
+
+    if (error) throw error;
     res.json({ paper });
   } catch (err) {
     console.error(err);
@@ -30,20 +34,27 @@ router.post('/', auth, async (req, res) => {
 // GET /api/papers - list based on role
 router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    let query = {};
+    const { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    let query = supabase.from('papers').select('*, owner:users(name, email)');
 
     if (user.role === 'teacher' || user.role === 'faculty') {
-      query = { owner: req.userId };
+      query = query.eq('owner', req.userId);
     } else if (user.role === 'chairman') {
-      query = { status: { $in: ['submitted_to_chairman', 'pending_coordinator', 'finalized'] } };
+      query = query.in('status', ['submitted_to_chairman', 'pending_coordinator', 'finalized']);
     } else if (user.role === 'module_coordinator') {
-      query = { status: { $in: ['pending_coordinator', 'finalized'] } };
+      query = query.in('status', ['pending_coordinator', 'finalized']);
     } else if (user.role === 'admin') {
-      query = {};
+      // no filter
     }
 
-    const papers = await Paper.find(query).populate('owner', 'name email').sort({ createdAt: -1 });
+    const { data: papers, error } = await query.order('createdAt', { ascending: false });
+    
+    if (error) throw error;
     res.json({ papers });
   } catch (err) {
     console.error(err);
@@ -54,31 +65,49 @@ router.get('/', auth, async (req, res) => {
 // POST /api/papers/:id/submit - Teacher -> Chairman
 router.post('/:id/submit', auth, async (req, res) => {
   try {
-    const paper = await Paper.findById(req.params.id);
-    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+    const { data: paper, error: findError } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!paper || findError) return res.status(404).json({ message: 'Paper not found' });
     if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
 
-    paper.status = 'submitted_to_chairman';
-    paper.workflowHistory.push({
+    const newWorkflowHistory = [...(paper.workflowHistory || []), {
       action: 'submitted',
-      from: req.userId
-    });
-    await paper.save();
+      from: req.userId,
+      timestamp: new Date().toISOString()
+    }];
+
+    const { data: updatedPaper, error: updateError } = await supabase
+      .from('papers')
+      .update({ 
+        status: 'submitted_to_chairman',
+        workflowHistory: newWorkflowHistory
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     // Notify Chairmen
-    const chairmen = await User.find({ role: 'chairman' });
-    for (const chairman of chairmen) {
-      await new Notification({
-        recipient: chairman._id,
+    const { data: chairmen } = await supabase.from('users').select('id').eq('role', 'chairman');
+    if (chairmen) {
+      const notifications = chairmen.map(chairman => ({
+        recipient: chairman.id,
         sender: req.userId,
-        paper: paper._id,
+        paper: paper.id,
         type: 'workflow_update',
         message: `New question paper submitted: ${paper.paperTitle || paper.courseName}`
-      }).save();
+      }));
+      await supabase.from('notifications').insert(notifications);
     }
 
-    res.json({ message: 'Submitted to Chairman', paper });
+    res.json({ message: 'Submitted to Chairman', paper: updatedPaper });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -86,30 +115,48 @@ router.post('/:id/submit', auth, async (req, res) => {
 // POST /api/papers/:id/forward - Chairman -> Coordinator
 router.post('/:id/forward', auth, roleAuth(['chairman']), async (req, res) => {
   try {
-    const paper = await Paper.findById(req.params.id);
-    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+    const { data: paper, error: findError } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
 
-    paper.status = 'pending_coordinator';
-    paper.workflowHistory.push({
+    if (!paper || findError) return res.status(404).json({ message: 'Paper not found' });
+
+    const newWorkflowHistory = [...(paper.workflowHistory || []), {
       action: 'forwarded',
-      from: req.userId
-    });
-    await paper.save();
+      from: req.userId,
+      timestamp: new Date().toISOString()
+    }];
+
+    const { data: updatedPaper, error: updateError } = await supabase
+      .from('papers')
+      .update({ 
+        status: 'pending_coordinator',
+        workflowHistory: newWorkflowHistory
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     // Notify Coordinators
-    const coordinators = await User.find({ role: 'module_coordinator' });
-    for (const coordinator of coordinators) {
-      await new Notification({
-        recipient: coordinator._id,
+    const { data: coordinators } = await supabase.from('users').select('id').eq('role', 'module_coordinator');
+    if (coordinators) {
+      const notifications = coordinators.map(coordinator => ({
+        recipient: coordinator.id,
         sender: req.userId,
-        paper: paper._id,
+        paper: paper.id,
         type: 'workflow_update',
         message: `Paper forwarded for coordination: ${paper.paperTitle || paper.courseName}`
-      }).save();
+      }));
+      await supabase.from('notifications').insert(notifications);
     }
 
-    res.json({ message: 'Forwarded to Module Coordinator', paper });
+    res.json({ message: 'Forwarded to Module Coordinator', paper: updatedPaper });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -117,28 +164,45 @@ router.post('/:id/forward', auth, roleAuth(['chairman']), async (req, res) => {
 // POST /api/papers/:id/finalize - Coordinator -> Teacher
 router.post('/:id/finalize', auth, roleAuth(['module_coordinator']), async (req, res) => {
   try {
-    const paper = await Paper.findById(req.params.id);
-    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+    const { data: paper, error: findError } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
 
-    paper.status = 'finalized';
-    paper.workflowHistory.push({
+    if (!paper || findError) return res.status(404).json({ message: 'Paper not found' });
+
+    const newWorkflowHistory = [...(paper.workflowHistory || []), {
       action: 'finalized',
       from: req.userId,
-      to: paper.owner
-    });
-    await paper.save();
+      to: paper.owner,
+      timestamp: new Date().toISOString()
+    }];
+
+    const { data: updatedPaper, error: updateError } = await supabase
+      .from('papers')
+      .update({ 
+        status: 'finalized',
+        workflowHistory: newWorkflowHistory
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     // Notify Teacher
-    await new Notification({
+    await supabase.from('notifications').insert([{
       recipient: paper.owner,
       sender: req.userId,
-      paper: paper._id,
+      paper: paper.id,
       type: 'finalized',
       message: `Your paper has been finalized: ${paper.paperTitle || paper.courseName}`
-    }).save();
+    }]);
 
-    res.json({ message: 'Paper finalized and teacher notified', paper });
+    res.json({ message: 'Paper finalized and teacher notified', paper: updatedPaper });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -147,37 +211,60 @@ router.post('/:id/finalize', auth, roleAuth(['module_coordinator']), async (req,
 router.post('/:id/comment', auth, async (req, res) => {
   try {
     const { text } = req.body;
-    const paper = await Paper.findById(req.params.id);
-    if (!paper) return res.status(404).json({ message: 'Paper not found' });
+    const { data: paper, error: findError } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
 
-    const user = await User.findById(req.userId);
-    paper.comments.push({
+    if (!paper || findError) return res.status(404).json({ message: 'Paper not found' });
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('name, role')
+      .eq('id', req.userId)
+      .single();
+
+    const newComments = [...(paper.comments || []), {
       user: req.userId,
       userName: user.name,
       role: user.role,
-      text
-    });
+      text,
+      createdAt: new Date().toISOString()
+    }];
     
-    paper.workflowHistory.push({
+    const newWorkflowHistory = [...(paper.workflowHistory || []), {
       action: 'commented',
-      from: req.userId
-    });
+      from: req.userId,
+      timestamp: new Date().toISOString()
+    }];
 
-    await paper.save();
+    const { data: updatedPaper, error: updateError } = await supabase
+      .from('papers')
+      .update({ 
+        comments: newComments,
+        workflowHistory: newWorkflowHistory
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     // Notify owner if not the owner
     if (String(paper.owner) !== String(req.userId)) {
-      await new Notification({
+      await supabase.from('notifications').insert([{
         recipient: paper.owner,
         sender: req.userId,
-        paper: paper._id,
+        paper: paper.id,
         type: 'comment',
         message: `New comment on your paper from ${user.role}: ${text.substring(0, 50)}...`
-      }).save();
+      }]);
     }
 
-    res.json({ message: 'Comment added', paper });
+    res.json({ message: 'Comment added', paper: updatedPaper });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -185,13 +272,17 @@ router.post('/:id/comment', auth, async (req, res) => {
 // GET /api/papers/notifications
 router.get('/notifications/all', auth, async (req, res) => {
   try {
-    const notifications = await Notification.find({ recipient: req.userId })
-      .populate('sender', 'name role')
-      .populate('paper', 'paperTitle courseName')
-      .sort({ createdAt: -1 })
+    const { data: notifications, error } = await supabase
+      .from('notifications')
+      .select('*, sender:users(name, role), paper:papers("paperTitle", "courseName")')
+      .eq('recipient', req.userId)
+      .order('createdAt', { ascending: false })
       .limit(20);
+
+    if (error) throw error;
     res.json({ notifications });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -199,24 +290,54 @@ router.get('/notifications/all', auth, async (req, res) => {
 // GET /api/papers/stats - returns counts for dashboard
 router.get('/stats', auth, async (req, res) => {
   try{
-    const total = await Paper.countDocuments({ owner: req.userId });
-    const all = await Paper.find({ owner: req.userId }).lean();
+    const { count: total } = await supabase
+      .from('papers')
+      .select('*', { count: 'exact', head: true })
+      .eq('owner', req.userId);
+
+    const { data: all } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('owner', req.userId);
+
     const isComplete = (p) => {
       const hasTitle = (p.paperTitle && p.paperTitle.trim().length>0) || (p.courseName && p.courseName.trim().length>0);
       const hasQuestions = Array.isArray(p.sections) && p.sections.some(s => Array.isArray(s.questions) && s.questions.some(q => (q.text && q.text.trim().length>0) || (q.marks && q.marks>0)));
       return hasTitle && (p.totalQuestions && p.totalQuestions>0) && hasQuestions;
     };
     let drafts = 0;
-    for(const p of all) if(!isComplete(p)) drafts++;
-    const shared = await Shared.countDocuments({ sender_id: req.userId });
-    const user = await User.findById(req.userId).lean();
-    const received = user && user.email ? await Shared.countDocuments({ recipient_email: user.email }) : 0;
+    if (all) {
+      for(const p of all) if(!isComplete(p)) drafts++;
+    }
+
+    const { count: shared } = await supabase
+      .from('shared')
+      .select('*', { count: 'exact', head: true })
+      .eq('sender_id', req.userId);
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('email')
+      .eq('id', req.userId)
+      .single();
+
+    const { count: received } = await supabase
+      .from('shared')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_email', user.email);
+
     // include latest received timestamp for notification seen logic
     let latestReceivedAt = null;
-    if(user && user.email){
-      const latest = await Shared.findOne({ recipient_email: user.email }).sort({ created_at: -1 }).lean();
-      if(latest && latest.created_at) latestReceivedAt = latest.created_at;
-    }
+    const { data: latest } = await supabase
+      .from('shared')
+      .select('created_at')
+      .eq('recipient_email', user.email)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if(latest && latest.created_at) latestReceivedAt = latest.created_at;
+    
     res.json({ total, drafts, shared, received, latestReceivedAt });
   }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
@@ -224,12 +345,22 @@ router.get('/stats', auth, async (req, res) => {
 // GET /api/papers/:id - get single
 router.get('/:id', auth, async (req, res) => {
   try {
-    const p = await Paper.findById(req.params.id).populate('owner', 'name email');
-    if (!p) return res.status(404).json({ message: 'Not found' });
+    const { data: p, error } = await supabase
+      .from('papers')
+      .select('*, owner:users(id, name, email)')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!p || error) return res.status(404).json({ message: 'Not found' });
     
-    const user = await User.findById(req.userId);
+    const { data: user } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', req.userId)
+      .single();
+
     // Access control: owner OR (Chairman if submitted+) OR (Coordinator if pending+) OR Admin
-    const isOwner = String(p.owner._id) === String(req.userId);
+    const isOwner = String(p.owner.id) === String(req.userId);
     const isChairman = user.role === 'chairman' && ['submitted_to_chairman', 'pending_coordinator', 'finalized'].includes(p.status);
     const isCoordinator = user.role === 'module_coordinator' && ['pending_coordinator', 'finalized'].includes(p.status);
     const isAdmin = user.role === 'admin';
@@ -248,10 +379,16 @@ router.get('/:id', auth, async (req, res) => {
 // DELETE /api/papers/:id
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const p = await Paper.findById(req.params.id);
+    const { data: p } = await supabase
+      .from('papers')
+      .select('owner')
+      .eq('id', req.params.id)
+      .single();
+
     if (!p) return res.status(404).json({ message: 'Not found' });
     if (String(p.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
-    await p.deleteOne();
+    
+    await supabase.from('papers').delete().eq('id', req.params.id);
     res.json({ message: 'Deleted' });
   } catch (err) {
     console.error(err);

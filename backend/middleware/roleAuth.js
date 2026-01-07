@@ -1,12 +1,19 @@
+const supabase = require('../supabaseClient');
+
 const roleAuth = (roles) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     if (!req.userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
     
-    const User = require('../models/User');
-    User.findById(req.userId).then(user => {
-      if (!user) {
+    try {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', req.userId)
+        .single();
+
+      if (!user || error) {
         return res.status(401).json({ message: 'User not found' });
       }
       
@@ -16,10 +23,10 @@ const roleAuth = (roles) => {
       
       req.user = user; // Attach user object to request
       next();
-    }).catch(err => {
+    } catch (err) {
       console.error(err);
       res.status(500).json({ message: 'Server error during authorization' });
-    });
+    }
   };
 };
 

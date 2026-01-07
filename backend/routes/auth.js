@@ -2,65 +2,9 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../models/User');
+const supabase = require('../supabaseClient');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_fallback_secret_key';
-
-// POST /api/auth/signup - Only admin can register new users
-router.post('/signup', auth, async (req, res) => {
-  try {
-    const admin = await User.findById(req.userId);
-    if (!admin || admin.role !== 'admin') {
-      return res.status(403).json({ message: 'Only Admin can register new users' });
-    }
-
-    const { name, email, password, role } = req.body || {};
-    if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
-
-    const existingUser = await User.findOne({ email }).lean();
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
-
-    const user = new User({ 
-      name, 
-      email, 
-      password, 
-      role: role || 'teacher' 
-    });
-    await user.save();
-
-    res.json({ 
-      message: 'User registered successfully',
-      user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role } 
-    });
-  } catch (err) {
-    console.error('Signup Exception:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// POST /api/auth/login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
-
-    res.json({ 
-      token, 
-      user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role } 
-    });
-  } catch (err) {
-    console.error('Login Exception:', err && err.stack ? err.stack : err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // Auth middleware
 async function auth(req, res, next) {
@@ -76,12 +20,95 @@ async function auth(req, res, next) {
   }
 }
 
+// POST /api/auth/signup - Only admin can register new users
+router.post('/signup', auth, async (req, res) => {
+  try {
+    const { data: admin, error: adminError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: 'Only Admin can register new users' });
+    }
+
+    const { name, email, password, role } = req.body || {};
+    if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
+
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert([{ 
+        name, 
+        email, 
+        password: hashedPassword, 
+        role: role || 'teacher' 
+      }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    res.json({ 
+      message: 'User registered successfully',
+      user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role } 
+    });
+  } catch (err) {
+    console.error('Signup Exception:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    const isMatch = await bcrypt.compare(String(password), user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({ 
+      token, 
+      user: { id: user.id, name: user.name, email: user.email, role: user.role } 
+    });
+  } catch (err) {
+    console.error('Login Exception:', err && err.stack ? err.stack : err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/auth/me - get profile
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('name email role').lean();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, email, role')
+      .eq('id', req.userId)
+      .single();
+
     if (!user) return res.status(404).json({ message: 'Not found' });
-    res.json({ user: { id: String(user._id), name: user.name, email: user.email, role: user.role } });
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

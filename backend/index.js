@@ -1,8 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const path = require('path');
+const supabase = require('./supabaseClient');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 
@@ -15,32 +16,42 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
-// DB Connect
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/new-test-creator';
-mongoose.connect(MONGO_URI)
-  .then(async () => {
-    console.log('✅ MongoDB connected successfully');
-    await seedAdmin();
-  })
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+// Supabase Init & Seed Admin
+(async () => {
+  console.log('✅ Supabase integrated');
+  await seedAdmin();
+})();
 
 async function seedAdmin() {
-  const User = require('./models/User');
   try {
-    const adminExists = await User.findOne({ role: 'admin' });
+    const { data: adminExists, error: findError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', 'admin@rscoe.in')
+      .single();
+
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+
     if (!adminExists) {
-      const admin = new User({
-        name: 'Super Admin',
-        email: 'admin@rscoe.in',
-        password: 'admin123',
-        role: 'admin'
-      });
-      await admin.save();
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([{
+          name: 'Super Admin',
+          email: 'admin@rscoe.in',
+          password: hashedPassword,
+          role: 'admin'
+        }]);
+      
+      if (insertError) throw insertError;
       console.log('👤 Predefined Admin created: admin@rscoe.in / admin123');
     } else {
       // Ensure the admin password is correct and hashed
-      adminExists.password = 'admin123';
-      await adminExists.save();
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ password: hashedPassword, role: 'admin' })
+        .eq('email', 'admin@rscoe.in');
+      
+      if (updateError) throw updateError;
       console.log('👤 Predefined Admin password reset to default: admin123');
     }
   } catch (err) {
