@@ -6,10 +6,15 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_fallback_secret_key';
 
-// POST /api/auth/signup
-router.post('/signup', async (req, res) => {
+// POST /api/auth/signup - Only admin can register new users
+router.post('/signup', auth, async (req, res) => {
   try {
-    const { name, email, password } = req.body || {};
+    const admin = await User.findById(req.userId);
+    if (!admin || admin.role !== 'admin') {
+      return res.status(403).json({ message: 'Only Admin can register new users' });
+    }
+
+    const { name, email, password, role } = req.body || {};
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
 
     const existingUser = await User.findOne({ email }).lean();
@@ -19,18 +24,16 @@ router.post('/signup', async (req, res) => {
       name, 
       email, 
       password, 
-      role: req.body.role || 'teacher' 
+      role: role || 'teacher' 
     });
     await user.save();
 
-    const token = jwt.sign({ userId: user._id.toString() }, JWT_SECRET, { expiresIn: '7d' });
-
     res.json({ 
-      token, 
-      user: { id: user._id.toString(), name: user.name, email: user.email } 
+      message: 'User registered successfully',
+      user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role } 
     });
   } catch (err) {
-    console.error('Signup Exception:', err && err.stack ? err.stack : err);
+    console.error('Signup Exception:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

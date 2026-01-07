@@ -18,8 +18,30 @@ app.use(express.json({ limit: '5mb' }));
 // DB Connect
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/new-test-creator';
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected successfully'))
+  .then(async () => {
+    console.log('✅ MongoDB connected successfully');
+    await seedAdmin();
+  })
   .catch(err => console.error('❌ MongoDB connection error:', err));
+
+async function seedAdmin() {
+  const User = require('./models/User');
+  try {
+    const adminExists = await User.findOne({ role: 'admin' });
+    if (!adminExists) {
+      const admin = new User({
+        name: 'Super Admin',
+        email: 'admin@rscoe.in',
+        password: 'admin123',
+        role: 'admin'
+      });
+      await admin.save();
+      console.log('👤 Predefined Admin created: admin@rscoe.in / admin123');
+    }
+  } catch (err) {
+    console.error('Error seeding admin:', err);
+  }
+}
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));

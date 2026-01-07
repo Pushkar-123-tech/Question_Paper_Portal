@@ -49,105 +49,41 @@
 </head>
 <body>
 
-<div class="container">
-  <!-- LOGIN FORM -->
-  <form id="loginForm" class="active active">
-    <h2>Login</h2>
-    <div class="input-box"><input id="loginEmail" type="email" placeholder="Enter Email" required></div>
-    <div class="input-box"><input id="loginPassword" type="password" placeholder="Enter Password" required></div>
-    <button type="submit" class="btn">Login</button>
-    <p class="toggle">Don't have an account? <span onclick="showSignup()">Sign up</span></p>
-  </form>
+  <div class="container">
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="active">
+      <h2>Login</h2>
+      <div class="input-box"><input id="loginEmail" type="email" placeholder="Enter Email" required></div>
+      <div class="input-box"><input id="loginPassword" type="password" placeholder="Enter Password" required></div>
+      <button type="submit" class="btn">Login</button>
+      <p style="text-align:center; margin-top:15px; font-size:12px; color:#666;">Only authorized personnel can login.</p>
+    </form>
+  </div>
 
-  <!-- SIGNUP FORM -->
-  <form id="signupForm">
-    <h2>Sign Up</h2>
-    <div class="input-box"><input id="signupName" type="text" placeholder="Enter Full Name" required></div>
-    <div class="input-box"><input id="signupEmail" type="email" placeholder="Enter Email" required></div>
-    <div class="input-box"><input id="signupMobile" type="text" placeholder="Enter Mobile Number" maxlength="10" required></div>
-    <div class="input-box"><input id="signupPassword" type="password" placeholder="Create Password (min 6 chars)" minlength="6" required></div>
-      <div class="input-box">
-        <select id="signupRole" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:10px; font-size:15px; outline:none; background:white;">
-          <option value="teacher">Teacher</option>
-          <option value="faculty">Faculty</option>
-          <option value="chairman">Chairman</option>
-          <option value="module_coordinator">Module Coordinator</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <button type="submit" class="btn">Create Account</button>
-    <p class="toggle">Already have an account? <span onclick="showLogin()">Login</span></p>
-  </form>
-</div>
+  <script>
+    const loginForm = document.getElementById("loginForm");
 
-<script>
-  const loginForm = document.getElementById("loginForm");
-  const signupForm = document.getElementById("signupForm");
-
-  function showSignup() {
-    loginForm.classList.remove("active");
-    signupForm.classList.add("active");
-  }
-  function showLogin() {
-    signupForm.classList.remove("active");
-    loginForm.classList.add("active");
-  }
-
-  // Handle pre-selected role from landing page
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get('role');
-    if (role) {
-      showSignup();
-      const select = document.getElementById('signupRole');
-      if (select) {
-        select.value = role;
-      }
-    }
-  });
-
-  // AUTH
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) { showToast(data.message || 'Login failed', 'error'); return; }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userName', data.user.name);
-      localStorage.setItem('userEmail', data.user.email || email);
-      showToast('Logged in', 'success');
-      // continue to dashboard
-      window.location.href = '/dashboard.html';
-    } catch (err) { console.error(err); showToast('Network error', 'error'); }
-  });
-
-    signupForm.addEventListener('submit', async (e) => {
+    // AUTH
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const role = document.getElementById('signupRole').value;
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
       try {
-        const res = await fetch('/api/auth/signup', {
+        const res = await fetch('/api/auth/login', {
           method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ name, email, password, role })
+          body: JSON.stringify({ email, password })
         });
-      const data = await res.json();
-      if (!res.ok) { showToast(data.message || 'Signup failed', 'error'); return; }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userName', data.user.name);
-      localStorage.setItem('userEmail', data.user.email || email);
-      showToast('Account created', 'success');
-      window.location.href = '/dashboard.html';
-    } catch (err) { console.error(err); showToast('Network error', 'error'); }
-  });
-</script>
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || 'Login failed', 'error'); return; }
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('userEmail', data.user.email || email);
+        showToast('Logged in', 'success');
+        window.location.href = '/dashboard.html';
+      } catch (err) { console.error(err); showToast('Network error', 'error'); }
+    });
+  </script>
+
 <script src="/public/ui.js"></script>
 </body>
 </html>

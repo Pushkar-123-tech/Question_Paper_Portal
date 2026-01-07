@@ -21,15 +21,62 @@
 </head>
 <body>
 <div class="container">
-  <a href="/dashboard.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
-  <h1>User Management</h1>
-  <div id="usersList">Loading users...</div>
-</div>
+    <a href="/dashboard.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+    <h1>User Management</h1>
 
-<script src="/public/ui.js"></script>
-<script>
-  const token = localStorage.getItem('token');
-  if (!token) window.location.href = '/login.html';
+    <div class="card" style="margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+      <h3>Register New User</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+        <input type="text" id="regName" placeholder="Full Name" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+        <input type="email" id="regEmail" placeholder="Email (e.g. user@rscoe.in)" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+        <input type="password" id="regPassword" placeholder="Password" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+        <select id="regRole" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
+          <option value="teacher">Teacher</option>
+          <option value="faculty">Faculty</option>
+          <option value="chairman">Chairman</option>
+          <option value="module_coordinator">Module Coordinator</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button onclick="registerUser()" style="background: var(--primary); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Register User</button>
+      </div>
+    </div>
+
+    <div id="usersList">Loading users...</div>
+  </div>
+
+  <script src="/public/ui.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login.html';
+
+    async function registerUser() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+
+      if (!name || !email || !password) return showToast('Please fill all fields', 'warn');
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ name, email, password, role })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Registration failed');
+        
+        showToast('User registered successfully', 'success');
+        // Clear fields
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        loadUsers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
 
   async function loadUsers() {
     try {
