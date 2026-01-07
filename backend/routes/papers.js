@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { authMiddleware: auth } = require('./auth');
 const roleAuth = require('../middleware/roleAuth');
 
-// POST /api/papers - create
+// POST /api/papers - create or update
 router.post('/', auth, async (req, res) => {
   try {
     const data = req.body;
@@ -14,19 +14,31 @@ router.post('/', auth, async (req, res) => {
     if (data.jspmLogo) delete data.jspmLogo;
     if (data.rscoeLogo) delete data.rscoeLogo;
     data.owner = req.userId;
-    data.status = 'draft';
     
-    // Mongoose to Supabase field mapping (if any) - here they match because of my SQL update
-    const { data: paper, error } = await supabase
-      .from('papers')
-      .insert([data])
-      .select()
-      .single();
-
-    if (error) throw error;
-    res.json({ paper });
+    if (data.id) {
+      // Update existing
+      const { data: paper, error } = await supabase
+        .from('papers')
+        .update(data)
+        .eq('id', data.id)
+        .eq('owner', req.userId)
+        .select()
+        .single();
+      if (error) throw error;
+      return res.json({ paper });
+    } else {
+      // Create new
+      data.status = 'draft';
+      const { data: paper, error } = await supabase
+        .from('papers')
+        .insert([data])
+        .select()
+        .single();
+      if (error) throw error;
+      return res.json({ paper });
+    }
   } catch (err) {
-    console.error(err);
+    console.error('Paper Save Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -34,11 +46,16 @@ router.post('/', auth, async (req, res) => {
 // GET /api/papers - list based on role
 router.get('/', auth, async (req, res) => {
   try {
-    const { data: user } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('id', req.userId)
       .single();
+
+    if (!user || userError) {
+      console.warn('User not found in GET /api/papers:', req.userId);
+      return res.status(401).json({ message: 'User not found' });
+    }
 
     let query = supabase.from('papers').select('*, owner:users(name, email)');
 

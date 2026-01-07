@@ -7,9 +7,18 @@ const supabase = require('../supabaseClient');
 // POST /api/share/send
 router.post('/send', auth, async (req, res) => {
   const { paperId, recipientEmail, message } = req.body || {};
-  if (!paperId || !recipientEmail) return res.status(400).json({ message: 'paperId and recipientEmail required' });
+  if (!paperId || !recipientEmail) {
+    console.warn('Share failed: Missing paperId or recipientEmail', { paperId, recipientEmail });
+    return res.status(400).json({ message: 'paperId and recipientEmail required' });
+  }
   
   try {
+    // Validate UUID format for paperId
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(paperId)) {
+      console.warn('Share failed: Invalid paperId format', paperId);
+      return res.status(400).json({ message: 'Invalid paperId format' });
+    }
     const { data: sender } = await supabase
       .from('users')
       .select('*')

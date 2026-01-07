@@ -162,12 +162,27 @@ textarea{height:56px;resize:none;}
 
     <div style="margin-top:6px;">
       <strong class="muted">Preset Instructions</strong>
-      <div id="presetInstructions" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-        <label><input type="checkbox" value="Answer all questions" /> Answer all questions</label>
-        <label><input type="checkbox" value="Each question carries equal marks" /> Each question carries equal marks</label>
-        <label><input type="checkbox" value="Use of non-programmable calculator allowed" /> Use of non-programmable calculator allowed</label>
-        <label><input type="checkbox" value="Write your answers clearly" /> Write your answers clearly</label>
-        <label><input type="checkbox" value="Time management is essential" /> Time management is essential</label>
+      <div id="presetInstructions" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" value="Answer all questions" style="width:auto;margin:0;"/>
+          <span>Answer all questions</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" value="Each question carries equal marks" style="width:auto;margin:0;"/>
+          <span>Each question carries equal marks</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" value="Use of non-programmable calculator allowed" style="width:auto;margin:0;"/>
+          <span>Use of non-programmable calculator allowed</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" value="Write your answers clearly" style="width:auto;margin:0;"/>
+          <span>Write your answers clearly</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" value="Time management is essential" style="width:auto;margin:0;"/>
+          <span>Time management is essential</span>
+        </label>
       </div>
       <div style="margin-top:8px;display:flex;gap:8px;"><button class="btn" onclick="addSelectedInstructions()">+ Add Selected Instructions</button> <button class="btn small secondary" onclick="addInstruction()">+ Add Custom Instruction</button></div>
     </div>

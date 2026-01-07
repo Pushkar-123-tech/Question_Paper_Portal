@@ -81,7 +81,10 @@ router.post('/login', async (req, res) => {
       .eq('email', email)
       .single();
 
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user) {
+      console.warn('Login failed: User not found for email', email);
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
     if (!user.password || typeof user.password !== 'string') {
       console.error('Password hash missing or invalid for user:', user.email);
@@ -89,7 +92,10 @@ router.post('/login', async (req, res) => {
     }
     
     const isMatch = await bcrypt.compare(String(password), String(user.password));
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      console.warn('Login failed: Password mismatch for email', email);
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
 
