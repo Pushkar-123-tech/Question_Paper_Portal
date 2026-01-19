@@ -464,31 +464,31 @@
       } catch (err) { console.error(err); }
     }
 
-      function renderUsers(users) {
-        const tbody = document.getElementById('usersTableBody');
-        tbody.innerHTML = '';
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '';
 
-        users.forEach(u => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-              <td><strong>${u.name}</strong></td>
-              <td>${u.email}</td>
-              <td>
-                  <select onchange="updateRole('${u.id}', this.value)" style="padding:4px 8px; font-size:12px;">
-                      <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-                      <option value="faculty" ${u.role === 'faculty' ? 'selected' : ''}>Faculty</option>
-                      <option value="chairman" ${u.role === 'chairman' ? 'selected' : ''}>Chairman</option>
-                      <option value="module_coordinator" ${u.role === 'module_coordinator' ? 'selected' : ''}>Coordinator</option>
-                      <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                  </select>
-              </td>
-              <td>
-                  <button class="btn btn-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i></button>
-              </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${u.name}</strong></td>
+            <td>${u.email}</td>
+            <td>
+                <select onchange="updateRole('${u._id}', this.value)" style="padding:4px 8px; font-size:12px;">
+                    <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                    <option value="faculty" ${u.role === 'faculty' ? 'selected' : ''}>Faculty</option>
+                    <option value="chairman" ${u.role === 'chairman' ? 'selected' : ''}>Chairman</option>
+                    <option value="module_coordinator" ${u.role === 'module_coordinator' ? 'selected' : ''}>Coordinator</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+            </td>
+            <td>
+                <button class="btn btn-danger" onclick="deleteUser('${u._id}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
     function updateStats(users) {
       document.getElementById('statTotalUsers').innerText = users.length;
@@ -497,34 +497,48 @@
       document.getElementById('statOther').innerText = users.filter(u => !['teacher', 'faculty'].includes(u.role)).length;
     }
 
-      async function updateRole(userId, newRole) {
-        try {
-          const res = await fetch(`/api/admin/users/${userId}/role`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-              body: JSON.stringify({ role: newRole })
-          });
-          if (!res.ok) throw new Error('Update failed');
-          showToast('Role updated successfully', 'success');
-          loadUsers();
-      } catch (err) { showToast(err.message, 'error'); }
-  }
+    async function updateRole(userId, newRole) {
+  try {
+    const res = await fetch(`/api/admin/users/${userId}/role`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token,
+      },
+      body: JSON.stringify({ role: newRole }),
+    });
 
-  async function deleteUser(userId) {
-      if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-      try {
-          const res = await fetch(`/api/admin/users/${userId}`, {
-              method: 'DELETE',
-              headers: { 'Authorization': 'Bearer ' + token }
-          });
-          if (!res.ok) throw new Error('Delete failed');
-          showToast('User deleted', 'success');
-          loadUsers();
-      } catch (err) { showToast(err.message, 'error'); }
+    if (!res.ok) throw new Error("Role update failed");
+
+    showToast("Role updated successfully", "success");
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, "error");
   }
+}
+
+async function deleteUser(userId) {
+  if (!confirm("Are you sure you want to delete this user?")) return;
+
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token,
+      },
+    });
+
+    if (!res.ok) throw new Error("User deletion failed");
+
+    showToast("User deleted successfully", "success");
+    loadUsers();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
 
 loadUsers();
   </script>
-  </body>
+</body>
 
 </html>
