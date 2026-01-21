@@ -286,6 +286,70 @@ router.post('/:id/comment', auth, async (req, res) => {
   }
 });
 
+// GET /api/papers/external/assigned - get papers for external review
+router.get('/external/assigned', auth, async (req, res) => {
+  try {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    if (!user || userError) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    let papers = [];
+
+    const { data: ownPapers } = await supabase
+      .from('papers')
+      .select('*, owner:users(id, name, email)')
+      .eq('owner', req.userId)
+      .order('createdAt', { ascending: false });
+
+    if (ownPapers) papers = [...papers, ...ownPapers];
+
+    const { data: sharedItems } = await supabase
+      .from('shared')
+      .select('paper_id')
+      .eq('recipient_email', user.email);
+
+    if (sharedItems && sharedItems.length > 0) {
+      const paperIds = sharedItems.map(s => s.paper_id).filter(Boolean);
+      if (paperIds.length > 0) {
+        const { data: sharedPapers } = await supabase
+          .from('papers')
+          .select('*, owner:users(id, name, email)')
+          .in('id', paperIds)
+          .order('createdAt', { ascending: false });
+        if (sharedPapers) {
+          const existingIds = papers.map(p => p.id);
+          const newPapers = sharedPapers.filter(p => !existingIds.includes(p.id));
+          papers = [...papers, ...newPapers];
+        }
+      }
+    }
+
+    if (user.role === 'external') {
+      const { data: allPapers } = await supabase
+        .from('papers')
+        .select('*, owner:users(id, name, email)')
+        .in('status', ['submitted_to_chairman', 'pending_coordinator', 'finalized'])
+        .order('createdAt', { ascending: false });
+      if (allPapers) {
+        const existingIds = papers.map(p => p.id);
+        const newPapers = allPapers.filter(p => !existingIds.includes(p.id));
+        papers = [...papers, ...newPapers];
+      }
+    }
+
+    res.json({ papers });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/papers/notifications
 router.get('/notifications/all', auth, async (req, res) => {
   try {

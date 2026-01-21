@@ -83,6 +83,8 @@
         
         if (data.user.role === 'admin') {
             window.location.href = '/admin.html';
+        } else if (data.user.role === 'external') {
+            window.location.href = '/externalhome.html';
         } else {
             window.location.href = '/dashboard.html';
         }

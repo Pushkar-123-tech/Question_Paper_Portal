@@ -328,6 +328,12 @@ function updateUIForRole(role) {
   sidebarTitle.innerText = role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ') + ' Panel';
   mainTitle.innerText = `Welcome, ${role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ')} 👋`;
 
+  // Redirect external users to their dedicated page
+  if (role === 'external') {
+    window.location.href = '/externalhome.html';
+    return;
+  }
+
   // Hide/Show role specific buttons
   if (role === 'admin') {
     const adminBtn = document.createElement('button');
