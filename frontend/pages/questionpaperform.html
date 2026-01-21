@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Teacher Dashboard | Question Paper Form</title>
+<title>External Dashboard | Question Paper Form</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="/public/ui.css">
@@ -80,24 +80,33 @@ textarea{height:56px;resize:none;}
   border-left:2px solid var(--primary);
   margin-left:6px;
 }
-
-.checkbox-row {
-  display: flex;
-  gap: 20px;
-  margin: 10px 0;
+.question-box{
+  border:1px solid var(--border);
+  padding:14px;
+  border-radius:6px;
+  background:#fafafa;
+  margin-bottom:14px;
 }
-.checkbox-row label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
+.sub-box{
+  margin-left:20px;
+  padding:10px;
+  border-left:2px solid var(--primary);
+  margin-bottom:10px;
 }
-.sub-box {
-  background: #f8f9fa;
-  padding: 12px;
-  border-radius: 6px;
-  margin: 10px 0;
-  border-left: 3px solid var(--primary);
+.checkbox-row{
+  display:flex;
+  gap:16px;
+  margin-top:8px;
+}
+.checkbox-row label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+}
+.checkbox-row input[type="checkbox"]{
+  width:auto;
+  margin:0;
 }
 </style>
 </head>
@@ -126,6 +135,10 @@ textarea{height:56px;resize:none;}
 
     <div class="card">
       <h2>Examination Form</h2>
+      <!-- <div class="flex-row">
+        <div><label>JSPM/Left Logo</label><input type="file" id="jspmLogoInput" accept="image/*"/></div>
+        <div><label>RSCOE/Right Logo</label><input type="file" id="rscoeLogoInput" accept="image/*"/></div>
+      </div> -->
       <div class="flex-row">
         <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
         <div><label>Semester</label>
@@ -205,7 +218,14 @@ textarea{height:56px;resize:none;}
 
   <div class="card"><h2>Course Outcomes</h2><div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button></div>
   <div class="card"><h2>Instructions</h2><div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add Instruction</button></div>
-  <div class="card"><h2>Question Sections</h2><div id="sectionContainer"></div></div>
+  
+  <div class="card">
+    <h2>Questions</h2>
+    <div id="questions"></div>
+    <button class="btn" onclick="addQuestion()">+ Add Question</button>
+  </div>
+  
+  <div class="card"><h2>Question Sections (Legacy)</h2><div id="sectionContainer"></div></div>
     <div class="card">
       <div id="paperStatusContainer" style="margin-bottom:10px; font-weight:bold; color:var(--primary);"></div>
       <button class="btn primary" onclick="savePaper()">Save Draft</button> 
@@ -219,24 +239,106 @@ textarea{height:56px;resize:none;}
 
 <script>
 const CO_OPTIONS = ["CO1","CO2","CO3","CO4","CO5","CO6"];
-let paperData = { 
-  paperTitle:'', 
-  semester:'', 
-  academicYear:'', 
-  program:'', 
-  courseCode:'', 
-  courseName:'', 
-  duration:'', 
-  maxMarks:0, 
-  totalQuestions:0, 
-  courseOutcomes:[], 
-  instructions:[], 
-  sections:[
-    {title:"A",questions:[]},
-    {title:"B",questions:[]},
-    {title:"C",questions:[]}
-  ]
-};
+let paperData = { paperTitle:'', semester:'', academicYear:'', program:'', courseCode:'', courseName:'', duration:'', maxMarks:0, totalQuestions:0, courseOutcomes:[], instructions:[], sections:[{title:"A",questions:[]},{title:"B",questions:[]},{title:"C",questions:[]}]};
+
+let questions = [];
+
+function addQuestion(){
+  questions.push({
+    text:'',
+    marks:'',
+    type:'OR',
+    subA:null,
+    subB:null
+  });
+  render();
+}
+
+function toggleSub(qi,which,checked){
+  if(checked){
+    questions[qi][which]={ text:'', marks:'' };
+  }else{
+    questions[qi][which]=null;
+  }
+  render();
+}
+
+function render(){
+  const c = document.getElementById('questions');
+  c.innerHTML = '';
+
+  questions.forEach((q,qi)=>{
+    c.innerHTML += `
+    <div class="question-box">
+      <strong>Q${qi+1}</strong>
+
+      <textarea placeholder="Main question"
+        oninput="questions[${qi}].text=this.value">${q.text}</textarea>
+
+      <input type="number" placeholder="Marks"
+        value="${q.marks}"
+        oninput="questions[${qi}].marks=this.value"/>
+
+      <div class="muted">Sub Question Type</div>
+      <select onchange="questions[${qi}].type=this.value">
+        <option ${q.type==='OR'?'selected':''}>OR</option>
+        <option ${q.type==='AND'?'selected':''}>AND</option>
+        <option ${q.type==='EITHER-OR'?'selected':''}>EITHER-OR</option>
+      </select>
+
+      <div class="muted">Add Sub Questions</div>
+      <div class="checkbox-row">
+        <label>
+          <input type="checkbox"
+            ${q.subA?'checked':''}
+            onchange="toggleSub(${qi},'subA',this.checked)">
+          A
+        </label>
+        <label>
+          <input type="checkbox"
+            ${q.subB?'checked':''}
+            onchange="toggleSub(${qi},'subB',this.checked)">
+          B
+        </label>
+      </div>
+
+      ${renderSubs(qi)}
+      
+      <button class='delete-btn' onclick='questions.splice(${qi},1);render()' style="margin-top:10px;">Delete Question</button>
+    </div>`;
+  });
+}
+
+function renderSubs(qi){
+  const q = questions[qi];
+  let html = '';
+
+  if(q.subA){
+    html += `
+    <div class="sub-box">
+      <strong>A)</strong>
+      <textarea placeholder="Sub question A"
+        oninput="questions[${qi}].subA.text=this.value">${q.subA.text}</textarea>
+      <input type="number" placeholder="Marks"
+        value="${q.subA.marks}"
+        oninput="questions[${qi}].subA.marks=this.value"/>
+    </div>`;
+  }
+
+  if(q.subB){
+    html += `
+    <div class="sub-box">
+      <strong>B)</strong>
+      <textarea placeholder="Sub question B"
+        oninput="questions[${qi}].subB.text=this.value">${q.subB.text}</textarea>
+      <input type="number" placeholder="Marks"
+        value="${q.subB.marks}"
+        oninput="questions[${qi}].subB.marks=this.value"/>
+    </div>`;
+  }
+
+  return html;
+}
 
 /* Sidebar active */
 function setActive(btn){
@@ -254,6 +356,7 @@ if(!token){
 // show logged in user
 const name = localStorage.getItem('userName');
 if(name){
+  // place the name in sidebar header if needed
   const h = document.querySelector('.sidebar h2');
   if(h) h.innerHTML = `<i class="fa-solid fa-chalkboard-user"></i> ${name}`;
 }
@@ -262,81 +365,11 @@ if(name){
 function navigate(sec){
   document.getElementById("dashboardSection").style.display = sec==="dashboard"?"block":"none";
   document.getElementById("formSection").style.display = sec==="form"?"block":"none";
-  if(sec === 'dashboard') {
-    loadMyPapers(); // refresh list when user navigates to dashboard
-  } else if(sec === 'form') {
-    // Load any saved form data when navigating to form
-    loadFormData();
-  }
+  if(sec === 'dashboard') loadMyPapers(); // refresh list when user navigates to dashboard
 }
-
 // Redirect to dashboard page (full page) when user clicks Back
 function backToDashboard(){
   window.location.href = '/dashboard.html';
-}
-
-/* Save form data to localStorage */
-function saveFormData() {
-  try {
-    const formData = {
-      paperTitle: document.getElementById('paperTitle').value,
-      semester: document.getElementById('semester').value,
-      academicYear: document.getElementById('academicYear').value,
-      program: document.getElementById('program').value,
-      courseCode: document.getElementById('courseCode').value,
-      courseName: document.getElementById('courseName').value,
-      prnNo: document.getElementById('prnNo') ? document.getElementById('prnNo').value : '',
-      qpCode: document.getElementById('qpCode') ? document.getElementById('qpCode').value : '',
-      duration: document.getElementById('duration').value,
-      maxMarks: document.getElementById('maxMarks').value,
-      totalQuestions: document.getElementById('totalQuestions').value,
-      courseOutcomes: paperData.courseOutcomes,
-      instructions: paperData.instructions,
-      sections: paperData.sections
-    };
-    localStorage.setItem('formDraft', JSON.stringify(formData));
-  } catch(e) {
-    console.error('Failed to save form data:', e);
-  }
-}
-
-/* Load form data from localStorage */
-function loadFormData() {
-  try {
-    const saved = localStorage.getItem('formDraft');
-    if(saved) {
-      const formData = JSON.parse(saved);
-      
-      // Populate basic form fields
-      document.getElementById('paperTitle').value = formData.paperTitle || '';
-      document.getElementById('semester').value = formData.semester || '';
-      document.getElementById('academicYear').value = formData.academicYear || '';
-      document.getElementById('program').value = formData.program || '';
-      document.getElementById('courseCode').value = formData.courseCode || '';
-      document.getElementById('courseName').value = formData.courseName || '';
-      if(document.getElementById('prnNo')) document.getElementById('prnNo').value = formData.prnNo || '';
-      if(document.getElementById('qpCode')) document.getElementById('qpCode').value = formData.qpCode || '';
-      document.getElementById('duration').value = formData.duration || '';
-      document.getElementById('maxMarks').value = formData.maxMarks || '';
-      document.getElementById('totalQuestions').value = formData.totalQuestions || '';
-      
-      // Load COs, instructions, and sections if they exist
-      if(formData.courseOutcomes) {
-        paperData.courseOutcomes = formData.courseOutcomes;
-        renderCO();
-      }
-      if(formData.instructions) {
-        paperData.instructions = formData.instructions;
-        renderInstructions();
-      }
-      if(formData.sections) {
-        paperData.sections = formData.sections;
-        renderSections();
-      }
-    }
-  } catch(e) {
-    console.error('Failed to load form data:', e);
-  }
 }
 
 /* CO */
@@ -345,55 +378,37 @@ function addCO(){
   if(next>6) return;
   paperData.courseOutcomes.push(`CO${next}: `);
   renderCO();
-  saveFormData();
 }
 function renderCO(){
   const c=document.getElementById("coContainer");c.innerHTML="";
   paperData.courseOutcomes.forEach((co,i)=>{
-    c.innerHTML+=`<div class='question-box'><textarea oninput='paperData.courseOutcomes[${i}]=this.value;saveFormData()'>${co}</textarea>
+    c.innerHTML+=`<div class='question-box'><textarea oninput='paperData.courseOutcomes[${i}]=this.value'>${co}</textarea>
     <button class='delete-btn' onclick='deleteCO(${i})'>Delete CO</button></div>`;
   });
 }
-function deleteCO(i){
-  paperData.courseOutcomes.splice(i,1);
-  renderCO();
-  saveFormData();
-}
+function deleteCO(i){paperData.courseOutcomes.splice(i,1);renderCO();}
 
 /* Instructions */
-function addInstruction(){
-  paperData.instructions.push('');
-  renderInstructions();
-  saveFormData();
-}
+function addInstruction(){paperData.instructions.push('');renderInstructions();}
 function addSelectedInstructions(){
   const boxes = document.querySelectorAll('#presetInstructions input[type="checkbox"]:checked');
-  boxes.forEach(b => { 
-    paperData.instructions.push(b.value); 
-    b.checked = false; 
-  });
+  boxes.forEach(b => { paperData.instructions.push(b.value); b.checked = false; });
   renderInstructions();
-  saveFormData();
 }
 function renderInstructions(){
   const c=document.getElementById("instructionContainer");c.innerHTML="";
   paperData.instructions.forEach((ins,i)=>{
-    c.innerHTML+=`<div class='question-box'><div style="font-weight:600;margin-bottom:6px">Instruction ${i+1}</div><textarea oninput='paperData.instructions[${i}]=this.value;saveFormData()'>${ins}</textarea>
+    c.innerHTML+=`<div class='question-box'><div style="font-weight:600;margin-bottom:6px">Instruction ${i+1}</div><textarea oninput='paperData.instructions[${i}]=this.value'>${ins}</textarea>
     <button class='delete-btn' onclick='deleteInstruction(${i})'>Delete</button></div>`;
   });
 }
-function deleteInstruction(i){
-  paperData.instructions.splice(i,1);
-  renderInstructions();
-  saveFormData();
-} 
+function deleteInstruction(i){paperData.instructions.splice(i,1);renderInstructions();} 
 
 /* Sections & Questions */
 function renderSections(){
   const c=document.getElementById("sectionContainer");c.innerHTML="";
   paperData.sections.forEach((sec,i)=>{
     c.innerHTML+=`<div class='card'><h3>Section ${sec.title}</h3><button class='btn small secondary' onclick='addMainQuestion(${i})'>+ Add Question</button><div id='qSec${i}'></div></div>`;
-    renderMainQuestions(i);
   });
 }
 function addMainQuestion(sIdx){
@@ -401,188 +416,139 @@ function addMainQuestion(sIdx){
   const qno = sec.questions.length+1;
   sec.questions.push({ qno, text:"", marks:"", bl:"", co:"", subQuestions:[] });
   renderMainQuestions(sIdx);
-  saveFormData();
 }
 function renderMainQuestions(sIdx){
   const sec = paperData.sections[sIdx];
-  const c = document.getElementById(`qSec${sIdx}`);
-  if(!c) return;
-  
-  c.innerHTML="";
+  const c = document.getElementById(`qSec${sIdx}`);c.innerHTML="";
   sec.questions.forEach((q,qIdx)=>{
-    const subOptions = q.subQuestions && q.subQuestions.length > 0 
-      ? q.subQuestions.map(sq => sq.label).join(',')
-      : '';
-    
-    c.innerHTML+=`
-    <div class='question-item'>
-      <label>Q${q.qno}</label>
-      <textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value;saveFormData()'>${q.text}</textarea>
-      <div class='row'>
-        <input type='number' placeholder='Marks' value="${q.marks || ''}" oninput='paperData.sections[${sIdx}].questions[${qIdx}].marks=this.value;saveFormData()'/>
-        <input placeholder='BL Level' value="${q.bl || ''}" oninput='paperData.sections[${sIdx}].questions[${qIdx}].bl=this.value;saveFormData()'/>
-        <select onchange='paperData.sections[${sIdx}].questions[${qIdx}].co=this.value;saveFormData()'>
-          <option value=''>CO</option>
-          ${CO_OPTIONS.map(co=>`<option ${q.co===co?'selected':''}>${co}</option>`).join("")}
-        </select>
-      </div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <label class="muted">SubQuestions:</label>
-        <select onchange='setSubOptions(${sIdx},${qIdx},this.value)'>
-          <option value="">None</option>
-          <option value="A" ${subOptions.includes('A')?'selected':''}>A</option>
-          <option value="B" ${subOptions.includes('B')?'selected':''}>B</option>
-          <option value="A,B" ${subOptions.includes('A') && subOptions.includes('B')?'selected':''}>A & B</option>
-        </select>
-      </div>
-      <button class='delete-btn' onclick='paperData.sections[${sIdx}].questions.splice(${qIdx},1);renderMainQuestions(${sIdx});saveFormData()'>Delete</button>
-      <div id='subQ${sIdx}-${qIdx}' class='sub-container'></div>
-    </div>`;
-    
-    renderSubQuestions(sIdx,qIdx);
+    c.innerHTML+=`<div class='question-item'><label>Q${q.qno}</label><textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value'>${q.text}</textarea><div class='row'><input type='number' placeholder='Marks' oninput='paperData.sections[${sIdx}].questions[${qIdx}].marks=this.value'/><input placeholder='BL Level' oninput='paperData.sections[${sIdx}].questions[${qIdx}].bl=this.value'/><select onchange='paperData.sections[${sIdx}].questions[${qIdx}].co=this.value'><option value=''>CO</option>${CO_OPTIONS.map(co=>`<option>${co}</option>`).join("")}</select></div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><label class="muted">SubQuestions:</label><select onchange='setSubOptions(${sIdx},${qIdx},this.value)'><option value="">None</option><option value="A">A</option><option value="B">B</option></select></div>
+    <button class='delete-btn' onclick='paperData.sections[${sIdx}].questions.splice(${qIdx},1);renderMainQuestions(${sIdx})'>Delete</button><div id='subQ${sIdx}-${qIdx}' class='sub-container'></div></div>`; 
   });
 }
-
 function setSubOptions(sIdx,qIdx,val){              
-  const sec = paperData.sections[sIdx];
-  const q = sec.questions[qIdx];
-  
-  // Clear existing subquestions
-  q.subQuestions = [];
-  
-  // Add new subquestions based on selection
-  if(val.includes('A')) {
-    q.subQuestions.push({ label: 'A', text:'', marks:'', bl:'', co:'' });
-  }
-  if(val.includes('B')) {
-    q.subQuestions.push({ label: 'B', text:'', marks:'', bl:'', co:'' });
-  }
-  
+  const parts = (val||"").split(',').filter(Boolean);
+  const subs = [];
+  parts.forEach((p,i)=>{ subs.push({ label: p.trim(), text:'', marks:'', bl:'', co:'' }); });
+  paperData.sections[sIdx].questions[qIdx].subQuestions = subs;
   renderSubQuestions(sIdx,qIdx);
-  saveFormData();
 }
-
 function renderSubQuestions(sIdx,qIdx){
-  const q = paperData.sections[sIdx].questions[qIdx];
-  const subs = q.subQuestions || [];
-  const c = document.getElementById(`subQ${sIdx}-${qIdx}`);
-  if(!c) return;
-  
-  c.innerHTML="";
+  const subs = paperData.sections[sIdx].questions[qIdx].subQuestions || [];
+  const c = document.getElementById(`subQ${sIdx}-${qIdx}`);c.innerHTML="";
   subs.forEach((sq,i)=>{
-    c.innerHTML+=`
-    <div class='question-box'>
-      <label>${sq.label})</label>
-      <textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].text=this.value;saveFormData()'>${sq.text||''}</textarea>
-      <div class='row'>
-        <input type='number' placeholder='Marks' value='${sq.marks||""}' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].marks=this.value;saveFormData()'/>
-        <input placeholder='BL Level' value='${sq.bl||""}' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].bl=this.value;saveFormData()'/>
-        <select onchange='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].co=this.value;saveFormData()'>
-          <option value=''>CO</option>
-          ${CO_OPTIONS.map(co=>`<option ${sq.co===co?'selected':''}>${co}</option>`).join("")}
-        </select>
-      </div>
-      <button class='delete-btn' onclick='deleteSubQuestion(${sIdx},${qIdx},${i})'>Delete</button>
-    </div>`;
+    c.innerHTML+=`<div class='question-box'><label>${sq.label})</label><textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].text=this.value'>${sq.text||''}</textarea><div class='row'><input type='number' placeholder='Marks' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].marks=this.value' value='${sq.marks||""}'/><input placeholder='BL Level' oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].bl=this.value' value='${sq.bl||""}'/><select onchange='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].co=this.value'><option value=''>CO</option>${CO_OPTIONS.map(co=>`<option>${co}</option>`).join("")}</select></div><button class='delete-btn' onclick='deleteSubQuestion(${sIdx},${qIdx},${i})'>Delete</button></div>`;
   });
 }
+function deleteSubQuestion(s,q,sq){paperData.sections[s].questions[q].subQuestions.splice(sq,1);renderSubQuestions(s,q);}
+  // Logos have been removed from the app by request — upload function disabled intentionally.
+  async function uploadLogo(){ return null; }
 
-function deleteSubQuestion(s,q,sq){
-  paperData.sections[s].questions[q].subQuestions.splice(sq,1);
-  renderSubQuestions(s,q);
-  saveFormData();
-}
+  async function savePaper(){
+    // gather fields
+    const token = localStorage.getItem('token');
+    if(!token) { showToast('Please login first', 'error'); window.location.href='/login.html'; return; }
 
-async function savePaper(){
-  const token = localStorage.getItem('token');
-  if(!token) { 
-    showToast('Please login first', 'error'); 
-    window.location.href='/login.html'; 
-    return; 
+    // Logos removed: skip any logo upload or processing
+
+    paperData.paperTitle = document.getElementById('paperTitle').value;
+    paperData.examination = '';
+    paperData.semester = document.getElementById('semester').value;
+    paperData.academicYear = document.getElementById('academicYear').value;
+    paperData.program = document.getElementById('program').value;
+    paperData.courseCode = document.getElementById('courseCode').value;
+    paperData.courseName = document.getElementById('courseName').value;
+    paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+    paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+    paperData.duration = document.getElementById('duration').value;
+    paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+    paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+    // Include new questions array
+    paperData.questions = questions;
+    // Logos removed: ensure we don't include logo fields
+    if(paperData.jspmLogo) delete paperData.jspmLogo;
+    if(paperData.rscoeLogo) delete paperData.rscoeLogo;
+
+    try{
+      const res = await fetch('/api/papers', {
+        method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer '+token },
+        body: JSON.stringify(paperData)
+      });
+      const data = await res.json();
+      if(!res.ok) { showToast(data.message || 'Failed to save', 'error'); return; }
+      showToast('Saved!', 'success');
+      try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+      try{ localStorage.setItem('lastSavedPaper', JSON.stringify(data.paper)); }catch(e){}
+      
+      // Update UI with status and submit button
+      paperData.id = data.paper.id;
+      paperData.status = data.paper.status;
+      updateStatusUI();
+
+      console.log('Saved paper', data.paper);
+      try{ // add activity entry
+        const name = paperData.paperTitle || paperData.courseName || 'Untitled';
+        const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+        list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
+        if(list.length>50) list.length = 50;
+        localStorage.setItem('recentActivity', JSON.stringify(list));
+        // If dashboard is open in another tab, it can pick it up when refreshed; also try to call renderActivity if present
+        if(typeof renderActivity === 'function') renderActivity();
+      }catch(e){/* ignore */}
+    }catch(err){ console.error(err); showToast('Network error', 'error'); }
   }
 
-  // Gather form data
-  paperData.paperTitle = document.getElementById('paperTitle').value;
-  paperData.examination = '';
-  paperData.semester = document.getElementById('semester').value;
-  paperData.academicYear = document.getElementById('academicYear').value;
-  paperData.program = document.getElementById('program').value;
-  paperData.courseCode = document.getElementById('courseCode').value;
-  paperData.courseName = document.getElementById('courseName').value;
-  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-  paperData.duration = document.getElementById('duration').value;
-  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+  async function previewPaper(){
+    // populate current fields before preview
+    paperData.paperTitle = document.getElementById('paperTitle').value;
+    paperData.examination = '';
+    paperData.semester = document.getElementById('semester').value;
+    paperData.academicYear = document.getElementById('academicYear').value;
+    paperData.program = document.getElementById('program').value;
+    paperData.courseCode = document.getElementById('courseCode').value;
+    paperData.courseName = document.getElementById('courseName').value;
+    paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+    paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+    paperData.duration = document.getElementById('duration').value;
+    paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+    paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+    // Include new questions array
+    paperData.questions = questions;
 
-  try{
-    const res = await fetch('/api/papers', {
-      method: 'POST', 
-      headers: { 
-        'Content-Type':'application/json', 
-        'Authorization': 'Bearer '+token 
-      },
-      body: JSON.stringify(paperData)
-    });
-    
-    const data = await res.json();
-    if(!res.ok) { 
-      showToast(data.message || 'Failed to save', 'error'); 
-      return; 
+    try {
+      // Upload logos if selected
+      const jspmInput = document.getElementById('jspmLogoInput');
+      const rscoeInput = document.getElementById('rscoeLogoInput');
+      
+      if (jspmInput.files[0]) {
+        showToast('Uploading Left Logo for preview...', 'info');
+        paperData.jspmLogo = await uploadLogo(jspmInput.files[0]);
+      }
+      if (rscoeInput.files[0]) {
+        showToast('Uploading Right Logo for preview...', 'info');
+        paperData.rscoeLogo = await uploadLogo(rscoeInput.files[0]);
+      }
+    } catch (err) {
+      showToast('Logo upload failed: ' + err.message, 'error');
+      // continue anyway with placeholders
     }
-    
-    showToast('Saved!', 'success');
-    paperData.id = data.paper.id;
-    paperData.status = data.paper.status;
-    
-    // Clear draft after successful save
-    localStorage.removeItem('formDraft');
-    
-    updateStatusUI();
 
-    // Add to recent activity
-    try{ 
-      const name = paperData.paperTitle || paperData.courseName || 'Untitled';
-      const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
-      list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
-      if(list.length>50) list.length = 50;
-      localStorage.setItem('recentActivity', JSON.stringify(list));
-    }catch(e){/* ignore */}
-    
-  }catch(err){ 
-    console.error(err); 
-    showToast('Network error', 'error'); 
+    // minimal logos — allow user to choose files later; using placeholders
+    paperData.jspmLogo = paperData.jspmLogo || (window.location.origin + '/public/image1.png');
+    paperData.rscoeLogo = paperData.rscoeLogo || (window.location.origin + '/public/image2.png');
+
+      // Use sessionStorage and navigate to template page to avoid popup/permission prompts
+      try{
+        sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
+        window.location.href = '/template.html?preview=1&download=1';
+      }catch(e){
+      // fallback to old behaviour if sessionStorage not available
+      const w = window.open('/template.html','_blank');
+      const send = () => w.postMessage(paperData, window.location.origin);
+      const t = setInterval(()=>{ try{ send(); clearInterval(t);}catch(e){} },200);
+    }
   }
-}
 
-async function previewPaper(){
-  // Save current form state
-  saveFormData();
-  
-  // Populate paperData with current form values
-  paperData.paperTitle = document.getElementById('paperTitle').value;
-  paperData.semester = document.getElementById('semester').value;
-  paperData.academicYear = document.getElementById('academicYear').value;
-  paperData.program = document.getElementById('program').value;
-  paperData.courseCode = document.getElementById('courseCode').value;
-  paperData.courseName = document.getElementById('courseName').value;
-  paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-  paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-  paperData.duration = document.getElementById('duration').value;
-  paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-  paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
-
-  // Use sessionStorage and navigate to template page
-  try{
-    sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
-    window.location.href = '/template.html?preview=1&download=1';
-  }catch(e){
-    // fallback to old behaviour
-    const w = window.open('/template.html','_blank');
-    const send = () => w.postMessage(paperData, window.location.origin);
-    const t = setInterval(()=>{ try{ send(); clearInterval(t);}catch(e){} },200);
-  }
-}
 
 function updateStatusUI() {
   const container = document.getElementById('paperStatusContainer');
@@ -605,37 +571,31 @@ async function submitToChairmanFromForm() {
   if (!confirm('Submit to Chairman?')) return;
   try {
     const res = await fetch(`/api/papers/${paperData.id}/submit`, {
-      method: 'POST', 
-      headers: { 'Authorization': 'Bearer ' + token }
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!res.ok) throw new Error('Submit failed');
     showToast('Submitted to Chairman!', 'success');
     paperData.status = 'submitted_to_chairman';
     updateStatusUI();
-  } catch (err) { 
-    showToast(err.message, 'error'); 
-  }
+    try { localStorage.setItem('papersUpdated', Date.now()); } catch (e) {}
+  } catch (err) { showToast(err.message, 'error'); }
 }
 
-// Initialize form
 renderSections();
 renderInstructions();
 renderCO();
 updateStatusUI();
-loadFormData(); // Load any saved draft data
 
 // If this page is opened directly, show the form section by default
 if (window.location.pathname && window.location.pathname.endsWith('questionpaperform.html')) {
-  if (window.location.search.includes('list=1')) {
-    navigate('dashboard');
-  } else {
-    navigate('form');
-  }
-  
-  // Support ?edit=<id>
+  // if query includes ?list=1 then show papers list (dashboard), otherwise show form
+  if (window.location.search.includes('list=1')) navigate('dashboard');
+  else navigate('form');
+  // support ?edit=<id>
   const qp = new URLSearchParams(window.location.search);
   const editId = qp.get('edit');
   if (editId) {
+    // wait a tick so functions are defined
     setTimeout(()=>editPaper(editId), 200);
   }
 }
@@ -643,36 +603,17 @@ if (window.location.pathname && window.location.pathname.endsWith('questionpaper
 // ------- My Papers: load & render -------
 async function loadMyPapers(){
   const container = document.getElementById('myPapersContainer');
-  if(!container) return;
+  if(!container) return; // page might not include the dashboard section
   container.innerHTML = 'Loading...';
   const token = localStorage.getItem('token');
-  if(!token){ 
-    container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.'; 
-    return; 
-  }
-  
+  if(!token){ container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.'; return; }
   try{
-    const res = await fetch('/api/papers', { 
-      headers: { 'Authorization': 'Bearer '+token } 
-    });
-    
-    if (res.status === 401){ 
-      localStorage.removeItem('token'); 
-      window.location.href = '/login.html'; 
-      return; 
-    }
-    
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer '+token } });
+    if (res.status === 401){ localStorage.removeItem('token'); window.location.href = '/login.html'; return; }
     const data = await res.json();
-    if(!res.ok) { 
-      container.innerHTML = 'Failed to load papers'; 
-      return; 
-    }
-    
+    if(!res.ok) { container.innerHTML = 'Failed to load papers'; return; }
     renderMyPapers(data.papers || []);
-  }catch(err){ 
-    console.error(err); 
-    container.innerHTML = 'Network error'; 
-  }
+  }catch(err){ console.error(err); container.innerHTML = 'Network error'; }
 }
 
 function clearMyPapers(){
@@ -683,12 +624,7 @@ function clearMyPapers(){
 function renderMyPapers(papers){
   const container = document.getElementById('myPapersContainer');
   if(!container) return;
-  
-  if(!papers || papers.length===0){ 
-    container.innerHTML = '<div class="muted">No saved papers yet.</div>'; 
-    return; 
-  }
-  
+  if(!papers || papers.length===0){ container.innerHTML = '<div class="muted">No saved papers yet.</div>'; return; }
   container.innerHTML = '';
   papers.forEach(p => {
     const div = document.createElement('div');
@@ -716,86 +652,77 @@ function renderMyPapers(papers){
 async function fetchPaperById(id){
   const token = localStorage.getItem('token');
   if(!token) return null;
-  const r = await fetch('/api/papers/'+id, { 
-    headers: { 'Authorization': 'Bearer '+token } 
-  });
+  const r = await fetch('/api/papers/'+id, { headers: { 'Authorization': 'Bearer '+token } });
   if(!r.ok) return null;
   const d = await r.json();
   return d.paper;
 }
 
+async function viewPaper(id){
+  const paper = await fetchPaperById(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  try{ const name = paper.paperTitle || paper.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Viewed paper: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+  // open in new tab for preview
+  window.open('/template.html?preview=1','_blank');
+}
+
+async function downloadPaper(id){
+  const paper = await fetchPaperById(id);
+  if(!paper) return showToast('Unable to load paper', 'error');
+  sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+  try{ const name = paper.paperTitle || paper.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Downloaded paper: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
+  // open template which will auto-download when it sees download=1
+  window.open('/template.html?preview=1&download=1','_blank');
+}
+
 async function editPaper(id){
   const paper = await fetchPaperById(id);
   if(!paper) return showToast('Unable to load paper', 'error');
-  
-  // Load into form
+  // load into form
   paperData = paper;
+  // ensure arrays exist
   paperData.courseOutcomes = paperData.courseOutcomes || [];
   paperData.instructions = paperData.instructions || [];
-  paperData.sections = paperData.sections || [
-    {title:'A',questions:[]},
-    {title:'B',questions:[]},
-    {title:'C',questions:[]}
-  ];
-  
-  // Populate form fields
+  paperData.sections = paperData.sections || [{title:'A',questions:[]},{title:'B',questions:[]},{title:'C',questions:[]}];
+  // Load questions array
+  questions = paperData.questions || [];
+  // populate fields
   document.getElementById('paperTitle').value = paperData.paperTitle || '';
   document.getElementById('semester').value = paperData.semester || '';
   document.getElementById('academicYear').value = paperData.academicYear || '';
   document.getElementById('program').value = paperData.program || '';
   document.getElementById('courseCode').value = paperData.courseCode || '';
   document.getElementById('courseName').value = paperData.courseName || '';
-  if(document.getElementById('prnNo')) document.getElementById('prnNo').value = paperData.prnNo || '';
-  if(document.getElementById('qpCode')) document.getElementById('qpCode').value = paperData.qpCode || '';
-  document.getElementById('duration').value = paperData.duration || '';
-  document.getElementById('maxMarks').value = paperData.maxMarks || '';
-  document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
-  
-  renderCO(); 
-  renderInstructions(); 
-  renderSections(); 
-  updateStatusUI();
-  
-  // Save as draft
-  saveFormData();
-  
-  // Navigate to form
+  document.getElementById('prnNo') && (document.getElementById('prnNo').value = paperData.prnNo || '');
+  document.getElementById('qpCode') && (document.getElementById('qpCode').value = paperData.qpCode || '');
+    document.getElementById('duration').value = paperData.duration || '';
+    document.getElementById('maxMarks').value = paperData.maxMarks || '';
+    document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
+    renderCO(); renderInstructions(); renderSections(); render(); updateStatusUI();
+  try{ const name = paperData.paperTitle || paperData.courseName || 'Untitled'; const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Opened for edit: ${name}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
   navigate('form');
 }
 
 async function deletePaper(id){
   const ok = await showConfirm('Delete this paper?');
   if(!ok) return;
-  
   const token = localStorage.getItem('token');
-  if(!token) { 
-    showToast('Not logged in', 'error'); 
-    return; 
-  }
-  
+  if(!token) { showToast('Not logged in', 'error'); return; }
   try{
-    const r = await fetch('/api/papers/'+id, { 
-      method:'DELETE', 
-      headers: { 'Authorization': 'Bearer '+token } 
-    });
-    
-    if(!r.ok) { 
-      const dd = await r.json(); 
-      return showToast(dd.message || 'Delete failed', 'error'); 
-    }
-    
+    const r = await fetch('/api/papers/'+id, { method:'DELETE', headers: { 'Authorization': 'Bearer '+token } });
+    if(!r.ok) { const dd = await r.json(); return showToast(dd.message || 'Delete failed', 'error'); }
     showToast('Deleted', 'success');
+    try{ const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Deleted paper: ${id}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
     loadMyPapers();
-  }catch(e){ 
-    console.error(e); 
-    showToast('Network error', 'error'); 
-  }
+    try{ localStorage.setItem('papersUpdated', Date.now()); }catch(e){}
+  }catch(e){ console.error(e); showToast('Network error', 'error'); }
 }
 
 // Load papers when section loads
 loadMyPapers();
 
-// Send modal
+// Send modal (same behavior as dashboard)
 async function openSendModal(paperId){
   const fromEmail = localStorage.getItem('userEmail') || '';
   const fromName = localStorage.getItem('userName') || '';
@@ -818,33 +745,16 @@ async function openSendModal(paperId){
     try{
       const token = localStorage.getItem('token');
       if(!token) return window.location.href='/login.html';
-      const r = await fetch('/api/share/send', { 
-        method:'POST', 
-        headers:{ 
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+token 
-        }, 
-        body: JSON.stringify({ 
-          paperId, 
-          recipientEmail: to, 
-          message: msg 
-        }) 
-      });
+      const r = await fetch('/api/share/send', { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+token }, body: JSON.stringify({ paperId, recipientEmail: to, message: msg }) });
       const d = await r.json();
-      if(!r.ok) { 
-        showToast(d.message || 'Send failed', 'error'); 
-        return; 
-      }
+      if(!r.ok) { showToast(d.message || 'Send failed', 'error'); return; }
       showToast('Shared successfully', 'success');
+      try{ const list = JSON.parse(localStorage.getItem('recentActivity')||'[]'); list.unshift({ text:`Shared paper to ${to}`, time: Date.now() }); if(list.length>50) list.length=50; localStorage.setItem('recentActivity', JSON.stringify(list)); if(typeof renderActivity==='function') renderActivity(); }catch(e){}
       overlay.remove();
-    }catch(e){ 
-      console.error(e); 
-      showToast('Network error', 'error'); 
-    }
+      try{ localStorage.setItem('sharedUpdated', Date.now()); }catch(e){}
+    }catch(e){ console.error(e); showToast('Network error', 'error'); }
   });
 }
-
-// Remove the legacy question system at the bottom
 </script>
 <script src="/public/ui.js"></script>
 

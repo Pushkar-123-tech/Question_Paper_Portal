@@ -253,7 +253,7 @@
       color: #991b1b;
     }
 
-    .role-teacher {
+    .role-external {
       background: #dcfce7;
       color: #166534;
     }
@@ -342,8 +342,8 @@
             <p>Total Users</p>
           </div>
           <div class="stat-card">
-            <h3 id="statTeachers">0</h3>
-            <p>Teachers</p>
+            <h3 id="statExternals">0</h3>
+            <p>Externals</p>
           </div>
           <div class="stat-card">
             <h3 id="statFaculty">0</h3>
@@ -364,7 +364,7 @@
           <input type="email" id="regEmail" placeholder="Official Email (e.g. user@rscoe.in)">
           <input type="password" id="regPassword" placeholder="Password">
           <select id="regRole">
-            <option value="teacher">Teacher</option>
+            <option value="external">External</option>
             <option value="faculty">Faculty</option>
             <option value="chairman">Chairman</option>
             <option value="module_coordinator">Module Coordinator</option>
@@ -458,7 +458,7 @@
         if (!res.ok) throw new Error('Failed to load stats');
         const data = await res.json();
         document.getElementById('statTotalUsers').innerText = data.totalUsers;
-        document.getElementById('statTeachers').innerText = data.teachers;
+        document.getElementById('statExternals').innerText = data.externals;
         document.getElementById('statFaculty').innerText = data.faculty;
         document.getElementById('statOther').innerText = data.chairmen + data.coordinators + data.admins;
       } catch (err) { console.error(err); }
@@ -492,9 +492,9 @@
 
     function updateStats(users) {
       document.getElementById('statTotalUsers').innerText = users.length;
-      document.getElementById('statTeachers').innerText = users.filter(u => u.role === 'teacher').length;
+      document.getElementById('statExternals').innerText = users.filter(u => u.role === 'external').length;
       document.getElementById('statFaculty').innerText = users.filter(u => u.role === 'faculty').length;
-      document.getElementById('statOther').innerText = users.filter(u => !['teacher', 'faculty'].includes(u.role)).length;
+      document.getElementById('statOther').innerText = users.filter(u => !['external', 'faculty'].includes(u.role)).length;
     }
 
     async function updateRole(userId, newRole) {

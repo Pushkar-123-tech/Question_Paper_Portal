@@ -11,7 +11,7 @@ router.use(auth, roleAuth(['admin']));
 router.get('/stats', async (req, res) => {
   try {
     const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
-    const { count: teachers } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'teacher');
+    const { count: externals } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'external');
     const { count: faculty } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'faculty');
     const { count: chairmen } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'chairman');
     const { count: coordinators } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'module_coordinator');
@@ -19,7 +19,7 @@ router.get('/stats', async (req, res) => {
 
     res.json({
       totalUsers,
-      teachers,
+      externals,
       faculty,
       chairmen,
       coordinators,

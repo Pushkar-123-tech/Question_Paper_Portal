@@ -338,7 +338,7 @@ function updateUIForRole(role) {
   }
   
   const createBtn = document.getElementById('createPaperBtn');
-  if (role !== 'teacher' && role !== 'faculty' && role !== 'admin') {
+  if (role !== 'external' && role !== 'faculty' && role !== 'admin') {
     if (createBtn) createBtn.style.display = 'none';
     const sidebarCreate = sidebar.querySelector('button[onclick="createPaper()"]');
     if (sidebarCreate) sidebarCreate.style.display = 'none';
@@ -410,7 +410,7 @@ function renderMyPapersDashboard(papers){
     `;
 
     // Workflow actions
-    if (currentUser.role === 'teacher' || currentUser.role === 'faculty') {
+    if (currentUser.role === 'external' || currentUser.role === 'faculty') {
       if (p.status === 'draft') {
         actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit to Chairman</button>`;
         actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p.id}')">Edit</button>`;
@@ -462,7 +462,7 @@ async function forwardPaper(id) {
 }
 
 async function finalizePaper(id) {
-  if (!confirm('Finalize this paper and notify teacher?')) return;
+  if (!confirm('Finalize this paper and notify external?')) return;
   try {
     const res = await fetch(`/api/papers/${id}/finalize`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
     if (!res.ok) throw new Error('Finalize failed');

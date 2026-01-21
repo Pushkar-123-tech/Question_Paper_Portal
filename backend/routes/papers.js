@@ -59,7 +59,7 @@ router.get('/', auth, async (req, res) => {
 
     let query = supabase.from('papers').select('*, owner:users(name, email)');
 
-    if (user.role === 'teacher' || user.role === 'faculty') {
+    if (user.role === 'external' || user.role === 'faculty') {
       query = query.eq('owner', req.userId);
     } else if (user.role === 'chairman') {
       query = query.in('status', ['submitted_to_chairman', 'pending_coordinator', 'finalized']);
@@ -217,7 +217,7 @@ router.post('/:id/finalize', auth, roleAuth(['module_coordinator']), async (req,
       message: `Your paper has been finalized: ${paper.paperTitle || paper.courseName}`
     }]);
 
-    res.json({ message: 'Paper finalized and teacher notified', paper: updatedPaper });
+    res.json({ message: 'Paper finalized and external notified', paper: updatedPaper });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
