@@ -52,7 +52,7 @@ router.post('/signup', auth, async (req, res) => {
         name, 
         email, 
         password: hashedPassword, 
-        role: role || 'teacher' 
+        role: role || 'external' 
       }])
       .select()
       .single();
