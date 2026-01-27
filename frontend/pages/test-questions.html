@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Test Question Paper Input - 12 Sample Questions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+:root {
+  --primary: #7b0000;
+  --success: #4CAF50;
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #d1d5db;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+
+h1 {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: #ccc;
+}
+
+.status {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid.full {
+  grid-template-columns: 1fr;
+}
+
+.question-preview {
+  background: #f9f9f9;
+  border-left: 4px solid var(--primary);
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+.question-preview strong {
+  color: var(--primary);
+}
+
+.question-preview .marks {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.section-title {
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 16px 0 10px 0;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 8px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 8px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+
+.success-message {
+  text-align: center;
+  color: var(--success);
+  font-size: 18px;
+  margin: 20px 0;
+}
+
+.spinner {
+  border: 4px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.nav-links {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="nav-links">
+      <a href="/questionpaperform.html" class="btn btn-secondary">← Back to Form</a>
+      <a href="/dashboard.html" class="btn btn-secondary">Dashboard</a>
+    </div>
+    
+    <h1>📋 Test Question Paper Input</h1>
+    <p class="subtitle">Automatically input 12 sample questions into the form for testing</p>
+    
+    <div id="statusMsg"></div>
+  </div>
+
+  <!-- Test Configuration -->
+  <div class="card">
+    <h2>Test Configuration <span class="badge">12 Questions</span></h2>
+    
+    <div class="form-group">
+      <label for="testMode">Select Test Mode:</label>
+      <select id="testMode" onchange="updateTestMode()">
+        <option value="auto">Auto-Fill Form (Load in Current Tab)</option>
+        <option value="api">Test API Endpoint (POST to Backend)</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-success" onclick="startTest()">
+        <i class="fa-solid fa-play"></i> Start Test
+      </button>
+      <button class="btn btn-primary" onclick="previewQuestions()">
+        <i class="fa-solid fa-eye"></i> Preview Questions
+      </button>
+      <button class="btn btn-secondary" onclick="openQuestionForm()">
+        <i class="fa-solid fa-arrow-right"></i> Go to Form & Auto-Fill
+      </button>
+    </div>
+  </div>
+
+  <!-- Paper Details -->
+  <div class="card">
+    <h2>Paper Configuration</h2>
+    <div class="grid">
+      <div class="form-group">
+        <label for="paperTitle">Paper Title:</label>
+        <input type="text" id="paperTitle" value="Data Structures - Test Paper" />
+      </div>
+      <div class="form-group">
+        <label for="courseCode">Course Code:</label>
+        <input type="text" id="courseCode" value="CS2203T" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label for="courseName">Course Name:</label>
+        <input type="text" id="courseName" value="Data Structures [2023 Pattern]" />
+      </div>
+      <div class="form-group">
+        <label for="semester">Semester:</label>
+        <input type="text" id="semester" value="3" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label for="academicYear">Academic Year:</label>
+        <input type="text" id="academicYear" value="2024-2025" />
+      </div>
+      <div class="form-group">
+        <label for="program">Program:</label>
+        <input type="text" id="program" value="B.Tech CSE" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="form-group">
+        <label for="duration">Duration:</label>
+        <input type="text" id="duration" value="2 Hours" />
+      </div>
+      <div class="form-group">
+        <label for="maxMarks">Max Marks:</label>
+        <input type="text" id="maxMarks" value="50" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Test Description:</label>
+      <textarea id="description" readonly>This test file will input 12 sample Data Structures questions across 3 sections:
+- Section A: 4 questions × 2 marks = 8 marks
+- Section B: 4 questions × 4 marks = 16 marks  
+- Section C: 4 questions × 8 marks = 32 marks
+Total: 12 questions, 50 marks, 2 hours</textarea>
+    </div>
+  </div>
+
+  <!-- Questions Preview -->
+  <div class="card">
+    <h2>Questions Overview</h2>
+    
+    <div class="section-title">Section A (2 marks each)</div>
+    <div class="question-preview">
+      <strong>Q1:</strong> What is Data Structure and explain its importance?
+      <div class="marks">Marks: 2 | BL: Remember | CO: CO1</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q2:</strong> Define a Linear Data Structure with examples.
+      <div class="marks">Marks: 2 | BL: Remember | CO: CO1</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q3:</strong> What is the difference between Array and Linked List?
+      <div class="marks">Marks: 2 | BL: Understand | CO: CO2</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q4:</strong> Explain the concept of Stack with real-world example.
+      <div class="marks">Marks: 2 | BL: Understand | CO: CO2</div>
+    </div>
+
+    <div class="section-title">Section B (4 marks each)</div>
+    <div class="question-preview">
+      <strong>Q5:</strong> Write algorithm for binary search and analyze its time complexity.
+      <div class="marks">Marks: 4 | BL: Apply | CO: CO3</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q6:</strong> Implement a Queue using Array. Show all operations.
+      <div class="marks">Marks: 4 | BL: Apply | CO: CO3</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q7:</strong> Explain the difference between DFS and BFS traversal methods.
+      <div class="marks">Marks: 4 | BL: Understand | CO: CO2</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q8:</strong> Write a program to implement Bubble Sort and explain its complexity.
+      <div class="marks">Marks: 4 | BL: Apply | CO: CO3</div>
+    </div>
+
+    <div class="section-title">Section C (8 marks each)</div>
+    <div class="question-preview">
+      <strong>Q9:</strong> Design and implement a Binary Search Tree with all operations. Discuss complexity analysis.
+      <div class="marks">Marks: 8 | BL: Create | CO: CO4</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q10:</strong> Explain Hashing and Hash Table. Solve collision handling with examples.
+      <div class="marks">Marks: 8 | BL: Analyze | CO: CO4</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q11:</strong> Compare various sorting algorithms (Merge Sort, Quick Sort, Heap Sort) in terms of time and space complexity.
+      <div class="marks">Marks: 8 | BL: Analyze | CO: CO4</div>
+    </div>
+    <div class="question-preview">
+      <strong>Q12:</strong> Implement Graph data structure and perform DFS/BFS traversal. Write complete code with explanation.
+      <div class="marks">Marks: 8 | BL: Create | CO: CO4</div>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="card">
+    <h2>Sample Instructions</h2>
+    <ol style="padding-left: 20px; line-height: 1.8;">
+      <li>Answer all questions</li>
+      <li>Each question carries equal marks</li>
+      <li>Write your answers clearly in the answer sheet</li>
+      <li>Use of non-programmable calculator allowed</li>
+      <li>Time management is essential</li>
+    </ol>
+  </div>
+
+  <!-- Course Outcomes -->
+  <div class="card">
+    <h2>Course Outcomes</h2>
+    <ul style="padding-left: 20px; line-height: 1.8;">
+      <li><strong>CO1:</strong> Understand fundamental data structures and their properties</li>
+      <li><strong>CO2:</strong> Apply data structures to solve real-world problems</li>
+      <li><strong>CO3:</strong> Analyze time and space complexity of algorithms</li>
+      <li><strong>CO4:</strong> Design and implement complex data structure solutions</li>
+    </ul>
+  </div>
+
+  <!-- Test Results -->
+  <div class="card">
+    <h2>Test Results</h2>
+    <div id="testResults">
+      <p class="subtitle">Run a test to see results here</p>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closePreviewModal()">&times;</span>
+    <h2>Questions Preview</h2>
+    <div id="previewContent"></div>
+    <button class="btn btn-success" onclick="closePreviewModal()">Close</button>
+  </div>
+</div>
+
+<script>
+const SAMPLE_DATA = {
+  paperTitle: "Data Structures - Test Paper",
+  semester: "3",
+  academicYear: "2024-2025",
+  program: "B.Tech CSE",
+  courseCode: "CS2203T",
+  courseName: "Data Structures [2023 Pattern]",
+  prnNo: "",
+  qpCode: "",
+  duration: "2 Hours",
+  maxMarks: 50,
+  totalQuestions: 12,
+  courseOutcomes: [
+    "CO1: Understand fundamental data structures and their properties",
+    "CO2: Apply data structures to solve real-world problems",
+    "CO3: Analyze time and space complexity of algorithms",
+    "CO4: Design and implement complex data structure solutions"
+  ],
+  instructions: [
+    "Answer all questions",
+    "Each question carries equal marks",
+    "Write your answers clearly in the answer sheet",
+    "Use of non-programmable calculator allowed",
+    "Time management is essential"
+  ],
+  sections: [
+    {
+      title: "A",
+      questions: [
+        { qno: 1, text: "What is Data Structure and explain its importance?", marks: "2", bl: "BL 1", co: "CO1", subQuestions: [{ label: 'A', text: 'Define Data Structure', marks: '1', bl: 'BL 1', co: 'CO1' }, { label: 'B', text: 'Explain its importance in programming', marks: '1', bl: 'BL 1', co: 'CO1' }], orOptions: [] },
+        { qno: 2, text: "Define a Linear Data Structure with examples.", marks: "2", bl: "BL 1", co: "CO1", subQuestions: [{ label: 'A', text: 'What is linear data structure?', marks: '1', bl: 'BL 1', co: 'CO1' }, { label: 'B', text: 'Give three examples', marks: '1', bl: 'BL 1', co: 'CO1' }], orOptions: [] },
+        { qno: 3, text: "What is the difference between Array and Linked List?", marks: "2", bl: "BL 2", co: "CO2", subQuestions: [{ label: 'A', text: 'Compare memory allocation', marks: '1', bl: 'BL 2', co: 'CO2' }, { label: 'B', text: 'Compare access time', marks: '1', bl: 'BL 2', co: 'CO2' }], orOptions: [] },
+        { qno: 4, text: "Explain the concept of Stack with real-world example.", marks: "2", bl: "BL 2", co: "CO2", subQuestions: [{ label: 'A', text: 'Define Stack operation (LIFO)', marks: '1', bl: 'BL 2', co: 'CO2' }, { label: 'B', text: 'Give a real-world example', marks: '1', bl: 'BL 2', co: 'CO2' }], orOptions: [] }
+      ]
+    },
+    {
+      title: "B",
+      questions: [
+        { qno: 5, text: "Write algorithm for binary search and analyze its time complexity.", marks: "4", bl: "BL 3", co: "CO3", subQuestions: [{ label: 'A', text: 'Write the binary search algorithm', marks: '2', bl: 'BL 3', co: 'CO3' }, { label: 'B', text: 'Analyze time complexity (Best, Worst, Average case)', marks: '2', bl: 'BL 3', co: 'CO3' }], orOptions: [] },
+        { qno: 6, text: "Implement a Queue using Array. Show all operations.", marks: "4", bl: "BL 3", co: "CO3", subQuestions: [{ label: 'A', text: 'Write enqueue and dequeue operations', marks: '2', bl: 'BL 3', co: 'CO3' }, { label: 'B', text: 'Show peek and isEmpty operations', marks: '2', bl: 'BL 3', co: 'CO3' }], orOptions: [] },
+        { qno: 7, text: "Explain the difference between DFS and BFS traversal methods.", marks: "4", bl: "BL 2", co: "CO2", subQuestions: [{ label: 'A', text: 'Explain DFS with example', marks: '2', bl: 'BL 2', co: 'CO2' }, { label: 'B', text: 'Explain BFS with example', marks: '2', bl: 'BL 2', co: 'CO2' }], orOptions: [] },
+        { qno: 8, text: "Write a program to implement Bubble Sort and explain its complexity.", marks: "4", bl: "BL 3", co: "CO3", subQuestions: [{ label: 'A', text: 'Write the Bubble Sort code', marks: '2', bl: 'BL 3', co: 'CO3' }, { label: 'B', text: 'Analyze time and space complexity', marks: '2', bl: 'BL 3', co: 'CO3' }], orOptions: [] }
+      ]
+    },
+    {
+      title: "C",
+      questions: [
+        { qno: 9, text: "Design and implement a Binary Search Tree with all operations. Discuss complexity analysis.", marks: "8", bl: "BL 3", co: "CO4", subQuestions: [{ label: 'A', text: 'Implement BST insertion and deletion', marks: '4', bl: 'BL 3', co: 'CO4' }, { label: 'B', text: 'Discuss search complexity and tree balancing', marks: '4', bl: 'BL 3', co: 'CO4' }], orOptions: [] },
+        { qno: 10, text: "Explain Hashing and Hash Table. Solve collision handling with examples.", marks: "8", bl: "BL 3", co: "CO4", subQuestions: [{ label: 'A', text: 'Explain hash function and hash table concept', marks: '4', bl: 'BL 3', co: 'CO4' }, { label: 'B', text: 'Discuss collision handling: Chaining and Open Addressing', marks: '4', bl: 'BL 3', co: 'CO4' }], orOptions: [] },
+        { qno: 11, text: "Compare various sorting algorithms (Merge Sort, Quick Sort, Heap Sort) in terms of time and space complexity.", marks: "8", bl: "BL 3", co: "CO4", subQuestions: [{ label: 'A', text: 'Compare time complexities (Best, Average, Worst case)', marks: '4', bl: 'BL 3', co: 'CO4' }, { label: 'B', text: 'Compare space complexities and stability', marks: '4', bl: 'BL 3', co: 'CO4' }], orOptions: [] },
+        { qno: 12, text: "Implement Graph data structure and perform DFS/BFS traversal. Write complete code with explanation.", marks: "8", bl: "BL 3", co: "CO4", subQuestions: [{ label: 'A', text: 'Implement Graph using adjacency list and DFS', marks: '4', bl: 'BL 3', co: 'CO4' }, { label: 'B', text: 'Implement BFS traversal with code and explanation', marks: '4', bl: 'BL 3', co: 'CO4' }], orOptions: [] }
+      ]
+    }
+  ]
+};
+
+function updateTestMode() {
+  const mode = document.getElementById('testMode').value;
+  const resultsDiv = document.getElementById('testResults');
+  resultsDiv.innerHTML = `<p class="subtitle">Test mode: ${mode}</p>`;
+}
+
+function showStatus(message, type) {
+  const statusDiv = document.getElementById('statusMsg');
+  statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+  setTimeout(() => { statusDiv.innerHTML = ''; }, 5000);
+}
+
+function previewQuestions() {
+  const modal = document.getElementById('previewModal');
+  const content = document.getElementById('previewContent');
+  
+  let html = '<div style="max-height: 500px; overflow-y: auto;">';
+  
+  SAMPLE_DATA.sections.forEach(section => {
+    html += `<h3 style="margin-top: 16px; color: #7b0000;">Section ${section.title}</h3>`;
+    section.questions.forEach(q => {
+      html += `<div style="padding: 10px; border-left: 3px solid #7b0000; margin: 8px 0; background: #f9f9f9;">
+        <strong>Q${q.qno}:</strong> ${q.text}<br/>
+        <small style="color: #666;">Marks: ${q.marks} | BL: ${q.bl} | CO: ${q.co}</small>
+      </div>`;
+    });
+  });
+  
+  html += '</div>';
+  content.innerHTML = html;
+  modal.style.display = 'block';
+}
+
+function closePreviewModal() {
+  document.getElementById('previewModal').style.display = 'none';
+}
+
+function startTest() {
+  const mode = document.getElementById('testMode').value;
+  const resultsDiv = document.getElementById('testResults');
+  
+  resultsDiv.innerHTML = '<div class="spinner"></div><p>Testing...</p>';
+  
+  if (mode === 'auto') {
+    autoFillForm();
+  } else if (mode === 'api') {
+    testAPIEndpoint();
+  }
+}
+
+function autoFillForm() {
+  const resultsDiv = document.getElementById('testResults');
+  
+  try {
+    // Store data in localStorage and sessionStorage
+    sessionStorage.setItem('testQuestionsData', JSON.stringify(SAMPLE_DATA));
+    localStorage.setItem('testQuestionsData', JSON.stringify(SAMPLE_DATA));
+    
+    resultsDiv.innerHTML = `
+      <div class="status success">✅ Data prepared successfully!</div>
+      <p>Question paper data has been prepared with 12 sample questions:</p>
+      <ul style="padding-left: 20px; margin: 10px 0;">
+        <li><strong>Section A:</strong> 4 questions × 2 marks = 8 marks</li>
+        <li><strong>Section B:</strong> 4 questions × 4 marks = 16 marks</li>
+        <li><strong>Section C:</strong> 4 questions × 8 marks = 32 marks</li>
+        <li><strong>Total:</strong> 12 questions, 50 marks, 2 hours</li>
+      </ul>
+      <p style="margin-top: 16px;"><strong>Next Step:</strong> Click the button below to open the form with auto-fill</p>
+      <button class="btn btn-success" onclick="openQuestionForm()" style="margin-top: 10px;">
+        <i class="fa-solid fa-arrow-right"></i> Open Form & Auto-Fill
+      </button>
+    `;
+    
+    showStatus('✅ Test data prepared! Click "Open Form & Auto-Fill" to proceed.', 'success');
+  } catch (error) {
+    resultsDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+    showStatus('Error preparing test data', 'error');
+  }
+}
+
+function testAPIEndpoint() {
+  const resultsDiv = document.getElementById('testResults');
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    resultsDiv.innerHTML = `<div class="status error">❌ Not logged in. Please login first.</div>`;
+    showStatus('Please login to test API', 'error');
+    return;
+  }
+
+  fetch('/api/papers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify(SAMPLE_DATA)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.paper) {
+      resultsDiv.innerHTML = `
+        <div class="status success">✅ Paper created successfully via API!</div>
+        <p><strong>Paper ID:</strong> ${data.paper.id}</p>
+        <p><strong>Status:</strong> ${data.paper.status}</p>
+        <p><strong>Questions:</strong> ${SAMPLE_DATA.totalQuestions}</p>
+        <button class="btn btn-primary" onclick="window.location.href='/questionpaperform.html?edit=${data.paper.id}'">
+          View in Form
+        </button>
+      `;
+      showStatus('✅ Paper created successfully via API!', 'success');
+    } else {
+      resultsDiv.innerHTML = `<div class="status error">❌ Error: ${data.message || 'Unknown error'}</div>`;
+    }
+  })
+  .catch(error => {
+    resultsDiv.innerHTML = `<div class="status error">❌ Network Error: ${error.message}</div>`;
+    showStatus('Network error', 'error');
+  });
+}
+
+function openQuestionForm() {
+  // Store test data and redirect
+  sessionStorage.setItem('testQuestionsData', JSON.stringify(SAMPLE_DATA));
+  window.location.href = '/questionpaperform.html?test=1';
+}
+
+// Check if we came from test page
+window.addEventListener('load', function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('test') === '1') {
+    const data = sessionStorage.getItem('testQuestionsData');
+    if (data) {
+      // Data is available to be loaded
+      console.log('Test data available:', data);
+    }
+  }
+});
+</script>
+
+</body>
+</html>

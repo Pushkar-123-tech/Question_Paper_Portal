@@ -1,0 +1,195 @@
+{
+  "paperTitle": "Data Structures - End Semester Examination",
+  "semester": "II",
+  "academicYear": "2025-26",
+  "program": "B.Tech Computer Engineering",
+  "courseCode": "CS2203T",
+  "courseName": "Data Structures [2023 Pattern]",
+  "prnNo": "12345",
+  "qpCode": "CS2203T-ESE-2026",
+  "duration": "2 Hours",
+  "maxMarks": "50",
+  "totalQuestions": "6",
+  "courseOutcomes": [
+    "CO1: Understand fundamental data structures and their operations",
+    "CO2: Analyze and compare different data structure implementations",
+    "CO3: Apply data structures to solve real-world problems",
+    "CO4: Evaluate the efficiency of data structure algorithms"
+  ],
+  "instructions": [
+    "Answer all questions",
+    "Each question carries equal marks",
+    "Use of non-programmable calculator allowed",
+    "Write your answers clearly"
+  ],
+  "sections": [
+    {
+      "title": "A",
+      "questions": [
+        {
+          "qno": 1,
+          "text": "Define data structure and list its types.",
+          "marks": "5",
+          "bl": "BL 1",
+          "co": "CO1",
+          "subQuestions": [],
+          "orOptions": []
+        },
+        {
+          "qno": 2,
+          "text": "What is a stack? Write the algorithm for push and pop operations.",
+          "marks": "5",
+          "bl": "BL 2",
+          "co": "CO1",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Write the algorithm for push operation in a stack",
+              "marks": "2.5",
+              "bl": "BL 2",
+              "co": "CO1"
+            },
+            {
+              "label": "B",
+              "text": "Write the algorithm for pop operation in a stack",
+              "marks": "2.5",
+              "bl": "BL 2",
+              "co": "CO1"
+            }
+          ],
+          "orOptions": []
+        },
+        {
+          "qno": 3,
+          "text": "Explain the concept of linked lists and their advantages.",
+          "marks": "5",
+          "bl": "BL 2",
+          "co": "CO2",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Compare arrays and linked lists in terms of time and space complexity",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Implement insertion operation in a singly linked list",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "B",
+      "questions": [
+        {
+          "qno": 4,
+          "text": "What is a queue? Explain circular queue with example.",
+          "marks": "10",
+          "bl": "BL 2",
+          "co": "CO1",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Describe the structure and operations of a circular queue",
+              "marks": "5",
+              "bl": "BL 2",
+              "co": "CO1"
+            },
+            {
+              "label": "B",
+              "text": "Write the enqueue operation for a circular queue",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO1"
+            }
+          ],
+          "orOptions": []
+        },
+        {
+          "qno": 5,
+          "text": "Explain tree traversal methods.",
+          "marks": "10",
+          "bl": "BL 2",
+          "co": "CO2",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Implement In-order, Pre-order, and Post-order traversal for a binary tree",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Draw and explain the difference between depth-first and breadth-first search",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO3"
+            }
+          ]
+        },
+        {
+          "qno": 6,
+          "text": "Apply hashing techniques to solve a real-world problem.",
+          "marks": "10",
+          "bl": "BL 3",
+          "co": "CO3",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Design and implement a hash table with collision handling using open addressing",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Compare linear probing and quadratic probing in hash tables with examples",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "C",
+      "questions": [
+        {
+          "qno": 7,
+          "text": "Analyze the efficiency of different sorting algorithms.",
+          "marks": "10",
+          "bl": "BL 3",
+          "co": "CO4",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Compare the time and space complexity of Quicksort and Mergesort",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Explain when to use each sorting algorithm based on data characteristics",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ],
+          "orOptions": []
+        }
+      ]
+    }
+  ]
+}

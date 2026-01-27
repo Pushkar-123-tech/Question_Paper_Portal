@@ -166,15 +166,34 @@ function renderPaper(){
       `;
 
       (sec.questions || []).forEach(q => {
+        if(q.isOrWithPrevious) {
+          const orRow = document.createElement('tr');
+          orRow.innerHTML = `<td></td><td></td><td style="text-align:center;font-weight:bold;">OR</td><td></td><td></td><td></td>`;
+          tbl.appendChild(orRow);
+        }
+        
         if(q.subQuestions && q.subQuestions.length){
           // main question row
           const mainRow = document.createElement('tr');
-          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td></td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
           tbl.appendChild(mainRow);
-          q.subQuestions.forEach(sq => {
+          q.subQuestions.forEach((sq, sqIdx) => {
             const r = document.createElement('tr');
             r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
             tbl.appendChild(r);
+          });
+        } else if(q.orOptions && q.orOptions.length){
+          // main question with OR options
+          const mainRow = document.createElement('tr');
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          tbl.appendChild(mainRow);
+          q.orOptions.forEach((orOpt, orIdx) => {
+            const orRow = document.createElement('tr');
+            orRow.innerHTML = `<td></td><td></td><td>OR</td><td></td><td></td><td></td>`;
+            tbl.appendChild(orRow);
+            const optRow = document.createElement('tr');
+            optRow.innerHTML = `<td></td><td>${orOpt.label})</td><td>${orOpt.text||''}</td><td>${orOpt.marks||''}</td><td>${orOpt.bl||''}</td><td>${orOpt.co||''}</td>`;
+            tbl.appendChild(optRow);
           });
         } else {
           const r = document.createElement('tr');
@@ -227,32 +246,68 @@ async function downloadPDF(){
   }
 }
 
-// Try reading preview from sessionStorage (set by form page) to avoid popup/postMessage
+// Try reading preview from sessionStorage (set by form page)
 try{
   const stored = sessionStorage.getItem('previewPaper');
   if(stored){
     paper = JSON.parse(stored);
     sessionStorage.removeItem('previewPaper');
     renderPaper();
+    
+    // Auto-download if requested via query param (e.g. ?download=1)
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('download') === '1'){
+      setTimeout(()=>{ try{ downloadPDF(); }catch(e){} }, 1000);
+    }
+  } else {
+    // If no preview data, check if we need to load from API (view=ID or download=ID)
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('view');
+    const downloadId = params.get('download');
+    // Treat as ID if it's not '1' (which is used for preview flag)
+    const idToLoad = (viewId && viewId !== '1') ? viewId : (downloadId && downloadId !== '1' ? downloadId : null);
+
+    if (idToLoad) {
+      loadPaperFromApi(idToLoad).then(() => {
+        if (downloadId) {
+          setTimeout(()=>{ try{ downloadPDF(); }catch(e){} }, 1000);
+        }
+      });
+    }
   }
-}catch(e){/* ignore */}
+}catch(e){ console.error(e); }
+
+async function loadPaperFromApi(id) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    if(typeof showToast === 'function') showToast('Please login to view paper', 'error');
+    else alert('Please login to view paper');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/papers/${id}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    
+    if (!res.ok) throw new Error('Failed to load paper');
+    
+    const data = await res.json();
+    paper = data.paper;
+    renderPaper();
+  } catch (err) {
+    console.error(err);
+    if(typeof showToast === 'function') showToast('Error loading paper', 'error');
+    else alert('Error loading paper: ' + err.message);
+  }
+}
 
 // Fallback to message-based transport
 window.addEventListener("message", (event) => {
   paper = event.data || {};
   renderPaper();
 });
-
-// Auto-download if requested via query param (e.g. ?download=1)
-try{
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('download') === '1'){
-    // wait for DOM and a microtask for render to complete
-    setTimeout(()=>{
-      try{ downloadPDF(); }catch(e){}
-    }, 500);
-  }
-}catch(e){/* ignore */}
 </script>
 
 </body>

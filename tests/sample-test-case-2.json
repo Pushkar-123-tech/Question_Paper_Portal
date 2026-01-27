@@ -1,0 +1,148 @@
+{
+  "paperTitle": "Object-Oriented Programming - Mid Semester Examination",
+  "semester": "III",
+  "academicYear": "2025-26",
+  "program": "B.Tech Computer Engineering",
+  "courseCode": "CS3301T",
+  "courseName": "Object-Oriented Programming [2023 Pattern]",
+  "prnNo": "67890",
+  "qpCode": "CS3301T-MSE-2026",
+  "duration": "1.5 Hours",
+  "maxMarks": "30",
+  "totalQuestions": "4",
+  "courseOutcomes": [
+    "CO1: Understand object-oriented programming concepts and principles",
+    "CO2: Implement classes, objects, and inheritance patterns",
+    "CO3: Apply polymorphism and abstraction in real-world scenarios",
+    "CO4: Design and develop complex OOP applications"
+  ],
+  "instructions": [
+    "Answer all questions compulsory",
+    "Question 1 and 2 are 5 marks each",
+    "Question 3 and 4 are 10 marks each",
+    "Write pseudocode or actual code where required",
+    "Diagrams should be clear and labeled"
+  ],
+  "sections": [
+    {
+      "title": "A",
+      "questions": [
+        {
+          "qno": 1,
+          "text": "What is a class? How is it different from an object? Explain with a real-world example.",
+          "marks": "5",
+          "bl": "BL 1",
+          "co": "CO1",
+          "subQuestions": [],
+          "orOptions": []
+        },
+        {
+          "qno": 2,
+          "text": "Define encapsulation and explain its importance in OOP.",
+          "marks": "5",
+          "bl": "BL 2",
+          "co": "CO1",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Explain access modifiers (public, private, protected) with examples",
+              "marks": "5",
+              "bl": "BL 2",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Write a Java class demonstrating getters and setters for encapsulation",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "B",
+      "questions": [
+        {
+          "qno": 3,
+          "text": "Explain inheritance in OOP. What are the types of inheritance?",
+          "marks": "10",
+          "bl": "BL 2",
+          "co": "CO2",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Design a class hierarchy for a banking system with Account, SavingsAccount, and CheckingsAccount classes",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO3"
+            },
+            {
+              "label": "B",
+              "text": "Explain multiple inheritance problem and how interfaces solve it in Java. Provide code example.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        },
+        {
+          "qno": 4,
+          "text": "What is polymorphism? Explain method overloading and method overriding.",
+          "marks": "10",
+          "bl": "BL 2",
+          "co": "CO3",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Write Java code demonstrating both compile-time (method overloading) and runtime (method overriding) polymorphism",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Design a Shape class hierarchy with Circle, Rectangle, and Triangle. Implement area calculation using polymorphism.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "C",
+      "questions": [
+        {
+          "qno": 5,
+          "text": "What is abstraction? How do abstract classes and interfaces differ in achieving abstraction?",
+          "marks": "10",
+          "bl": "BL 2",
+          "co": "CO3",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Create an abstract Animal class with concrete subclasses Dog and Cat. Demonstrate abstract methods.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Design an interface-based solution for a Vehicle system with Car, Bike, and Truck implementations",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
