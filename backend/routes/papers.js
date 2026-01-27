@@ -69,7 +69,7 @@ router.get('/', auth, async (req, res) => {
       // no filter
     }
 
-    const { data: papers, error } = await query.order('createdAt', { ascending: false });
+    const { data: papers, error } = await query.order('created_at', { ascending: false });
     
     if (error) throw error;
     res.json({ papers });
@@ -246,9 +246,9 @@ router.post('/:id/comment', auth, async (req, res) => {
       user: req.userId,
       userName: user.name,
       role: user.role,
-      text,
-      createdAt: new Date().toISOString()
-    }];
+        text,
+        created_at: new Date().toISOString()
+      }];
     
     const newWorkflowHistory = [...(paper.workflowHistory || []), {
       action: 'commented',
@@ -305,7 +305,7 @@ router.get('/external/assigned', auth, async (req, res) => {
       .from('papers')
       .select('*, owner:users(id, name, email)')
       .eq('owner', req.userId)
-      .order('createdAt', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (ownPapers) papers = [...papers, ...ownPapers];
 
@@ -321,7 +321,7 @@ router.get('/external/assigned', auth, async (req, res) => {
           .from('papers')
           .select('*, owner:users(id, name, email)')
           .in('id', paperIds)
-          .order('createdAt', { ascending: false });
+          .order('created_at', { ascending: false });
         if (sharedPapers) {
           const existingIds = papers.map(p => p.id);
           const newPapers = sharedPapers.filter(p => !existingIds.includes(p.id));
@@ -335,7 +335,7 @@ router.get('/external/assigned', auth, async (req, res) => {
         .from('papers')
         .select('*, owner:users(id, name, email)')
         .in('status', ['submitted_to_chairman', 'pending_coordinator', 'finalized'])
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
       if (allPapers) {
         const existingIds = papers.map(p => p.id);
         const newPapers = allPapers.filter(p => !existingIds.includes(p.id));
@@ -357,7 +357,7 @@ router.get('/notifications/all', auth, async (req, res) => {
       .from('notifications')
       .select('*, sender:users(name, role), paper:papers("paperTitle", "courseName")')
       .eq('recipient', req.userId)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(20);
 
     if (error) throw error;

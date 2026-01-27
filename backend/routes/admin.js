@@ -36,8 +36,8 @@ router.get('/users', async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('users')
-      .select('id, name, email, role, createdAt')
-      .order('createdAt', { ascending: false });
+      .select('id, name, email, role, created_at')
+      .order('created_at', { ascending: false });
     
     if (error) throw error;
     res.json({ users });

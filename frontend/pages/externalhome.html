@@ -525,7 +525,7 @@ function renderPapers(papers, container, isOwned = false) {
     const title = paper.paperTitle || paper.courseName || 'Untitled Paper';
     const statusClass = getStatusClass(paper.status);
     const statusText = (paper.status || 'draft').replace(/_/g, ' ').toUpperCase();
-    const date = new Date(paper.createdAt || Date.now()).toLocaleDateString();
+    const date = new Date(paper.created_at || Date.now()).toLocaleDateString();
     const ownerName = paper.owner?.name || 'Unknown';
     const comments = paper.comments || [];
     
@@ -577,7 +577,7 @@ function renderComments(comments) {
           <span class="comment-author">${c.userName || 'User'}</span>
           <span class="comment-role">${c.role || 'user'}</span>
         </div>
-        <span class="comment-date">${new Date(c.createdAt).toLocaleString()}</span>
+          <span class="comment-date">${new Date(c.created_at).toLocaleString()}</span>
       </div>
       <div class="comment-text">${c.text}</div>
     </div>
@@ -703,7 +703,7 @@ async function showNotifications() {
     
     let html = '<h3>Notifications</h3>';
     list.forEach(n => {
-      const dt = new Date(n.createdAt).toLocaleString();
+      const dt = new Date(n.created_at).toLocaleString();
       html += `<div style="border-bottom:1px solid #eee;padding:10px 0;">
         <div><strong>${n.message}</strong></div>
         <div class="muted" style="font-size:12px;">${dt}</div>
