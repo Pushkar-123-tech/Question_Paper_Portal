@@ -21,6 +21,12 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif;}
 body{background:var(--bg);color:var(--text);display:flex;height:100vh;}
 
+.main{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+}
 /* Sidebar (UNCHANGED) */
 .sidebar{
   width:260px;background:var(--sidebar);color:white;padding:20px;
@@ -99,9 +105,60 @@ textarea{height:56px;resize:none;}
   margin: 10px 0;
   border-left: 3px solid var(--primary);
 }
+
+/* OR Option Styles */
+.or-option {
+  background: #fff3cd;
+  border: 1px dashed #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+}
+.or-button {
+  background: #ffc107;
+  color: #333;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0;
+}
+.or-button:hover {
+  background: #ffca2c;
+  transform: translateY(-1px);
+}
+.or-label {
+  background: #ffc107;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+.or-options-container {
+  margin-top: 12px;
+}
+.or-delete-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-top: 8px;
+}
 </style>
 </head>
 <body>
+
 
 
 <main class="main">
@@ -124,94 +181,94 @@ textarea{height:56px;resize:none;}
     <button class="btn secondary" onclick="backToDashboard()">← Back to Dashboard</button>
   </div>
 
-    <div class="card">
-      <h2>Examination Form</h2>
-      <div class="flex-row">
-        <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
-        <div><label>Semester</label>
-        <select id="semester"><option value="">Select</option><option>I</option><option>II</option></select>
-      </div>
-    </div>
+  <div class="card">
+    <h2>Examination Form</h2>
     <div class="flex-row">
-      <div><label>Academic Year</label>
-        <select id="academicYear"><option value="">Select</option><option>2024-25</option><option>2025-26</option><option>2026-27</option><option>2027-28</option></select>
-      </div>
-      <div><label>Program</label>
-        <select id="program">
-          <option value="">Select</option>
-          <option>B.Tech Computer Engineering</option>
-          <option>B.Tech Information Technology</option>
-          <option>B.Tech Computer Science & Business Systems</option>
-          <option>B.Tech Automation & Robotics</option>
-          <option>B.Tech Electronics & Telecommunication Engineering</option>
-          <option>B.Tech Mechanical Engineering</option>
-          <option>B.Tech Civil Engineering</option>
-        </select>
-      </div>
+      <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title"/></div>
+      <div><label>Semester</label>
+      <select id="semester"><option value="">Select</option><option>I</option><option>II</option></select>
     </div>
-    <div class="flex-row">
-      <div><label>Course Code</label><input id="courseCode" placeholder="CS2203T"/></div>
-      <div><label>Course Name</label><input id="courseName" placeholder="Data Structures [2023 Pattern]"/></div>
-      <div><label>PRN No.</label><input id="prnNo" placeholder="PRN No."/></div>
-      <div><label>QP Code</label><input id="qpCode" placeholder="QP Code"/></div>
+  </div>
+  <div class="flex-row">
+    <div><label>Academic Year</label>
+      <select id="academicYear"><option value="">Select</option><option>2024-25</option><option>2025-26</option><option>2026-27</option><option>2027-28</option></select>
     </div>
-    <div class="flex-row">
-      <div><label>Duration</label>
-        <select id="duration"><option value="">Select</option><option>1.5 Hours</option><option>2 Hours</option><option>2.5 Hours</option><option>3 Hours</option></select>
-      </div>
-      <div><label>Max Marks</label>
-        <select id="maxMarks"><option value="">Select</option><option>30</option><option>50</option></select>
-      </div>
-      <div><label>Total Questions</label>
-        <select id="totalQuestions"><option value="">Select</option>
-          <option>6</option>
-          <option>7</option>
-          <option>8</option>
-          <option>9</option>
-          <option>10</option>
-          <option>11</option>
-          <option>12</option>
-        </select>
-      </div>
+    <div><label>Program</label>
+      <select id="program">
+        <option value="">Select</option>
+        <option>B.Tech Computer Engineering</option>
+        <option>B.Tech Information Technology</option>
+        <option>B.Tech Computer Science & Business Systems</option>
+        <option>B.Tech Automation & Robotics</option>
+        <option>B.Tech Electronics & Telecommunication Engineering</option>
+        <option>B.Tech Mechanical Engineering</option>
+        <option>B.Tech Civil Engineering</option>
+      </select>
     </div>
+  </div>
+  <div class="flex-row">
+    <div><label>Course Code</label><input id="courseCode" placeholder="CS2203T"/></div>
+    <div><label>Course Name</label><input id="courseName" placeholder="Data Structures [2023 Pattern]"/></div>
+    <div><label>PRN No.</label><input id="prnNo" placeholder="PRN No."/></div>
+    <div><label>QP Code</label><input id="qpCode" placeholder="QP Code"/></div>
+  </div>
+  <div class="flex-row">
+    <div><label>Duration</label>
+      <select id="duration"><option value="">Select</option><option>1.5 Hours</option><option>2 Hours</option><option>2.5 Hours</option><option>3 Hours</option></select>
+    </div>
+    <div><label>Max Marks</label>
+      <select id="maxMarks"><option value="">Select</option><option>30</option><option>50</option></select>
+    </div>
+    <div><label>Total Questions</label>
+      <select id="totalQuestions"><option value="">Select</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+        <option>11</option>
+        <option>12</option>
+      </select>
+    </div>
+  </div>
 
-    <div style="margin-top:6px;">
-      <strong class="muted">Preset Instructions</strong>
-      <div id="presetInstructions" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-          <input type="checkbox" value="Answer all questions" style="width:auto;margin:0;"/>
-          <span>Answer all questions</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-          <input type="checkbox" value="Each question carries equal marks" style="width:auto;margin:0;"/>
-          <span>Each question carries equal marks</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-          <input type="checkbox" value="Use of non-programmable calculator allowed" style="width:auto;margin:0;"/>
-          <span>Use of non-programmable calculator allowed</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-          <input type="checkbox" value="Write your answers clearly" style="width:auto;margin:0;"/>
-          <span>Write your answers clearly</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-          <input type="checkbox" value="Time management is essential" style="width:auto;margin:0;"/>
-          <span>Time management is essential</span>
-        </label>
-      </div>
-      <div style="margin-top:8px;display:flex;gap:8px;"><button class="btn" onclick="addSelectedInstructions()">+ Add Selected Instructions</button> <button class="btn small secondary" onclick="addInstruction()">+ Add Custom Instruction</button></div>
+  <div style="margin-top:6px;">
+    <strong class="muted">Preset Instructions</strong>
+    <div id="presetInstructions" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" value="Answer all questions" style="width:auto;margin:0;"/>
+        <span>Answer all questions</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" value="Each question carries equal marks" style="width:auto;margin:0;"/>
+        <span>Each question carries equal marks</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" value="Use of non-programmable calculator allowed" style="width:auto;margin:0;"/>
+        <span>Use of non-programmable calculator allowed</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" value="Write your answers clearly" style="width:auto;margin:0;"/>
+        <span>Write your answers clearly</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" value="Time management is essential" style="width:auto;margin:0;"/>
+        <span>Time management is essential</span>
+      </label>
     </div>
-  </div> 
+    <div style="margin-top:8px;display:flex;gap:8px;"><button class="btn" onclick="addSelectedInstructions()">+ Add Selected Instructions</button> <button class="btn small secondary" onclick="addInstruction()">+ Add Custom Instruction</button></div>
+  </div>
+</div> 
 
-  <div class="card"><h2>Course Outcomes</h2><div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button></div>
-  <div class="card"><h2>Instructions</h2><div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add Instruction</button></div>
-  <div class="card"><h2>Question Sections</h2><div id="sectionContainer"></div></div>
-    <div class="card">
-      <div id="paperStatusContainer" style="margin-bottom:10px; font-weight:bold; color:var(--primary);"></div>
-      <button class="btn primary" onclick="savePaper()">Save Draft</button> 
-      <button class="btn primary" id="submitToChairmanBtn" style="display:none;" onclick="submitToChairmanFromForm()">Submit to Chairman</button>
-      <button class="btn" onclick="previewPaper()">Preview & Download</button>
-    </div>
+<div class="card"><h2>Course Outcomes</h2><div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button></div>
+<div class="card"><h2>Instructions</h2><div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add Instruction</button></div>
+<div class="card"><h2>Question Sections</h2><div id="sectionContainer"></div></div>
+<div class="card">
+  <div id="paperStatusContainer" style="margin-bottom:10px; font-weight:bold; color:var(--primary);"></div>
+  <button class="btn primary" onclick="savePaper()">Save Draft</button> 
+  <button class="btn primary" id="submitToChairmanBtn" style="display:none;" onclick="submitToChairmanFromForm()">Submit to Chairman</button>
+  <button class="btn" onclick="previewPaper()">Preview & Download</button>
+</div>
 
 </section>
 
@@ -399,7 +456,7 @@ function renderSections(){
 function addMainQuestion(sIdx){
   const sec = paperData.sections[sIdx];
   const qno = sec.questions.length+1;
-  sec.questions.push({ qno, text:"", marks:"", bl:"", co:"", subQuestions:[] });
+  sec.questions.push({ qno, text:"", marks:"", bl:"", co:"", subQuestions:[], orOptions:[] });
   renderMainQuestions(sIdx);
   saveFormData();
 }
@@ -413,10 +470,16 @@ function renderMainQuestions(sIdx){
     const subOptions = q.subQuestions && q.subQuestions.length > 0 
       ? q.subQuestions.map(sq => sq.label).join(',')
       : '';
+    const hasOrOptions = q.orOptions && q.orOptions.length > 0;
     
     c.innerHTML+=`
     <div class='question-item'>
-      <label>Q${q.qno}</label>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label><strong>Q${q.qno}</strong></label>
+        <button class='or-button' onclick='addOrOption(${sIdx},${qIdx})'>
+          <i class="fas fa-plus-circle"></i> Add OR Option
+        </button>
+      </div>
       <textarea oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value;saveFormData()'>${q.text}</textarea>
       <div class='row'>
         <input type='number' placeholder='Marks' value="${q.marks || ''}" oninput='paperData.sections[${sIdx}].questions[${qIdx}].marks=this.value;saveFormData()'/>
@@ -426,6 +489,12 @@ function renderMainQuestions(sIdx){
           ${CO_OPTIONS.map(co=>`<option ${q.co===co?'selected':''}>${co}</option>`).join("")}
         </select>
       </div>
+      
+      <!-- OR Options Container -->
+      <div id='orOptions${sIdx}-${qIdx}' class='or-options-container'>
+        ${hasOrOptions ? renderOrOptions(sIdx, qIdx, q.orOptions) : ''}
+      </div>
+      
       <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
         <label class="muted">SubQuestions:</label>
         <select onchange='setSubOptions(${sIdx},${qIdx},this.value)'>
@@ -441,6 +510,80 @@ function renderMainQuestions(sIdx){
     
     renderSubQuestions(sIdx,qIdx);
   });
+}
+
+/* OR Options Functions */
+function addOrOption(sIdx, qIdx) {
+  const sec = paperData.sections[sIdx];
+  const q = sec.questions[qIdx];
+  
+  // Initialize orOptions array if it doesn't exist
+  if (!q.orOptions) {
+    q.orOptions = [];
+  }
+  
+  // Add new OR option with letter label (A, B, C, etc.)
+  const optionLetter = String.fromCharCode(65 + q.orOptions.length); // A, B, C, ...
+  q.orOptions.push({
+    label: optionLetter,
+    text: "",
+    marks: q.marks || "", // Default to main question marks
+    bl: q.bl || "",
+    co: q.co || ""
+  });
+  
+  renderOrOptions(sIdx, qIdx, q.orOptions);
+  saveFormData();
+}
+
+function renderOrOptions(sIdx, qIdx, orOptions) {
+  if (!orOptions || orOptions.length === 0) return '';
+  
+  let html = '<div class="or-label">OR Options:</div>';
+  
+  orOptions.forEach((option, index) => {
+    html += `
+    <div class="or-option">
+      <div style="font-weight:600;margin-bottom:6px">OR ${option.label}</div>
+      <textarea placeholder="OR Option text" oninput='paperData.sections[${sIdx}].questions[${qIdx}].orOptions[${index}].text=this.value;saveFormData()'>${option.text || ''}</textarea>
+      <div class='row'>
+        <input type='number' placeholder='Marks' value="${option.marks || ''}" oninput='paperData.sections[${sIdx}].questions[${qIdx}].orOptions[${index}].marks=this.value;saveFormData()'/>
+        <input placeholder='BL Level' value="${option.bl || ''}" oninput='paperData.sections[${sIdx}].questions[${qIdx}].orOptions[${index}].bl=this.value;saveFormData()'/>
+        <select onchange='paperData.sections[${sIdx}].questions[${qIdx}].orOptions[${index}].co=this.value;saveFormData()'>
+          <option value=''>CO</option>
+          ${CO_OPTIONS.map(co=>`<option ${option.co===co?'selected':''}>${co}</option>`).join("")}
+        </select>
+      </div>
+      <button class='or-delete-btn' onclick='deleteOrOption(${sIdx},${qIdx},${index})'>
+        <i class="fas fa-trash"></i> Delete OR ${option.label}
+      </button>
+    </div>
+    `;
+  });
+  
+  // Update the OR options container
+  const container = document.getElementById(`orOptions${sIdx}-${qIdx}`);
+  if (container) {
+    container.innerHTML = html;
+  }
+  
+  return html;
+}
+
+function deleteOrOption(sIdx, qIdx, optionIdx) {
+  const q = paperData.sections[sIdx].questions[qIdx];
+  
+  if (q.orOptions && q.orOptions.length > optionIdx) {
+    q.orOptions.splice(optionIdx, 1);
+    
+    // Re-label remaining options
+    q.orOptions.forEach((option, index) => {
+      option.label = String.fromCharCode(65 + index); // A, B, C, ...
+    });
+    
+    renderOrOptions(sIdx, qIdx, q.orOptions);
+    saveFormData();
+  }
 }
 
 function setSubOptions(sIdx,qIdx,val){              
@@ -738,6 +881,15 @@ async function editPaper(id){
     {title:'C',questions:[]}
   ];
   
+  // Ensure all questions have orOptions array
+  paperData.sections.forEach(section => {
+    section.questions.forEach(question => {
+      if (!question.orOptions) {
+        question.orOptions = [];
+      }
+    });
+  });
+  
   // Populate form fields
   document.getElementById('paperTitle').value = paperData.paperTitle || '';
   document.getElementById('semester').value = paperData.semester || '';
@@ -844,9 +996,55 @@ async function openSendModal(paperId){
   });
 }
 
-// Remove the legacy question system at the bottom
+// Helper functions for UI
+function showToast(message, type='info') {
+  // Simple toast implementation
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.cssText = `
+    position:fixed; bottom:20px; right:20px; background:${type==='error'?'#dc2626':type==='success'?'#10b981':'#3b82f6'}; 
+    color:white; padding:12px 16px; border-radius:6px; z-index:1000; font-size:14px;
+  `;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 3000);
+}
+
+function showConfirm(message) {
+  return confirm(message);
+}
+
+function showModal(html) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000;';
+  overlay.innerHTML = `
+    <div style="background:white; padding:24px; border-radius:12px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
+      ${html}
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  window.location.href = '/login.html';
+}
+
+function loadRecentActivity() {
+  // Implementation for loading recent activity
+  showToast('Recent activity feature coming soon', 'info');
+}
+
+function viewPaper(id) {
+  window.open(`/template.html?view=${id}`, '_blank');
+}
+
+function downloadPaper(id) {
+  window.open(`/template.html?download=${id}`, '_blank');
+}
 </script>
-<script src="/public/ui.js"></script>
 
 </body>
 </html>
