@@ -99,7 +99,7 @@ router.get('/received', auth, async (req, res) => {
       .from('shared')
       .select('*')
       .eq('recipient_email', user.email)
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) throw error;
     res.json({ list: shares });

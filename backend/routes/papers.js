@@ -69,7 +69,7 @@ router.get('/', auth, async (req, res) => {
       // no filter
     }
 
-    const { data: papers, error } = await query.order('created_at', { ascending: false });
+    const { data: papers, error } = await query.order('createdAt', { ascending: false });
     
     if (error) throw error;
     res.json({ papers });
@@ -247,7 +247,7 @@ router.post('/:id/comment', auth, async (req, res) => {
       userName: user.name,
       role: user.role,
         text,
-        created_at: new Date().toISOString()
+        createdAt: new Date().toISOString()
       }];
     
     const newWorkflowHistory = [...(paper.workflowHistory || []), {
@@ -305,7 +305,7 @@ router.get('/external/assigned', auth, async (req, res) => {
       .from('papers')
       .select('*, owner:users(id, name, email)')
       .eq('owner', req.userId)
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (ownPapers) papers = [...papers, ...ownPapers];
 
@@ -321,7 +321,7 @@ router.get('/external/assigned', auth, async (req, res) => {
           .from('papers')
           .select('*, owner:users(id, name, email)')
           .in('id', paperIds)
-          .order('created_at', { ascending: false });
+          .order('createdAt', { ascending: false });
         if (sharedPapers) {
           const existingIds = papers.map(p => p.id);
           const newPapers = sharedPapers.filter(p => !existingIds.includes(p.id));
@@ -335,7 +335,7 @@ router.get('/external/assigned', auth, async (req, res) => {
         .from('papers')
         .select('*, owner:users(id, name, email)')
         .in('status', ['submitted_to_chairman', 'pending_coordinator', 'finalized'])
-        .order('created_at', { ascending: false });
+        .order('createdAt', { ascending: false });
       if (allPapers) {
         const existingIds = papers.map(p => p.id);
         const newPapers = allPapers.filter(p => !existingIds.includes(p.id));
@@ -357,7 +357,7 @@ router.get('/notifications/all', auth, async (req, res) => {
       .from('notifications')
       .select('*, sender:users(name, role), paper:papers("paperTitle", "courseName")')
       .eq('recipient', req.userId)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
       .limit(20);
 
     if (error) throw error;
@@ -411,13 +411,13 @@ router.get('/stats', auth, async (req, res) => {
     let latestReceivedAt = null;
     const { data: latest } = await supabase
       .from('shared')
-      .select('created_at')
+      .select('createdAt')
       .eq('recipient_email', user.email)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
       .limit(1)
       .single();
 
-    if(latest && latest.created_at) latestReceivedAt = latest.created_at;
+    if(latest && latest.createdAt) latestReceivedAt = latest.createdAt;
     
     res.json({ total, drafts, shared, received, latestReceivedAt });
   }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }

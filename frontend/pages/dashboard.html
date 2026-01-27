@@ -404,7 +404,7 @@ function renderMyPapersDashboard(papers){
   container.innerHTML = '';
   papers.forEach(p => {
     const d = document.createElement('div'); d.className='card';
-    const date = new Date(p.created_at||Date.now()).toLocaleString();
+    const date = new Date(p.createdAt||Date.now()).toLocaleString();
     const title = p.paperTitle && p.paperTitle.trim().length ? p.paperTitle : (p.courseName && p.courseName.trim().length ? p.courseName : 'Untitled');
     const statusText = p.status.toUpperCase().replace(/_/g, ' ');
     const ownerName = p.owner ? p.owner.name : 'Unknown';
@@ -522,7 +522,7 @@ async function receivedPapers(){
     if(!res.ok) { showToast('Failed to load received items', 'error'); return; }
     const d = await res.json();
     const rows = d.list.map(it=>{
-      const dt = new Date(it.created_at).toLocaleString();
+      const dt = new Date(it.createdAt).toLocaleString();
       const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Untitled';
       return `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
     }).join('') || '<div class="muted">No items</div>';
@@ -563,7 +563,7 @@ async function notifications(){
     if(!list.length) return showModal('<h3>Notifications</h3><p class="muted">No notifications</p>');
     let rows = '';
     list.forEach(it => {
-      const dt = new Date(it.created_at).toLocaleString();
+      const dt = new Date(it.createdAt).toLocaleString();
       const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Shared Paper';
       rows += `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message||''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
     });

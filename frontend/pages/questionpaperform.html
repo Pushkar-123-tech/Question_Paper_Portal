@@ -836,7 +836,7 @@ function renderMyPapers(papers){
   papers.forEach(p => {
     const div = document.createElement('div');
     div.className = 'card';
-    const date = new Date(p.created_at || p.updated_at || Date.now()).toLocaleString();
+    const date = new Date(p.createdAt || p.updated_at || Date.now()).toLocaleString();
     div.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <div>
