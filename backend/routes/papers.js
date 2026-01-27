@@ -440,13 +440,14 @@ router.get('/:id', auth, async (req, res) => {
       .eq('id', req.userId)
       .single();
 
-    // Access control: owner OR (Chairman if submitted+) OR (Coordinator if pending+) OR Admin
+    // Access control: owner OR (Chairman if submitted+) OR (Coordinator if pending+) OR Admin OR External
     const isOwner = String(p.owner.id) === String(req.userId);
     const isChairman = user.role === 'chairman' && ['submitted_to_chairman', 'pending_coordinator', 'finalized'].includes(p.status);
     const isCoordinator = user.role === 'module_coordinator' && ['pending_coordinator', 'finalized'].includes(p.status);
     const isAdmin = user.role === 'admin';
+    const isExternal = user.role === 'external' && ['submitted_to_chairman', 'pending_coordinator', 'finalized'].includes(p.status);
 
-    if (!isOwner && !isChairman && !isCoordinator && !isAdmin) {
+    if (!isOwner && !isChairman && !isCoordinator && !isAdmin && !isExternal) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     

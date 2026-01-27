@@ -474,8 +474,8 @@
             <td><strong>${u.name}</strong></td>
             <td>${u.email}</td>
             <td>
-                <select onchange="updateRole('${u._id}', this.value)" style="padding:4px 8px; font-size:12px;">
-                    <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                <select onchange="updateRole('${u.id}', this.value)" style="padding:4px 8px; font-size:12px;">
+                    <option value="external" ${u.role === 'external' ? 'selected' : ''}>External</option>
                     <option value="faculty" ${u.role === 'faculty' ? 'selected' : ''}>Faculty</option>
                     <option value="chairman" ${u.role === 'chairman' ? 'selected' : ''}>Chairman</option>
                     <option value="module_coordinator" ${u.role === 'module_coordinator' ? 'selected' : ''}>Coordinator</option>
@@ -483,7 +483,7 @@
                 </select>
             </td>
             <td>
-                <button class="btn btn-danger" onclick="deleteUser('${u._id}')"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn btn-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
