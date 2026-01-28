@@ -235,6 +235,187 @@
         .co {
             width: 60px;
         }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 1024px) {
+            .a4 {
+                width: 95%;
+                height: auto;
+                padding: 30px 20px;
+            }
+            body {
+                padding-top: 10px;
+            }
+            .college h2:first-child {
+                font-size: 15px;
+            }
+            .college h2:nth-child(2) {
+                font-size: 14px;
+            }
+            .college h3 {
+                font-size: 12px;
+            }
+            .exam-title {
+                font-size: 10px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 14px;
+            }
+            table {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .a4 {
+                width: 100%;
+                height: auto;
+                padding: 20px 15px;
+                margin: 10px auto;
+                border: 1px solid black;
+            }
+            body {
+                background-color: white;
+                padding-top: 0;
+            }
+            .college h2:first-child {
+                font-size: 13px;
+                top: 5px;
+            }
+            .college h2:nth-child(2) {
+                font-size: 12px;
+                top: 5px;
+            }
+            .college h3 {
+                font-size: 11px;
+                top: 7px;
+            }
+            .exam-title {
+                font-size: 9px;
+                top: 0;
+            }
+            header {
+                margin-bottom: 16px;
+            }
+            .left-header {
+                left: 0;
+            }
+            .right-header {
+                left: 0;
+            }
+            .left-header .box {
+                height: 26px;
+                width: 110px;
+                font-size: 12px;
+            }
+            .left-header .box1 {
+                height: 26px;
+                width: 140px;
+                font-size: 12px;
+            }
+            .box1 {
+                height: 26px;
+                width: 140px;
+                font-size: 12px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 12px;
+            }
+            table {
+                font-size: 11px;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .a4 {
+                width: 100%;
+                height: auto;
+                padding: 15px 10px;
+                margin: 5px 0;
+                border: none;
+            }
+            body {
+                background-color: white;
+                padding-top: 0;
+                margin: 0;
+            }
+            .college h2:first-child {
+                font-size: 12px;
+                top: 0;
+                left: 0;
+            }
+            .college h2:nth-child(2) {
+                font-size: 11px;
+                top: 0;
+                left: 0;
+            }
+            .college h3 {
+                font-size: 10px;
+                top: 5px;
+                left: 0;
+            }
+            .college {
+                margin-bottom: 15px;
+            }
+            .exam-title {
+                font-size: 8px;
+                top: 0;
+            }
+            header {
+                margin-bottom: 12px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .left-header, .right-header {
+                left: 0;
+                top: 0;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .left-header .box,
+            .left-header .box1,
+            .box, .box1 {
+                height: 24px;
+                width: 100%;
+                font-size: 11px;
+                padding-left: 3px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 11px;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .mid-row > div, .bottom-row > div {
+                left: 0 !important;
+                top: 0 !important;
+                position: relative !important;
+            }
+            .co-list-item {
+                font-size: 10px;
+            }
+            .co-list {
+                font-weight: bold;
+            }
+            .int-list-item {
+                font-size: 10px;
+                padding: 1px 3px;
+            }
+            table {
+                font-size: 9px;
+                width: 100%;
+            }
+            td, th {
+                padding: 2px;
+                border: 1px solid black;
+            }
+            .question-no, .marks, .bl, .co {
+                width: 30px;
+            }
+            .subquestion-no {
+                width: 25px;
+            }
+        }
     </style>
 </head>
 

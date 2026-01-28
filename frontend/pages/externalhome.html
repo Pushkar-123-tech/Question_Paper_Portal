@@ -19,6 +19,11 @@
   --warning:#f59e0b;
 }
 
+html, body {
+  display: block !important;
+  visibility: visible !important;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:var(--bg);color:var(--text);}
 
@@ -352,9 +357,298 @@ body{background:var(--bg);color:var(--text);}
   border-radius:6px;
   font-size:13px;
 }
-</style>
+
+/* MOBILE RESPONSIVE */
+.sidebar-toggle {
+  display:none;
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:12px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:16px;
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:1001;
+  min-width:44px;
+  min-height:44px;
+}
+
+@media (max-width:1024px) {
+  .college-header {
+    padding:10px 16px;
+  }
+  .header-row {
+    grid-template-columns:80px 1fr 80px;
+  }
+  .header-logo img {
+    max-height:60px;
+  }
+  .header-center h1 {
+    font-size:22px;
+  }
+  .header-center p {
+    font-size:11px;
+  }
+  .main {
+    padding:20px 16px;
+    gap:14px;
+  }
+  .card {
+    padding:14px 16px;
+  }
+  .stat-card {
+    padding:12px;
+  }
+  .stat-card h3 {
+    font-size:24px;
+  }
+  .paper-item {
+    padding:12px;
+  }
+  .paper-title {
+    font-size:14px;
+  }
+  .btn {
+    padding:8px 12px;
+    font-size:12px;
+  }
+}
+
+@media (max-width:768px) {
+  .sidebar-toggle {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .dashboard-container {
+    height:calc(100vh - 50px);
+  }
+  .sidebar {
+    position:fixed;
+    left:-260px;
+    top:50px;
+    width:260px;
+    height:calc(100vh - 50px);
+    z-index:1000;
+    transition:left 0.3s ease;
+    overflow-y:auto;
+    border-right:1px solid #333;
+  }
+  .sidebar.active {
+    left:0;
+  }
+  .main {
+    width:100%;
+    padding:16px 12px;
+    margin-top:0;
+  }
+  .header-row {
+    grid-template-columns:70px 1fr 70px;
+  }
+  .header-logo img {
+    max-height:50px;
+  }
+  .header-center h1 {
+    font-size:18px;
+  }
+  .header-center p {
+    font-size:10px;
+  }
+  .college-header {
+    padding:8px 12px;
+  }
+  .card {
+    padding:12px;
+    margin-bottom:8px;
+  }
+  .card h2 {
+    font-size:18px;
+  }
+  .stat-card {
+    padding:10px;
+  }
+  .stat-card h3 {
+    font-size:18px;
+  }
+  .stat-card p {
+    font-size:11px;
+  }
+  .paper-item {
+    padding:10px;
+  }
+  .paper-header {
+    flex-direction:column;
+    gap:8px;
+  }
+  .paper-title {
+    font-size:13px;
+  }
+  .paper-meta {
+    font-size:11px;
+  }
+  .paper-actions {
+    gap:6px;
+  }
+  .btn {
+    padding:8px 10px;
+    font-size:12px;
+    flex:1;
+    min-width:80px;
+  }
+  .tab-buttons {
+    gap:6px;
+  }
+  .tab-btn {
+    padding:8px 12px;
+    font-size:12px;
+  }
+  .filter-row {
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .filter-row select, .filter-row input {
+    padding:8px 10px;
+    font-size:12px;
+  }
+  .nav-btn {
+    padding:12px;
+    font-size:13px;
+    min-height:44px;
+  }
+  .sidebar h3 {
+    font-size:11px;
+    margin-top:10px;
+  }
+}
+
+@media (max-width:480px) {
+  .header-row {
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .header-logo {
+    display:none;
+  }
+  .header-center {
+    grid-column:1;
+  }
+  .header-center h1 {
+    font-size:16px;
+    margin-bottom:3px;
+  }
+  .header-center p {
+    font-size:9px;
+    line-height:1.3;
+  }
+  .sidebar {
+    width:100%;
+    left:-100%;
+  }
+  .sidebar.active {
+    left:0;
+  }
+  .main {
+    padding:12px 8px;
+    gap:10px;
+  }
+  .card {
+    padding:10px;
+  }
+  .card h2 {
+    font-size:16px;
+    margin-bottom:6px;
+  }
+  .stat-card {
+    padding:8px;
+  }
+  .stat-card h3 {
+    font-size:16px;
+  }
+  .stat-card p {
+    font-size:10px;
+  }
+  .paper-list {
+    gap:10px;
+  }
+  .paper-item {
+    padding:8px;
+  }
+  .paper-header {
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .paper-title {
+    font-size:12px;
+  }
+  .paper-meta {
+    font-size:10px;
+  }
+  .paper-status {
+    padding:3px 8px;
+    font-size:9px;
+  }
+  .paper-actions {
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .btn {
+    padding:8px 10px;
+    font-size:11px;
+    flex:0 1 48%;
+  }
+  .tab-buttons {
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .tab-btn {
+    padding:8px 10px;
+    font-size:11px;
+    flex:1;
+    min-width:70px;
+  }
+  .filter-row {
+    gap:6px;
+    flex-direction:column;
+  }
+  .filter-row select, .filter-row input {
+    width:100%;
+    padding:10px;
+    font-size:13px;
+  }
+  .comments-section {
+    margin-top:10px;
+    padding-top:10px;
+  }
+  .comment-item {
+    padding:8px;
+    margin-bottom:6px;
+  }
+  .comment-form {
+    flex-direction:column;
+    gap:8px;
+  }
+  .comment-form textarea {
+    padding:10px;
+    min-height:50px;
+  }
+  .comment-form button {
+    align-self:stretch;
+  }
+  .nav-btn {
+    padding:10px 12px;
+    font-size:12px;
+  }
+  .sidebar h3 {
+    font-size:10px;
+  }
+}
 </head>
 <body>
+
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
 
 <header class="college-header">
   <div class="header-row">
@@ -441,11 +735,19 @@ let currentUser = null;
 let allPapers = [];
 
 async function init() {
+  // Ensure page is visible
+  document.documentElement.style.visibility = 'visible';
+  document.body.style.display = 'block';
+  
   if (!token) { window.location.href = '/login.html?role=external'; return; }
   
   try {
     const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-    if (!res.ok) { logout(); return; }
+    if (!res.ok) { 
+      console.error('Auth failed:', res.status);
+      logout(); 
+      return; 
+    }
     const data = await res.json();
     currentUser = data.user;
     
@@ -461,7 +763,7 @@ async function init() {
     loadMyPapers();
     loadStats();
   } catch (err) {
-    console.error(err);
+    console.error('Init error:', err);
     showToast('Session expired', 'error');
     logout();
   }
@@ -719,6 +1021,35 @@ function logout() {
   localStorage.removeItem('userName');
   localStorage.removeItem('userEmail');
   window.location.href = '/login.html?role=external';
+}
+
+// Mobile sidebar toggle
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebar = document.querySelector('.sidebar');
+
+if (sidebarToggle) {
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  // Close sidebar when clicking a nav button
+  const navBtns = sidebar.querySelectorAll('.nav-btn');
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
+      }
+    });
+  });
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+      if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);

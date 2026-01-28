@@ -3,6 +3,7 @@ const router = express.Router();
 const supabase = require('../supabaseClient');
 const { authMiddleware: auth } = require('./auth');
 const roleAuth = require('../middleware/roleAuth');
+const { sendRoleChangeEmail } = require('../services/emailService');
 
 // All routes here require Admin role
 router.use(auth, roleAuth(['admin']));
@@ -50,17 +51,8 @@ router.get('/users', async (req, res) => {
 // PATCH /api/admin/users/:id/role
 router.patch('/users/:id/role', async (req, res) => {
   try {
-    const { role } = req.body;
-    const { data: user, error: updateError } = await supabase
-      .from('users')
-      .update({ role })
-      .eq('id', req.params.id)
-      .select()
-      .single();
-
-    if (!user || updateError) return res.status(404).json({ message: 'User not found' });
-    
-    res.json({ message: 'User role updated', user });
+    // Role changes are disabled - roles are fixed after registration
+    return res.status(403).json({ message: 'User roles cannot be changed after registration. Role is fixed.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

@@ -44,6 +44,63 @@
   .toggle span { color:var(--primary); cursor:pointer; font-weight:600; }
   form { display:none; }
   form.active { display:block; }
+
+  /* MOBILE RESPONSIVE */
+  @media (max-width:768px) {
+    body {
+      padding:16px;
+      height:auto;
+      min-height:100vh;
+    }
+    .container {
+      width:100%;
+      max-width:100%;
+      padding:18px;
+    }
+    h2 {
+      font-size:20px;
+    }
+    .input-box input {
+      padding:14px;
+      font-size:16px;
+    }
+    .btn {
+      padding:14px;
+      font-size:15px;
+    }
+  }
+
+  @media (max-width:480px) {
+    body {
+      padding:12px;
+    }
+    .container {
+      width:100%;
+      padding:16px;
+      border-radius:12px;
+    }
+    h2 {
+      font-size:18px;
+      margin-bottom:16px;
+    }
+    .input-box {
+      margin-bottom:12px;
+    }
+    .input-box input {
+      padding:12px;
+      border-radius:8px;
+      font-size:16px;
+    }
+    .btn {
+      padding:12px;
+      font-size:14px;
+      margin-top:8px;
+    }
+    .toggle {
+      font-size:13px;
+      margin-top:12px;
+    }
+  }
 </style>
 <link rel="stylesheet" href="/public/ui.css">
 </head>
