@@ -23,7 +23,7 @@ const sectionSchema = new mongoose.Schema({
 }, { _id:false });
 
 const paperSchema = new mongoose.Schema({
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  owner: { type: String, required: true },
   paperTitle: String,
   examination: String,
   semester: String,
@@ -46,7 +46,7 @@ const paperSchema = new mongoose.Schema({
     default: 'draft' 
   },
   comments: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    user: { type: String },
     userName: String,
     role: String,
     text: String,
@@ -54,8 +54,8 @@ const paperSchema = new mongoose.Schema({
   }],
   workflowHistory: [{
     action: String, // 'submitted', 'forwarded', 'commented', 'finalized'
-    from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    from: { type: String },
+    to: { type: String },
     timestamp: { type: Date, default: Date.now }
   }],
   createdAt: { type: Date, default: Date.now }

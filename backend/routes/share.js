@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Paper = require('../models/Paper');
-const Shared = require('../models/Shared');
+const supabase = require('../supabaseClient');
 const { sendPaperSharingEmail } = require('../services/emailService');
 
 function auth(req, res, next){
@@ -24,22 +22,38 @@ router.post('/send', auth, async (req, res) => {
   const { paperId, recipientEmail, message } = req.body;
   if (!paperId || !recipientEmail) return res.status(400).json({ message: 'paperId and recipientEmail required' });
   try{
-    const user = await User.findById(req.userId).lean();
-    if(!user) return res.status(401).json({ message: 'Invalid user' });
-    const paper = await Paper.findById(paperId).lean();
-    if(!paper) return res.status(404).json({ message: 'Paper not found' });
-    if(String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
 
-    const shared = new Shared({
-      senderId: req.userId,
-      senderName: user.name,
-      senderEmail: user.email,
-      recipientEmail,
-      message: message || '',
-      paperId,
-      paperSnapshot: paper,
-    });
-    await shared.save();
+    if(userError || !user) return res.status(401).json({ message: 'Invalid user' });
+
+    const { data: paper, error: paperError } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', paperId)
+      .single();
+
+    if(paperError || !paper) return res.status(404).json({ message: 'Paper not found' });
+    if(paper.owner !== req.userId) return res.status(403).json({ message: 'Forbidden' });
+
+    const { data: shared, error: shareError } = await supabase
+      .from('shared')
+      .insert([{
+        sender_id: req.userId,
+        sender_name: user.name,
+        sender_email: user.email,
+        recipient_email: recipientEmail,
+        message: message || '',
+        paper_id: paperId,
+        paper_snapshot: paper,
+      }])
+      .select()
+      .single();
+
+    if(shareError) throw shareError;
 
     console.log(`📤 Paper shared by ${user.name} to ${recipientEmail}`);
 
@@ -69,21 +83,45 @@ router.post('/send', auth, async (req, res) => {
 // GET /api/share/received - list shares where recipient is the logged-in user's email
 router.get('/received', auth, async (req, res) => {
   try{
-    const user = await User.findById(req.userId).lean();
-    if(!user) return res.status(401).json({ message: 'Invalid user' });
-    const list = await Shared.find({ recipientEmail: user.email }).sort({ createdAt: -1 });
-    res.json({ list });
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    if(userError || !user) return res.status(401).json({ message: 'Invalid user' });
+
+    const { data: list, error: listError } = await supabase
+      .from('shared')
+      .select('*')
+      .eq('recipient_email', user.email)
+      .order('created_at', { ascending: false });
+
+    if(listError) throw listError;
+
+    res.json({ list: list || [] });
   }catch(e){ console.error(e); res.status(500).json({ message: 'Server error' }); }
 });
 
 // GET /api/share/:id - get shared record if recipient is user or sender is user
 router.get('/:id', auth, async (req, res) => {
   try{
-    const user = await User.findById(req.userId).lean();
-    if(!user) return res.status(401).json({ message: 'Invalid user' });
-    const sh = await Shared.findById(req.params.id).lean();
-    if(!sh) return res.status(404).json({ message: 'Not found' });
-    if(sh.recipientEmail !== user.email && String(sh.senderId) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    if(userError || !user) return res.status(401).json({ message: 'Invalid user' });
+
+    const { data: sh, error: shareError } = await supabase
+      .from('shared')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if(shareError || !sh) return res.status(404).json({ message: 'Not found' });
+    if(sh.recipient_email !== user.email && sh.sender_id !== req.userId) return res.status(403).json({ message: 'Forbidden' });
     res.json({ shared: sh });
   }catch(e){ console.error(e); res.status(500).json({ message: 'Server error' }); }
 });

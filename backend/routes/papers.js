@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Paper = require('../models/Paper');
-const Shared = require('../models/Shared');
-const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const supabase = require('../supabaseClient');
 const { sendPaperCreationEmail } = require('../services/emailService');
 
 // simple auth middleware
@@ -114,43 +112,66 @@ function auth(req, res, next){
 
 
 
+// Add timeout error handling middleware
+router.use((req, res, next) => {
+  // Set response timeout for Vercel (default is 10s, max is 60s)
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(504).json({ message: 'Request timeout' });
+    }
+  }, 45000); // 45 second timeout
+  
+  res.on('finish', () => clearTimeout(timeout));
+  res.on('close', () => clearTimeout(timeout));
+  next();
+});
+
 router.post('/', auth, async (req, res) => {
   try {
     const data = req.body;
     data.owner = req.userId; // ensure owner is always set
 
-    const paper = new Paper(data);
-    await paper.save();
+    // Save to Supabase instead of MongoDB
+    const { data: paper, error } = await supabase
+      .from('papers')
+      .insert([data])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return res.status(500).json({ message: 'Failed to save paper' });
+    }
 
     // Send paper creation notification to all admin/faculty/coordinator roles (non-blocking)
-    const user = await User.findById(req.userId);
+    const { data: user } = await supabase.from('users').select('*').eq('id', req.userId).single();
     if (user) {
-      const recipients = await User.find({ 
-        role: { $in: ['admin', 'faculty', 'module_coordinator', 'chairman'] }
-      });
+      const { data: recipients } = await supabase.from('users').select('*').in('role', ['admin', 'faculty', 'module_coordinator', 'chairman']);
       
       console.log(`📄 Paper saved by ${user.name} (${user.email})`);
-      console.log(`📬 Found ${recipients.length} recipients to notify`);
+      console.log(`📬 Found ${recipients ? recipients.length : 0} recipients to notify`);
       
       const paperTitle = data.paperTitle || data.courseName || 'Untitled Paper';
       
       // Send emails asynchronously without blocking the response
-      setImmediate(async () => {
-        for (const recipient of recipients) {
-          try {
-            console.log(`📧 Sending email to ${recipient.email} (${recipient.role})...`);
-            await sendPaperCreationEmail({
-              userEmail: user.email,
-              userName: user.name,
-              paperTitle: paperTitle,
-              recipientEmail: recipient.email,
-              recipientRole: recipient.role
-            });
-          } catch (emailErr) {
-            console.error(`❌ Failed to send email to ${recipient.email}:`, emailErr.message);
+      if (recipients && recipients.length > 0) {
+        setImmediate(async () => {
+          for (const recipient of recipients) {
+            try {
+              console.log(`📧 Sending email to ${recipient.email} (${recipient.role})...`);
+              await sendPaperCreationEmail({
+                userEmail: user.email,
+                userName: user.name,
+                paperTitle: paperTitle,
+                recipientEmail: recipient.email,
+                recipientRole: recipient.role
+              });
+            } catch (emailErr) {
+              console.error(`❌ Failed to send email to ${recipient.email}:`, emailErr.message);
+            }
           }
-        }
-      });
+        });
+      }
     } else {
       console.log('⚠️  User not found for paper save');
     }
@@ -165,7 +186,14 @@ router.post('/', auth, async (req, res) => {
 
 router.get('/stats', auth, async (req, res) => {
   try {
-    const total = await Paper.countDocuments({ owner: req.userId }); // filter by owner
+    const { data: papers, error } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('owner', req.userId);
+
+    if (error) throw error;
+
+    const total = papers ? papers.length : 0;
     res.json({ total });
 
   } catch (err) {
@@ -176,8 +204,15 @@ router.get('/stats', auth, async (req, res) => {
 
 router.get('/', auth, async (req, res) => {
   try {
-    const papers = await Paper.find({ owner: req.userId }).sort({ createdAt: -1 }); // filter by owner
-    res.json({ papers });
+    const { data: papers, error } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('owner', req.userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ papers: papers || [] });
 
   } catch (err) {
     console.error("❌ Fetch Error:", err);

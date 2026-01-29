@@ -8,7 +8,7 @@ const { sendWelcomeEmail, sendLoginEmail } = require('../services/emailService')
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' });
 
     // Check if user already exists
@@ -17,10 +17,10 @@ router.post('/signup', async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
     
-    // Insert user into Supabase - role is always 'external' during registration
+    // Insert user into Supabase - use provided role or default to 'external'
     const { data: user, error } = await supabase
       .from('users')
-      .insert([{ name, email, password: hashed, role: 'external' }])
+      .insert([{ name, email, password: hashed, role: role || 'external' }])
       .select()
       .single();
 

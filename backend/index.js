@@ -91,11 +91,17 @@ app.get(/^\/(?!api).*/, (req, res) => {
 
 // Start Server (default port set to 3000)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server Running!`);
-  console.log(`🌐 http://localhost:${PORT}`);
-  console.log(`🔐 http://localhost:${PORT}/login.html`);
-  console.log(`📝 http://localhost:${PORT}/dashboard.html`);
-  console.log(`📄 http://localhost:${PORT}/questionpaperform.html`);
-  console.log(`📑 http://localhost:${PORT}/template.html\n`);
-});
+
+function startServer() {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server Running!`);
+    console.log(`🌐 http://localhost:${PORT}`);
+    console.log(`🔐 http://localhost:${PORT}/login.html`);
+    console.log(`📝 http://localhost:${PORT}/dashboard.html`);
+    console.log(`📄 http://localhost:${PORT}/questionpaperform.html`);
+    console.log(`📑 http://localhost:${PORT}/template.html\n`);
+  });
+}
+
+// Start server immediately (no MongoDB dependency)
+startServer();
