@@ -778,17 +778,12 @@
 
       users.forEach(u => {
         const tr = document.createElement('tr');
+        const roleLabel = u.role === 'module_coordinator' ? 'Coordinator' : u.role.charAt(0).toUpperCase() + u.role.slice(1);
         tr.innerHTML = `
             <td><strong>${u.name}</strong></td>
             <td>${u.email}</td>
             <td>
-                <select onchange="updateRole('${u.id}', this.value)" style="padding:4px 8px; font-size:12px;">
-                    <option value="external" ${u.role === 'external' ? 'selected' : ''}>External</option>
-                    <option value="faculty" ${u.role === 'faculty' ? 'selected' : ''}>Faculty</option>
-                    <option value="chairman" ${u.role === 'chairman' ? 'selected' : ''}>Chairman</option>
-                    <option value="module_coordinator" ${u.role === 'module_coordinator' ? 'selected' : ''}>Coordinator</option>
-                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                </select>
+                <span class="role-badge role-${u.role}">${roleLabel}</span>
             </td>
             <td>
                 <button class="btn btn-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i></button>
