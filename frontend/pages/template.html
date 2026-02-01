@@ -236,7 +236,7 @@ td,th{border:1.5px solid black}
     width: 25px;
   }
 }
-
+</style>
 </head>
 <body>
 
@@ -434,36 +434,62 @@ async function downloadPDF(){
   }
 }
 
-// Try reading preview from sessionStorage (set by form page)
-try{
-  const stored = sessionStorage.getItem('previewPaper');
-  if(stored){
-    paper = JSON.parse(stored);
-    sessionStorage.removeItem('previewPaper');
-    renderPaper();
-    
-    // Auto-download if requested via query param (e.g. ?download=1)
-    const params = new URLSearchParams(window.location.search);
-    if(params.get('download') === '1'){
-      setTimeout(()=>{ try{ downloadPDF(); }catch(e){} }, 1000);
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const stored = sessionStorage.getItem('previewPaper');
+
+    if (stored) {
+      paper = JSON.parse(stored);
+      sessionStorage.removeItem('previewPaper');
+      renderPaper();
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('download') === '1') {
+        setTimeout(downloadPDF, 800);
+      }
+      return;
     }
-  } else {
-    // If no preview data, check if we need to load from API (view=ID or download=ID)
+
     const params = new URLSearchParams(window.location.search);
     const viewId = params.get('view');
     const downloadId = params.get('download');
-    // Treat as ID if it's not '1' (which is used for preview flag)
-    const idToLoad = (viewId && viewId !== '1') ? viewId : (downloadId && downloadId !== '1' ? downloadId : null);
+
+    const idToLoad =
+      (viewId && viewId !== '1') ? viewId :
+      (downloadId && downloadId !== '1' ? downloadId : null);
 
     if (idToLoad) {
-      loadPaperFromApi(idToLoad).then(() => {
-        if (downloadId) {
-          setTimeout(()=>{ try{ downloadPDF(); }catch(e){} }, 1000);
-        }
-      });
+      await loadPaperFromApi(idToLoad);
+      if (downloadId) {
+        setTimeout(downloadPDF, 800);
+      }
     }
+
+  } catch (e) {
+    console.error(e);
   }
-}catch(e){ console.error(e); }
+});
+
+async function loadPaperFromApi(id) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Please login');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  const res = await fetch(`/api/papers/${id}`, {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+
+  const data = await res.json();
+
+  // ✅ THE REAL FIX
+  paper = data;
+
+  renderPaper();
+}
+
 
 async function loadPaperFromApi(id) {
   const token = localStorage.getItem('token');

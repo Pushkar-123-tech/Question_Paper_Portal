@@ -65,6 +65,9 @@ app.use('/api/papers', require('./routes/papers'));
 app.use('/api/share', require('./routes/share'));
 app.use('/api/admin', require('./routes/admin'));
 
+// Health check
+app.get('/api/health', (req, res) => res.json({ ok: true }));
+
 // Serve ALL frontend HTML + public assets
 const pagesPath = path.join(__dirname, '..', 'frontend', 'pages');
 const publicPath = path.join(__dirname, '..', 'frontend', 'public');

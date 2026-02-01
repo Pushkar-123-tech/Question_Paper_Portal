@@ -21,7 +21,8 @@
       --radius: 8px;
     }
 
-    html, body {
+    html,
+    body {
       display: block !important;
       visibility: visible !important;
       background: var(--bg);
@@ -633,10 +634,10 @@
 
       try {
         const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-        if (!res.ok) { 
+        if (!res.ok) {
           console.error('Auth failed:', res.status);
-          logout(); 
-          return; 
+          logout();
+          return;
         }
         const data = await res.json();
         currentUser = data.user;
@@ -743,7 +744,9 @@
         const d = document.createElement('div'); d.className = 'card';
         const date = new Date(p.created_at || p.createdAt || Date.now()).toLocaleString();
         const title = p.paperTitle && p.paperTitle.trim().length ? p.paperTitle : (p.courseName && p.courseName.trim().length ? p.courseName : 'Untitled');
-        const statusText = p.status.toUpperCase().replace(/_/g, ' ');
+        const rawStatus = (p.status || p.paper_status || 'draft').toString();
+        const statusText = rawStatus.toUpperCase().replace(/_/g, ' ');
+
         const ownerName = p.owner ? p.owner.name : 'Unknown';
 
         let actionsHtml = `
@@ -754,7 +757,8 @@
 
         // Workflow actions
         if (currentUser.role === 'external' || currentUser.role === 'faculty') {
-          if (p.status === 'draft') {
+          const st = (p.status || p.paper_status || 'draft');
+          if (st === 'draft') {
             actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit to Chairman</button>`;
             actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p.id}')">Edit</button>`;
             actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p.id}')">Delete</button>`;
@@ -1097,7 +1101,7 @@
       // Make sure page is visible
       document.documentElement.style.visibility = 'visible';
       document.body.style.display = 'block';
-      
+
       try {
         renderActivity();
         initDashboard();
@@ -1132,7 +1136,7 @@
     // Mobile sidebar toggle
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
-    
+
     if (sidebarToggle) {
       sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('active');

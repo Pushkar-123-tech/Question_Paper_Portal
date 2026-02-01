@@ -4,8 +4,64 @@ const jwt = require('jsonwebtoken');
 const supabase = require('../supabaseClient');
 const { sendPaperCreationEmail } = require('../services/emailService');
 
+
+
+
+
+
+const toSnake = (p) => ({
+  owner: p.owner,
+  paper_title: p.paperTitle,
+  examination: p.examination,
+  semester: p.semester,
+  academic_year: p.academicYear,
+  program: p.program,
+  program_name: p.programName,
+  course_code: p.courseCode,
+  course_name: p.courseName,
+  duration: p.duration,
+  max_marks: p.maxMarks,
+  total_questions: p.totalQuestions,
+  course_outcomes: p.courseOutcomes,
+  instructions: p.instructions,
+  sections: p.sections,
+  qp_code: p.qpCode,
+  prn_no: p.prnNo,
+  status: p.status,
+  comments: p.comments,
+  workflow_history: p.workflowHistory,
+});
+
+// convert snake_case DB rows to camelCase expected by frontend
+const toCamel = (r = {}) => ({
+  id: r.id,
+  owner: r.owner,
+  paperTitle: r.paper_title || r.paperTitle || '',
+  examination: r.examination || r.examination || '',
+  semester: r.semester || '',
+  academicYear: r.academic_year || r.academicYear || '',
+  program: r.program || '',
+  programName: r.program_name || r.programName || '',
+  courseCode: r.course_code || r.courseCode || '',
+  courseName: r.course_name || r.courseName || '',
+  duration: r.duration || '',
+  maxMarks: r.max_marks || r.maxMarks || 0,
+  totalQuestions: r.total_questions || r.totalQuestions || 0,
+  courseOutcomes: r.course_outcomes || r.courseOutcomes || [],
+  instructions: r.instructions || r.instructions || [],
+  sections: r.sections || r.sections || [],
+  qpCode: r.qp_code || r.qpCode || '',
+  prnNo: r.prn_no || r.prnNo || '',
+  status: r.status || '',
+  comments: r.comments || r.comments || [],
+  workflowHistory: r.workflow_history || r.workflowHistory || [],
+  createdAt: r.created_at || r.createdAt,
+  updatedAt: r.updated_at || r.updatedAt,
+});
+
+
 // simple auth middleware
-function auth(req, res, next){
+function auth(req, res, next) {
   const header = req.headers.authorization;
   if (!header) return res.status(401).json({ message: 'Unauthorized' });
   const token = header.split(' ')[1];
@@ -120,7 +176,7 @@ router.use((req, res, next) => {
       res.status(504).json({ message: 'Request timeout' });
     }
   }, 45000); // 45 second timeout
-  
+
   res.on('finish', () => clearTimeout(timeout));
   res.on('close', () => clearTimeout(timeout));
   next();
@@ -134,7 +190,7 @@ router.post('/', auth, async (req, res) => {
     // Save to Supabase instead of MongoDB
     const { data: paper, error } = await supabase
       .from('papers')
-      .insert([data])
+      .insert([toSnake(data)])
       .select()
       .single();
 
@@ -147,12 +203,12 @@ router.post('/', auth, async (req, res) => {
     const { data: user } = await supabase.from('users').select('*').eq('id', req.userId).single();
     if (user) {
       const { data: recipients } = await supabase.from('users').select('*').in('role', ['admin', 'faculty', 'module_coordinator', 'chairman']);
-      
+
       console.log(`📄 Paper saved by ${user.name} (${user.email})`);
       console.log(`📬 Found ${recipients ? recipients.length : 0} recipients to notify`);
-      
+
       const paperTitle = data.paperTitle || data.courseName || 'Untitled Paper';
-      
+
       // Send emails asynchronously without blocking the response
       if (recipients && recipients.length > 0) {
         setImmediate(async () => {
@@ -176,7 +232,7 @@ router.post('/', auth, async (req, res) => {
       console.log('⚠️  User not found for paper save');
     }
 
-    res.json({ paper });
+    res.json({ paper: toCamel(paper) });
 
   } catch (err) {
     console.error("❌ Save Error:", err);
@@ -208,14 +264,74 @@ router.get('/', auth, async (req, res) => {
       .from('papers')
       .select('*')
       .eq('owner', req.userId)
-      .order('created_at', { ascending: false });
+     .order('created_at', { ascending: false })
+
 
     if (error) throw error;
 
-    res.json({ papers: papers || [] });
+    res.json({ papers: (papers || []).map(toCamel) });
 
   } catch (err) {
     console.error("❌ Fetch Error:", err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/papers/:id - get single (owner or shared recipient can view)
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const { data: paper, error } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!paper) return res.status(404).json({ message: 'Not found' });
+
+    // Owner can always view
+    if (String(paper.owner) === String(req.userId)) return res.json({ paper: toCamel(paper) });
+
+    // Fetch user to check email for shared access
+    const { data: user } = await supabase.from('users').select('email,role').eq('id', req.userId).single();
+
+    if (user && user.email) {
+      const { data: shared } = await supabase
+        .from('shared')
+        .select('*')
+        .eq('paper_id', req.params.id)
+        .eq('recipient_email', user.email)
+        .single();
+
+      if (shared) return res.json({ paper: toCamel(paper) });
+    }
+
+    // Forbidden otherwise
+    return res.status(403).json({ message: 'Forbidden' });
+
+  } catch (err) {
+    console.error("❌ Fetch single Error:", err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/papers/:id - owner only
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const { data: paper } = await supabase
+      .from('papers')
+      .select('owner')
+      .eq('id', req.params.id)
+      .single();
+
+    if (!paper) return res.status(404).json({ message: 'Not found' });
+    if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+
+    const { error } = await supabase.from('papers').delete().eq('id', req.params.id);
+    if (error) throw error;
+
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    console.error("❌ Delete Error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 });
