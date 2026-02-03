@@ -21,8 +21,8 @@ transporter.verify(function(error, success) {
     console.log('📋 Check your EMAIL_USER and EMAIL_PASSWORD in .env file');
     console.log('📋 Gmail: Use app password, not regular password');
   } else if (success) {
-    console.log('✅ Email Service Ready - Emails will be sent');
-    console.log(`📧 Sender: ${process.env.EMAIL_USER}`);
+    // console.log('✅ Email Service Ready - Emails will be sent');
+    // console.log(`📧 Sender: ${process.env.EMAIL_USER}`);
   }
 });
 
