@@ -701,9 +701,10 @@ body{background:var(--bg);color:var(--text);}
         <select id="statusFilter" onchange="loadPapers()">
           <option value="all">All Status</option>
           <option value="draft">Draft</option>
-          <option value="submitted_to_chairman">Submitted</option>
-          <option value="pending_coordinator">Pending Coordinator</option>
+          <option value="submitted_to_dgca">Submitted to DGCA</option>
           <option value="finalized">Finalized</option>
+          <option value="sent_to_external">Sent to Me</option>
+          <option value="approved_by_external">Approved</option>
         </select>
         <input type="text" id="searchFilter" placeholder="Search by title..." oninput="loadPapers()">
         <button class="btn" onclick="loadPapers()"><i class="fa-solid fa-refresh"></i> Refresh</button>
@@ -775,7 +776,7 @@ async function loadPapers() {
   container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>';
   
   try {
-    const res = await fetch('/api/papers/external/assigned', { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer ' + token } });
     if (!res.ok) throw new Error('Failed to load papers');
     const data = await res.json();
     allPapers = data.papers || [];
@@ -849,6 +850,7 @@ function renderPapers(papers, container, isOwned = false) {
         <button class="btn" onclick="viewPaper('${paper.id}')"><i class="fa-solid fa-eye"></i> View</button>
         <button class="btn" onclick="downloadPaper('${paper.id}')"><i class="fa-solid fa-download"></i> Download</button>
         <button class="btn primary" onclick="toggleComments('${paper.id}')"><i class="fa-solid fa-comment"></i> Comments (${comments.length})</button>
+        ${paper.status === 'sent_to_external' ? `<button class="btn success" onclick="approvePaper('${paper.id}')"><i class="fa-solid fa-check"></i> Approve Paper</button>` : ''}
         ${isOwned && paper.status === 'draft' ? `<button class="btn success" onclick="submitPaper('${paper.id}')"><i class="fa-solid fa-paper-plane"></i> Submit</button>` : ''}
         ${isOwned && paper.status === 'draft' ? `<button class="btn" onclick="editPaper('${paper.id}')"><i class="fa-solid fa-edit"></i> Edit</button>` : ''}
       </div>
@@ -890,18 +892,19 @@ function renderComments(comments) {
 function getStatusClass(status) {
   const map = {
     'draft': 'status-draft',
-    'submitted_to_chairman': 'status-submitted',
-    'pending_coordinator': 'status-pending',
-    'finalized': 'status-finalized'
+    'submitted_to_dgca': 'status-submitted',
+    'finalized': 'status-finalized',
+    'sent_to_external': 'status-submitted',
+    'approved_by_external': 'status-finalized'
   };
   return map[status] || 'status-draft';
 }
 
 function updateStats(papers) {
   const total = papers.length;
-  const pending = papers.filter(p => p.status === 'submitted_to_chairman' || p.status === 'pending_coordinator').length;
+  const pending = papers.filter(p => ['submitted_to_dgca', 'sent_to_external'].includes(p.status)).length;
   const commented = papers.filter(p => (p.comments || []).some(c => c.user === currentUser?.id)).length;
-  const finalized = papers.filter(p => p.status === 'finalized').length;
+  const finalized = papers.filter(p => p.status === 'approved_by_external').length;
   
   document.getElementById('statTotal').innerText = total;
   document.getElementById('statPending').innerText = pending;
@@ -970,13 +973,26 @@ async function downloadPaper(id) {
 }
 
 async function submitPaper(id) {
-  if (!confirm('Submit this paper to Chairman for review?')) return;
+  if (!confirm('Submit this paper to DGCA for review?')) return;
   try {
     const res = await fetch(`/api/papers/${id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
     if (!res.ok) throw new Error('Submit failed');
-    showToast('Submitted to Chairman', 'success');
+    showToast('Submitted to DGCA', 'success');
     loadPapers();
     loadMyPapers();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function approvePaper(id) {
+  if (!confirm('Approve this question paper? This will finalize the review process.')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/approve`, { 
+      method: 'POST', 
+      headers: { 'Authorization': 'Bearer ' + token } 
+    });
+    if (!res.ok) throw new Error('Approval failed');
+    showToast('Paper approved successfully', 'success');
+    loadPapers();
   } catch (err) { showToast(err.message, 'error'); }
 }
 

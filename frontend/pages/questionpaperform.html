@@ -500,7 +500,7 @@
         </div>
         <button class="btn primary" onclick="savePaper()">Save Draft</button>
         <button class="btn primary" id="submitToChairmanBtn" style="display:none;"
-          onclick="submitToChairmanFromForm()">Submit to Chairman</button>
+          onclick="submitToDGCAFromForm()">Submit to DGCA</button>
         <button class="btn" onclick="previewPaper()">Preview & Download</button>
       </div>
 
@@ -543,12 +543,12 @@
     }
 
     /* Navigation */
-    function navigate(sec) {
+    function navigate(sec, skipLoadDraft = false) {
       document.getElementById("dashboardSection").style.display = sec === "dashboard" ? "block" : "none";
       document.getElementById("formSection").style.display = sec === "form" ? "block" : "none";
       if (sec === 'dashboard') {
         loadMyPapers(); // refresh list when user navigates to dashboard
-      } else if (sec === 'form') {
+      } else if (sec === 'form' && !skipLoadDraft) {
         // Load any saved form data when navigating to form
         loadFormData();
       }
@@ -563,6 +563,7 @@
     function saveFormData() {
       try {
         const formData = {
+          id: paperData.id || '',
           paperTitle: document.getElementById('paperTitle').value,
           semester: document.getElementById('semester').value,
           academicYear: document.getElementById('academicYear').value,
@@ -576,7 +577,10 @@
           totalQuestions: document.getElementById('totalQuestions').value,
           courseOutcomes: paperData.courseOutcomes,
           instructions: paperData.instructions,
-          sections: paperData.sections
+          sections: paperData.sections,
+          status: paperData.status || 'draft',
+          baseTitle: paperData.baseTitle || '',
+          setName: paperData.setName || ''
         };
         localStorage.setItem('formDraft', JSON.stringify(formData));
       } catch (e) {
@@ -591,32 +595,48 @@
         if (saved) {
           const formData = JSON.parse(saved);
 
-          // Populate basic form fields
-          document.getElementById('paperTitle').value = formData.paperTitle || '';
-          document.getElementById('semester').value = formData.semester || '';
-          document.getElementById('academicYear').value = formData.academicYear || '';
-          document.getElementById('program').value = formData.program || '';
-          document.getElementById('courseCode').value = formData.courseCode || '';
-          document.getElementById('courseName').value = formData.courseName || '';
-          if (document.getElementById('prnNo')) document.getElementById('prnNo').value = formData.prnNo || '';
-          if (document.getElementById('qpCode')) document.getElementById('qpCode').value = formData.qpCode || '';
-          document.getElementById('duration').value = formData.duration || '';
-          document.getElementById('maxMarks').value = formData.maxMarks || '';
-          document.getElementById('totalQuestions').value = formData.totalQuestions || '';
+          // Populate paperData object
+          paperData.id = formData.id || '';
+          paperData.status = formData.status || 'draft';
+          paperData.baseTitle = formData.baseTitle || '';
+          paperData.setName = formData.setName || '';
+          paperData.paperTitle = formData.paperTitle || '';
+          paperData.semester = formData.semester || '';
+          paperData.academicYear = formData.academicYear || '';
+          paperData.program = formData.program || '';
+          paperData.courseCode = formData.courseCode || '';
+          paperData.courseName = formData.courseName || '';
+          paperData.prnNo = formData.prnNo || '';
+          paperData.qpCode = formData.qpCode || '';
+          paperData.duration = formData.duration || '';
+          paperData.maxMarks = formData.maxMarks || '';
+          paperData.totalQuestions = formData.totalQuestions || '';
+          paperData.courseOutcomes = formData.courseOutcomes || [];
+          paperData.instructions = formData.instructions || [];
+          paperData.sections = formData.sections || [
+            { title: 'A', questions: [] },
+            { title: 'B', questions: [] },
+            { title: 'C', questions: [] }
+          ];
 
-          // Load COs, instructions, and sections if they exist
-          if (formData.courseOutcomes) {
-            paperData.courseOutcomes = formData.courseOutcomes;
-            renderCO();
-          }
-          if (formData.instructions) {
-            paperData.instructions = formData.instructions;
-            renderInstructions();
-          }
-          if (formData.sections) {
-            paperData.sections = formData.sections;
-            renderSections();
-          }
+          // Populate basic form fields in DOM
+          document.getElementById('paperTitle').value = paperData.paperTitle;
+          document.getElementById('semester').value = paperData.semester;
+          document.getElementById('academicYear').value = paperData.academicYear;
+          document.getElementById('program').value = paperData.program;
+          document.getElementById('courseCode').value = paperData.courseCode;
+          document.getElementById('courseName').value = paperData.courseName;
+          if (document.getElementById('prnNo')) document.getElementById('prnNo').value = paperData.prnNo;
+          if (document.getElementById('qpCode')) document.getElementById('qpCode').value = paperData.qpCode;
+          document.getElementById('duration').value = paperData.duration;
+          document.getElementById('maxMarks').value = paperData.maxMarks;
+          document.getElementById('totalQuestions').value = paperData.totalQuestions;
+
+          // Render all components
+          renderCO();
+          renderInstructions();
+          renderSections();
+          updateStatusUI();
         }
       } catch (e) {
         console.error('Failed to load form data:', e);
@@ -734,19 +754,40 @@
       saveFormData();
     }
 
-    /* Sections & Questions */
+    function updateQuestionNumbers() {
+      let globalCount = 1;
+      paperData.sections.forEach(sec => {
+        sec.questions.forEach(q => {
+          q.qno = globalCount++;
+        });
+      });
+    }
+
     function renderSections() {
-      const c = document.getElementById("sectionContainer"); c.innerHTML = "";
+      updateQuestionNumbers(); // Ensure numbers are correct before rendering
+      const c = document.getElementById("sectionContainer"); 
+      if (!c) return;
+      c.innerHTML = "";
+      
+      if (!paperData.sections || paperData.sections.length === 0) {
+        c.innerHTML = '<div class="card"><p class="muted">No sections defined for this paper.</p></div>';
+        return;
+      }
+
       paperData.sections.forEach((sec, i) => {
-        c.innerHTML += `<div class='card'><h3>Section ${sec.title}</h3><button class='btn small secondary' onclick='addMainQuestion(${i})'>+ Add Question</button><div id='qSec${i}'></div></div>`;
+        const secDiv = document.createElement('div');
+        secDiv.className = 'card';
+        secDiv.innerHTML = `<h3>Section ${sec.title}</h3><button class='btn small secondary' onclick='addMainQuestion(${i})'>+ Add Question</button><div id='qSec${i}'></div>`;
+        c.appendChild(secDiv);
         renderMainQuestions(i);
       });
     }
+
     function addMainQuestion(sIdx) {
       const sec = paperData.sections[sIdx];
 
       sec.questions.push({
-        qno: sec.questions.length + 1,
+        qno: 0, // Will be updated
         text: "",
         marks: "",
         bl: "",
@@ -755,8 +796,9 @@
         isOrWithPrevious: false
       });
 
-      const qIdx = sec.questions.length - 1;
-      appendSingleQuestion(sIdx, qIdx);
+      updateQuestionNumbers();
+      // We need to re-render ALL sections because numbers in subsequent sections shift
+      renderSections();
       saveFormData();
     }
 
@@ -767,9 +809,21 @@
     function renderMainQuestions(sIdx) {
       const sec = paperData.sections[sIdx];
       const c = document.getElementById(`qSec${sIdx}`);
-      if (!c) return;
+      if (!c) {
+        // Retry once after DOM update if needed
+        setTimeout(() => {
+          const retryC = document.getElementById(`qSec${sIdx}`);
+          if (retryC) renderMainQuestions(sIdx);
+        }, 0);
+        return;
+      }
 
       c.innerHTML = "";
+
+      if (!sec.questions || sec.questions.length === 0) {
+        c.innerHTML = '<div class="muted" style="padding:10px;">No questions in this section.</div>';
+        return;
+      }
 
       sec.questions.forEach((q, qIdx) => {
         if (q.isOrWithPrevious) {
@@ -842,7 +896,7 @@
     </div>
 
     <button class='delete-btn'
-      onclick='paperData.sections[${sIdx}].questions.splice(${qIdx},1);renderMainQuestions(${sIdx});saveFormData()'>
+      onclick='deleteMainQuestion(${sIdx}, ${qIdx})'>
       Delete
     </button>
 
@@ -852,13 +906,20 @@
 
 
 
+    function deleteMainQuestion(sIdx, qIdx) {
+      paperData.sections[sIdx].questions.splice(qIdx, 1);
+      updateQuestionNumbers();
+      renderSections();
+      saveFormData();
+    }
+
     function insertOrAfter(sIdx, qIdx) {
       const sec = paperData.sections[sIdx];
-
-      // If next question does not exist, create it
+      
+      // If next question doesn't exist, push new one
       if (!sec.questions[qIdx + 1]) {
         sec.questions.push({
-          qno: sec.questions.length + 1,
+          qno: 0, // updateQuestionNumbers will fix this
           text: "",
           marks: "",
           bl: "",
@@ -867,10 +928,16 @@
           isOrWithPrevious: true
         });
       } else {
+        // If it exists, just mark it as OR (logic from before)
+        // But wait, if I insert an OR, I probably want to INSERT it, not just flag the existing next one?
+        // The original code was: sec.questions[qIdx + 1].isOrWithPrevious = true;
+        // This implies turning the NEXT question into an OR option.
+        // If that's the intended behavior, I'll keep it.
         sec.questions[qIdx + 1].isOrWithPrevious = true;
       }
-
-      renderMainQuestions(sIdx);
+      
+      updateQuestionNumbers();
+      renderSections();
       saveFormData();
     }
 
@@ -949,7 +1016,48 @@
       saveFormData();
     }
 
+    function getCleanPaperData() {
+      // Clone data
+      const cleanData = JSON.parse(JSON.stringify(paperData));
+
+      // Gather form data into the clone
+      cleanData.paperTitle = document.getElementById('paperTitle').value || '';
+      cleanData.examination = '';
+      cleanData.semester = document.getElementById('semester').value || '';
+      cleanData.academicYear = document.getElementById('academicYear').value || '';
+      cleanData.program = document.getElementById('program').value || '';
+      cleanData.courseCode = document.getElementById('courseCode').value || '';
+      cleanData.courseName = document.getElementById('courseName').value || '';
+      cleanData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+      cleanData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+      cleanData.duration = document.getElementById('duration').value || '';
+      cleanData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+      cleanData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+      cleanData.baseTitle = paperData.baseTitle || '';
+      cleanData.setName = paperData.setName || '';
+
+      // We preserve all sections (A, B, C) even if empty for batch sets.
+      // But we can still filter empty questions if needed, or just leave them.
+      // Let's just keep everything to avoid losing structural data.
+      
+      // Re-number questions continuously for those that exist
+      let globalCount = 1;
+      cleanData.sections.forEach(sec => {
+        if (sec.questions) {
+          sec.questions.forEach(q => {
+            q.qno = globalCount++;
+          });
+        }
+      });
+
+      return cleanData;
+    }
+
     async function savePaper() {
+      if (paperData.status && paperData.status !== 'draft') {
+        showToast('Paper is locked and cannot be edited', 'warn');
+        return;
+      }
       const token = localStorage.getItem('token');
       if (!token) {
         showToast('Please login first', 'error');
@@ -957,19 +1065,7 @@
         return;
       }
 
-      // Gather form data
-      paperData.paperTitle = document.getElementById('paperTitle').value;
-      paperData.examination = '';
-      paperData.semester = document.getElementById('semester').value;
-      paperData.academicYear = document.getElementById('academicYear').value;
-      paperData.program = document.getElementById('program').value;
-      paperData.courseCode = document.getElementById('courseCode').value;
-      paperData.courseName = document.getElementById('courseName').value;
-      paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-      paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-      paperData.duration = document.getElementById('duration').value;
-      paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-      paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+      const finalData = getCleanPaperData();
 
       try {
         const res = await fetch('/api/papers', {
@@ -978,7 +1074,7 @@
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
           },
-          body: JSON.stringify(paperData)
+          body: JSON.stringify(finalData)
         });
 
         const data = await res.json();
@@ -1015,58 +1111,85 @@
       // Save current form state
       saveFormData();
 
-      // Populate paperData with current form values
-      paperData.paperTitle = document.getElementById('paperTitle').value;
-      paperData.semester = document.getElementById('semester').value;
-      paperData.academicYear = document.getElementById('academicYear').value;
-      paperData.program = document.getElementById('program').value;
-      paperData.courseCode = document.getElementById('courseCode').value;
-      paperData.courseName = document.getElementById('courseName').value;
-      paperData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
-      paperData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
-      paperData.duration = document.getElementById('duration').value;
-      paperData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
-      paperData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+      // Get clean data for preview
+      const cleanData = getCleanPaperData();
 
       // Use sessionStorage and navigate to template page
       try {
-        sessionStorage.setItem('previewPaper', JSON.stringify(paperData));
+        sessionStorage.setItem('previewPaper', JSON.stringify(cleanData));
         window.location.href = '/template.html?preview=1&download=1';
       } catch (e) {
         // fallback to old behaviour
         const w = window.open('/template.html', '_blank');
-        const send = () => w.postMessage(paperData, window.location.origin);
+        const send = () => w.postMessage(cleanData, window.location.origin);
         const t = setInterval(() => { try { send(); clearInterval(t); } catch (e) { } }, 200);
       }
     }
 
     function updateStatusUI() {
       const container = document.getElementById('paperStatusContainer');
-      const btn = document.getElementById('submitToChairmanBtn');
+      const submitBtn = document.getElementById('submitToChairmanBtn');
+      const saveBtn = document.querySelector('button[onclick="savePaper()"]');
+      
       if (paperData.id && paperData.status) {
-        container.innerText = 'Status: ' + paperData.status.toUpperCase().replace(/_/g, ' ');
-        if (paperData.status === 'draft') {
-          btn.style.display = 'inline-flex';
+        const st = paperData.status;
+        container.innerText = 'Status: ' + st.toUpperCase().replace(/_/g, ' ');
+        
+        if (st === 'draft') {
+          submitBtn.style.display = 'inline-flex';
+          if (saveBtn) saveBtn.style.display = 'inline-flex';
         } else {
-          btn.style.display = 'none';
+          submitBtn.style.display = 'none';
+          if (saveBtn) saveBtn.style.display = 'none';
+          // Disable all inputs if locked
+          document.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.id !== 'importFile') el.disabled = true;
+          });
         }
       } else {
         container.innerText = '';
-        btn.style.display = 'none';
+        submitBtn.style.display = 'none';
       }
     }
 
-    async function submitToChairmanFromForm() {
+    async function submitToDGCAFromForm() {
       if (!paperData.id) return showToast('Save as draft first', 'warn');
-      if (!confirm('Submit to Chairman?')) return;
+      
+      const isBatch = !!paperData.baseTitle;
+      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paperData.baseTitle}" to DGCA?` : 'Submit this paper to DGCA for review?';
+      
+      if (!confirm(confirmMsg)) return;
+      
       try {
-        const res = await fetch(`/api/papers/${paperData.id}/submit`, {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (!res.ok) throw new Error('Submit failed');
-        showToast('Submitted to Chairman!', 'success');
-        paperData.status = 'submitted_to_chairman';
+        if (isBatch) {
+          // We need to fetch all papers in the batch to get their IDs
+          // Or just submit the current one and let the user submit others from dashboard.
+          // But the requirement says "Once completed, all three sets should be submitted".
+          // To be safe and efficient, we'll fetch all papers with the same baseTitle.
+          
+          const resBatch = await fetch('/api/papers', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const dataBatch = await resBatch.json();
+          const batchPapers = (dataBatch.papers || []).filter(p => p.baseTitle === paperData.baseTitle);
+          
+          for (const p of batchPapers) {
+            await fetch(`/api/papers/${p.id}/submit`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+          }
+          showToast(`Batch "${paperData.baseTitle}" submitted to DGCA!`, 'success');
+        } else {
+          const res = await fetch(`/api/papers/${paperData.id}/submit`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!res.ok) throw new Error('Submit failed');
+          showToast('Submitted to DGCA!', 'success');
+        }
+        
+        paperData.status = 'submitted_to_dgca';
         updateStatusUI();
       } catch (err) {
         showToast(err.message, 'error');
@@ -1078,18 +1201,35 @@
     renderInstructions();
     renderCO();
     updateStatusUI();
-    loadFormData(); // Load any saved draft data
 
     // If this page is opened directly, show the form section by default
     if (window.location.pathname && window.location.pathname.endsWith('questionpaperform.html')) {
-      if (window.location.search.includes('list=1')) {
+      const qp = new URLSearchParams(window.location.search);
+      
+      // Handle ?title=...&batch=...&set=...
+      const title = qp.get('title');
+      const batch = qp.get('batch');
+      const setLetter = qp.get('set');
+      
+      if (title) {
+        document.getElementById('paperTitle').value = title;
+        paperData.paperTitle = title;
+      }
+      if (batch) {
+        paperData.baseTitle = batch; // Store batch name
+      }
+      if (setLetter) {
+        // You could store the set letter in paperData if needed
+        paperData.setName = setLetter;
+      }
+
+      if (qp.get('list') === '1') {
         navigate('dashboard');
       } else {
         navigate('form');
       }
 
       // Support ?edit=<id>
-      const qp = new URLSearchParams(window.location.search);
       const editId = qp.get('edit');
       if (editId) {
         setTimeout(() => editPaper(editId), 200);
@@ -1100,6 +1240,8 @@
       if (testMode === '1') {
         setTimeout(() => loadTestData(), 300);
       }
+    } else {
+      loadFormData(); // Load any saved draft data only if not in form.html directly or handled by params
     }
 
     // Load test data from sessionStorage/localStorage
@@ -1249,23 +1391,37 @@
       return d.paper;
     }
 
-    async function editPaper(id) {
+    async function editPaper(id, retryCount = 0) {
+      console.log(`Editing paper ID: ${id}, retry: ${retryCount}`);
       const paper = await fetchPaperById(id);
-      if (!paper) return showToast('Unable to load paper', 'error');
+      
+      if (!paper) {
+        if (retryCount < 2) {
+          console.warn('Paper not found, retrying...');
+          setTimeout(() => editPaper(id, retryCount + 1), 500);
+          return;
+        }
+        return showToast('Unable to load paper. Please try again from the dashboard.', 'error');
+      }
 
       // Load into form
       paperData = paper;
       paperData.courseOutcomes = paperData.courseOutcomes || [];
       paperData.instructions = paperData.instructions || [];
-      paperData.sections = paperData.sections || [
-        { title: 'A', questions: [] },
-        { title: 'B', questions: [] },
-        { title: 'C', questions: [] }
-      ];
+      if (!paperData.sections || paperData.sections.length === 0) {
+        paperData.sections = [
+          { title: 'A', questions: [] },
+          { title: 'B', questions: [] },
+          { title: 'C', questions: [] }
+        ];
+      }
 
 
 
-      // Populate form fields
+      // Navigate to form, skipping the load draft from localStorage
+      navigate('form', true);
+
+      // Populate form fields after navigation to ensure elements are visible
       document.getElementById('paperTitle').value = paperData.paperTitle || '';
       document.getElementById('semester').value = paperData.semester || '';
       document.getElementById('academicYear').value = paperData.academicYear || '';
@@ -1285,9 +1441,6 @@
 
       // Save as draft
       saveFormData();
-
-      // Navigate to form
-      navigate('form');
     }
 
     async function deletePaper(id) {
@@ -1420,6 +1573,7 @@
       window.open(`/template.html?download=${id}`, '_blank');
     }
   </script>
+  <script src="/public/ui.js"></script>
 
 </body>
 

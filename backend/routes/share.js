@@ -37,7 +37,9 @@ router.post('/send', auth, async (req, res) => {
       .single();
 
     if (paperError || !paper) return res.status(404).json({ message: 'Paper not found' });
-    if (paper.owner !== req.userId) return res.status(403).json({ message: 'Forbidden' });
+    
+    // Check paper owner - paper.owner is a UUID string in DB
+    if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden: You do not own this paper' });
 
     // ensure snapshot includes camelCase title fields so frontend can read `paperTitle` / `courseName`
     const snapshot = Object.assign({}, paper, {

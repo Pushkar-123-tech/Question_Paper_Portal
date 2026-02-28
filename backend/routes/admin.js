@@ -14,16 +14,14 @@ router.get('/stats', async (req, res) => {
     const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
     const { count: externals } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'external');
     const { count: faculty } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'faculty');
-    const { count: chairmen } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'chairman');
-    const { count: coordinators } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'module_coordinator');
+    const { count: dgca } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'dgca');
     const { count: admins } = await supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'admin');
 
     res.json({
       totalUsers,
       externals,
       faculty,
-      chairmen,
-      coordinators,
+      dgca,
       admins
     });
   } catch (err) {

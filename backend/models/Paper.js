@@ -26,6 +26,8 @@ const toSnake = (p) => ({
   status: p.status,
   comments: p.comments,
   workflow_history: p.workflowHistory,
+  base_title: p.baseTitle,
+  set_name: p.setName,
 });
 
 const create = async (data) => {

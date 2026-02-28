@@ -33,7 +33,7 @@ header{display:flex;justify-content:space-between;margin-bottom:24px}
 .center-text{text-align:center;font-size:16.5px;font-weight:700;margin:20px 0}
 .bottom-row{display:flex;justify-content:space-between;text-align:center;font-size:16.5px;font-weight:700}
 .outcome-box{border:1.5px solid black;width:97%;font-weight:bold;position:relative;top:-23px}
-.instruction-box{border-left:1.5px solid black;border-right:1.5px solid black;border-bottom:1.5px solid black;font-size:16px;padding:2px 0px;position:relative;top:-23px;left:16px;width:97%}
+.instruction-box{border-left:1.5px solid black;border-right:1.5px solid black;border-bottom:1.5px solid black;border-top:1.5px solid black;font-size:16px;padding:2px 0px;position:relative;top:-23px;left:16px;width:97%}
 .ins-title{font-weight:bold;padding:0px 6px}
 .int-list-item{list-style-type:none;border-top:1px solid black;padding:2px 6px}
 .co-list-items{position:relative;left:28px;font-size:17px;font-weight:normal;margin-left:12px;margin-bottom:12px}
@@ -280,7 +280,7 @@ td,th{border:1.5px solid black}
     <div style="position: relative;top: -37px;left: -10px;">Max. Marks: <span id="pMarks"></span></div>
   </section>
 
-  <section class="outcome-box" style="position: relative; left: 16px;">
+  <section class="outcome-box" id="pCOSection" style="position: relative; left: 16px;">
     <div class="box-title">Course Outcomes:</div>
     <div id="pCOList" class="co-list-items" style="position: relative;left: 10px;"></div>
   </section>
@@ -318,10 +318,19 @@ function renderPaper(){
   // Render COs as styled items
   const coList = document.getElementById('pCOList');
   if(coList) {
-    coList.innerHTML = '';
-    (paper.courseOutcomes || []).forEach(co => { 
-      coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; 
-    });
+    const coSection = document.getElementById('pCOSection');
+    const list = paper.courseOutcomes || [];
+
+    if(list.length === 0) {
+      coList.innerHTML = '';
+      if(coSection) coSection.style.display = 'none';
+    } else {
+      if(coSection) coSection.style.display = '';
+      coList.innerHTML = '';
+      list.forEach(co => { 
+        coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; 
+      });
+    }
   }
 
   // Render Instructions
@@ -523,6 +532,7 @@ window.addEventListener("message", (event) => {
   renderPaper();
 });
 </script>
+<script src="/public/ui.js"></script>
 
 </body>
 </html>

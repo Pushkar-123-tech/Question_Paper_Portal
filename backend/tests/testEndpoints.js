@@ -11,7 +11,7 @@
     log('  ok');
 
     log('2) POST /api/auth/signup');
-    r = await fetch(base + '/api/auth/signup', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'Test User', email:`test${rand}@example.com`, password:'password123' }) });
+    r = await fetch(base + '/api/auth/signup', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'Test User', email:`test${rand}@example.com`, password:'password123', role:'faculty' }) });
     const signup = await r.json();
     if (!r.ok) { console.error(signup); throw new Error('signup failed'); }
     log('  ok', signup.user.email);
@@ -42,7 +42,7 @@
     r = await fetch(base + '/api/auth/login', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: signup.user.email, password:'newpass456' }) });
     const reLogin = await r.json(); if(!r.ok){ console.error(reLogin); throw new Error('login with new password failed'); } log('  ok, login with new password');
 
-    log('4) POST /api/papers (create)');
+    log('4) POST /api/papers (create single paper)');
     const paper = {
       paperTitle: 'Test Paper 1', semester:'I', academicYear:'2025-26', program:'TestProg', programName:'Test Program', courseCode:'T100', courseName:'Testing', duration:'2 Hours', maxMarks:50, totalQuestions:5, courseOutcomes:['CO1'], instructions:['Read carefully'], sections:[{title:'A',questions:[{qno:1,text:'Sample Q',marks:5,bl:'2',co:'CO1'}]}]
     };
@@ -51,6 +51,31 @@
     if (!r.ok) { console.error(created); throw new Error('create paper failed'); }
     const paperId = created.paper._id || created.paper.id;
     log('  ok, created id', paperId);
+
+    log('4.1) submit paper to DGCA');
+    r = await fetch(base + `/api/papers/${paperId}/submit`, { method:'POST', headers:{ 'Authorization': 'Bearer '+token } });
+    const subRes = await r.json();
+    if (!r.ok) { console.error(subRes); throw new Error('submit failed'); }
+    log('  ok, status', subRes.status);
+
+    // create a DGCA user and finalize
+    log('4.2) create DGCA user');
+    r = await fetch(base + '/api/auth/signup', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'DGCA User', email:`dgca${rand}@example.com`, password:'password123', role:'dgca' }) });
+    const dgcaSignup = await r.json();
+    if(!r.ok){ console.error(dgcaSignup); throw new Error('DGCA signup failed'); }
+    log('  ok, dgca email', dgcaSignup.user.email);
+
+    log('4.3) login as DGCA');
+    r = await fetch(base + '/api/auth/login', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: dgcaSignup.user.email, password:'password123' }) });
+    const dgcaLogin = await r.json(); if(!r.ok){ console.error(dgcaLogin); throw new Error('dgca login failed'); }
+    const dgcaToken = dgcaLogin.token;
+    log('  ok, dgca token received');
+
+    log('4.4) finalize paper as DGCA');
+    r = await fetch(base + `/api/papers/${paperId}/finalize`, { method:'POST', headers:{ 'Authorization': 'Bearer '+dgcaToken } });
+    const finRes = await r.json();
+    if(!r.ok){ console.error(finRes); throw new Error('finalize failed'); }
+    log('  ok, finalized status', finRes.status);
 
     log('5) GET /api/papers (list)');
     r = await fetch(base + '/api/papers', { headers:{'Authorization':'Bearer '+token} });

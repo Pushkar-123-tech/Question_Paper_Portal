@@ -52,7 +52,7 @@ async function seedAdmin() {
         .eq('email', 'admin@rscoe.in');
       
       if (updateError) throw updateError;
-      console.log('👤 Predefined Admin password reset to default: admin123');
+    
     }
   } catch (err) {
     console.error('Error seeding admin:', err);

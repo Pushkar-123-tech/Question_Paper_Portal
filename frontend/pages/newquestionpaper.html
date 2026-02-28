@@ -158,6 +158,7 @@
             border-left: 1.5px solid black;
             border-right: 1.5px solid black;
             border-bottom: 1.5px solid black;
+            border-top:1.5px solid black;
             font-size: 16px;
             padding: 2px 0px;
             position: relative;
@@ -635,10 +636,10 @@
 
 
     </div>
-    <script src="html2canvas"></script>
-<script src="jspdf"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<script>
+    <script>
 let paperData = {};
 
 // Fill static template with dynamic data
@@ -657,10 +658,19 @@ function fillPaper() {
   // Render CO list
   const coList = document.getElementById("pCOList");
   if (coList) {
-    coList.innerHTML = "";
-    (paperData.courseOutcomes || []).forEach(co => {
-      coList.innerHTML += `<li>${co}</li>`;
-    });
+    const coSection = coList.parentElement;
+    const list = paperData.courseOutcomes || [];
+
+    if (list.length === 0) {
+      coList.innerHTML = "";
+      if (coSection) coSection.style.display = "none";
+    } else {
+      if (coSection) coSection.style.display = "";
+      coList.innerHTML = "";
+      list.forEach(co => {
+        coList.innerHTML += `<li>${co}</li>`;
+      });
+    }
   }
 
   // Render instruction list

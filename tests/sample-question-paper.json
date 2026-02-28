@@ -9,7 +9,7 @@
   "qpCode": "CS2203T-ESE-2026",
   "duration": "2 Hours",
   "maxMarks": "50",
-  "totalQuestions": "6",
+  "totalQuestions": "8",
   "courseOutcomes": [
     "CO1: Understand fundamental data structures and their operations",
     "CO2: Analyze and compare different data structure implementations",
@@ -20,6 +20,7 @@
     "Answer all questions",
     "Each question carries equal marks",
     "Use of non-programmable calculator allowed",
+    "Draw neat diagrams wherever necessary",
     "Write your answers clearly"
   ],
   "sections": [
@@ -28,7 +29,7 @@
       "questions": [
         {
           "qno": 1,
-          "text": "Define data structure and list its types.",
+          "text": "Define Data Structure. Classify different types of data structures with examples.",
           "marks": "5",
           "bl": "BL 1",
           "co": "CO1",
@@ -37,10 +38,10 @@
         },
         {
           "qno": 2,
-          "text": "What is a stack? Write the algorithm for push and pop operations.",
-          "marks": "5",
-          "bl": "BL 2",
-          "co": "CO1",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [
             {
               "label": "A",
@@ -61,10 +62,10 @@
         },
         {
           "qno": 3,
-          "text": "Explain the concept of linked lists and their advantages.",
-          "marks": "5",
-          "bl": "BL 2",
-          "co": "CO2",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [],
           "orOptions": [
             {
@@ -90,10 +91,10 @@
       "questions": [
         {
           "qno": 4,
-          "text": "What is a queue? Explain circular queue with example.",
-          "marks": "10",
-          "bl": "BL 2",
-          "co": "CO1",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [
             {
               "label": "A",
@@ -104,7 +105,7 @@
             },
             {
               "label": "B",
-              "text": "Write the enqueue operation for a circular queue",
+              "text": "Write the enqueue and dequeue operations for a circular queue",
               "marks": "5",
               "bl": "BL 3",
               "co": "CO1"
@@ -114,10 +115,10 @@
         },
         {
           "qno": 5,
-          "text": "Explain tree traversal methods.",
-          "marks": "10",
-          "bl": "BL 2",
-          "co": "CO2",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [],
           "orOptions": [
             {
@@ -129,7 +130,7 @@
             },
             {
               "label": "B",
-              "text": "Draw and explain the difference between depth-first and breadth-first search",
+              "text": "Draw and explain the difference between depth-first search (DFS) and breadth-first search (BFS)",
               "marks": "10",
               "bl": "BL 3",
               "co": "CO3"
@@ -138,10 +139,10 @@
         },
         {
           "qno": 6,
-          "text": "Apply hashing techniques to solve a real-world problem.",
-          "marks": "10",
-          "bl": "BL 3",
-          "co": "CO3",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [],
           "orOptions": [
             {
@@ -153,7 +154,7 @@
             },
             {
               "label": "B",
-              "text": "Compare linear probing and quadratic probing in hash tables with examples",
+              "text": "Compare linear probing and quadratic probing in hash tables with suitable examples",
               "marks": "10",
               "bl": "BL 3",
               "co": "CO4"
@@ -167,10 +168,10 @@
       "questions": [
         {
           "qno": 7,
-          "text": "Analyze the efficiency of different sorting algorithms.",
-          "marks": "10",
-          "bl": "BL 3",
-          "co": "CO4",
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
           "subQuestions": [
             {
               "label": "A",
@@ -188,6 +189,30 @@
             }
           ],
           "orOptions": []
+        },
+        {
+          "qno": 8,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Explain the concept of recursion. Write a recursive algorithm to calculate factorial of a number.",
+              "marks": "10",
+              "bl": "BL 2",
+              "co": "CO3"
+            },
+            {
+              "label": "B",
+              "text": "Explain the working of a binary search algorithm. Analyze its time complexity.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
         }
       ]
     }
