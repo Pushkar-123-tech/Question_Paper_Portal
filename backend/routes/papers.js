@@ -9,39 +9,34 @@ const { sendPaperCreationEmail } = require('../services/emailService');
 
 
 
-const toSnake = (p) => {
-  const obj = {
-    owner: p.owner ? (typeof p.owner === 'object' ? (p.owner.id || p.owner_id) : p.owner) : null,
-    paper_title: p.paperTitle,
-    base_title: p.baseTitle, // optional common name for grouped sets
-    examination: p.examination,
-    semester: p.semester,
-    academic_year: p.academicYear,
-    program: p.program,
-    program_name: p.programName,
-    course_code: p.courseCode,
-    course_name: p.courseName,
-    duration: p.duration,
-    max_marks: p.maxMarks,
-    total_questions: p.totalQuestions,
-    course_outcomes: p.courseOutcomes,
-    instructions: p.instructions,
-    sections: p.sections,
-    qp_code: p.qpCode,
-    prn_no: p.prnNo,
-    status: p.status,
-    comments: p.comments,
-    workflow_history: p.workflowHistory,
-    set_name: p.setName,
-  };
-  if (p.id) obj.id = p.id;
-  return obj;
-};
+const toSnake = (p) => ({
+  owner: p.owner,
+  paper_title: p.paperTitle,
+  base_title: p.baseTitle, 
+  examination: p.examination,
+  semester: p.semester,
+  academic_year: p.academicYear,
+  program: p.program,
+  program_name: p.programName,
+  course_code: p.courseCode,
+  course_name: p.courseName,
+  duration: p.duration,
+  max_marks: p.maxMarks,
+  total_questions: p.totalQuestions,
+  course_outcomes: p.courseOutcomes,
+  instructions: p.instructions,
+  sections: p.sections,
+  qp_code: p.qpCode,
+  prn_no: p.prnNo,
+  status: p.status,
+  comments: p.comments,
+  workflow_history: p.workflowHistory,
+});
 
 // convert snake_case DB rows to camelCase expected by frontend
 const toCamel = (r = {}) => ({
   id: r.id,
-  owner: r.owner ? (typeof r.owner === 'object' ? { id: r.owner_id || r.owner.id, ...r.owner } : { id: r.owner, name: 'Unknown' }) : { id: null, name: 'Unknown' },
+  owner: r.owner,
   paperTitle: r.paper_title || r.paperTitle || '',
   examination: r.examination || r.examination || '',
   semester: r.semester || '',
@@ -61,7 +56,6 @@ const toCamel = (r = {}) => ({
   status: r.status || '',
   comments: r.comments || r.comments || [],
   baseTitle: r.base_title || r.baseTitle || '',
-  setName: r.set_name || r.setName || '',
   workflowHistory: r.workflow_history || r.workflowHistory || [],
   createdAt: r.created_at || r.createdAt,
   updatedAt: r.updated_at || r.updatedAt,
@@ -195,28 +189,37 @@ router.post('/', auth, async (req, res) => {
     const data = req.body;
     data.owner = req.userId; // ensure owner is always set
 
-    // If ID exists, check if paper is locked before updating
+    // If an `id` is provided in the payload, update the existing paper
     if (data.id) {
-      const { data: existing } = await supabase.from('papers').select('status, owner').eq('id', data.id).single();
-      if (existing) {
-        if (existing.status !== 'draft') {
-          return res.status(403).json({ message: 'Paper is locked and cannot be edited' });
-        }
-        if (String(existing.owner) !== String(req.userId)) {
-          return res.status(403).json({ message: 'Forbidden: You do not own this paper' });
-        }
+      // verify ownership
+      const { data: existing, error: fetchErr } = await supabase.from('papers').select('owner').eq('id', data.id).single();
+      if (fetchErr || !existing) return res.status(404).json({ message: 'Not found' });
+      if (String(existing.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
+
+      const { data: updated, error: updErr } = await supabase
+        .from('papers')
+        .update(toSnake(data))
+        .eq('id', data.id)
+        .select()
+        .single();
+
+      if (updErr) {
+        console.error('Supabase update error:', updErr);
+        return res.status(500).json({ message: 'Failed to update paper' });
       }
+
+      return res.json({ paper: toCamel(updated) });
     }
 
-    // Save to Supabase (upsert handles both insert and update if ID is provided)
+    // Otherwise create a new paper
     const { data: paper, error } = await supabase
       .from('papers')
-      .upsert([toSnake(data)])
+      .insert([toSnake(data)])
       .select()
       .single();
 
     if (error) {
-      console.error('Supabase upsert error:', error);
+      console.error('Supabase insert error:', error);
       return res.status(500).json({ message: 'Failed to save paper' });
     }
 
@@ -281,25 +284,12 @@ router.get('/stats', auth, async (req, res) => {
 
 router.get('/', auth, async (req, res) => {
   try {
-    const { data: user } = await supabase.from('users').select('role, email').eq('id', req.userId).single();
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { data: papers, error } = await supabase
+      .from('papers')
+      .select('*')
+      .eq('owner', req.userId)
+     .order('created_at', { ascending: false })
 
-    let query = supabase.from('papers').select('*, owner_id:owner, owner:users(name)');
-
-    if (user.role === 'admin') {
-      // Admin sees everything
-    } else if (user.role === 'dgca') {
-      // DGCA sees papers submitted for review and their finalized ones
-      query = query.in('status', ['submitted_to_dgca', 'finalized', 'sent_to_external', 'approved_by_external']);
-    } else if (user.role === 'external') {
-      // External sees finalized papers
-      query = query.in('status', ['finalized', 'sent_to_external', 'approved_by_external']);
-    } else {
-      // Others see their own papers
-      query = query.eq('owner', req.userId);
-    }
-
-    const { data: papers, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
 
@@ -316,31 +306,19 @@ router.get('/:id', auth, async (req, res) => {
   try {
     const { data: paper, error } = await supabase
       .from('papers')
-      .select('*, owner_id:owner, owner:users(name)')
+      .select('*')
       .eq('id', req.params.id)
       .single();
 
     if (!paper) return res.status(404).json({ message: 'Not found' });
 
-    // fetch user to check role and email for access
-    const { data: user } = await supabase.from('users').select('email,role').eq('id', req.userId).single();
-    if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
     // Owner can always view
-    if (String(paper.owner_id) === String(req.userId)) return res.json({ paper: toCamel(paper) });
+    if (String(paper.owner) === String(req.userId)) return res.json({ paper: toCamel(paper) });
 
-    // DGCA can view papers in their workflow
-    if (user.role === 'dgca' && ['submitted_to_dgca', 'finalized', 'sent_to_external', 'approved_by_external'].includes(paper.status)) {
-      return res.json({ paper: toCamel(paper) });
-    }
+    // Fetch user to check email for shared access
+    const { data: user } = await supabase.from('users').select('email,role').eq('id', req.userId).single();
 
-    // External can view papers sent to them
-    if (user.role === 'external' && ['sent_to_external', 'approved_by_external'].includes(paper.status)) {
-      return res.json({ paper: toCamel(paper) });
-    }
-
-    // Shared access check
-    if (user.email) {
+    if (user && user.email) {
       const { data: shared } = await supabase
         .from('shared')
         .select('*')
@@ -404,7 +382,7 @@ router.post('/:id/submit', auth, async (req, res) => {
   }
 });
 
-// POST /api/papers/:id/finalize - DGCA finalizes one set from a batch
+// POST /api/papers/:id/finalize - DGCA finalizes and notifies external
 router.post('/:id/finalize', auth, async (req, res) => {
   try {
     const { data: paper } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
@@ -414,7 +392,6 @@ router.post('/:id/finalize', auth, async (req, res) => {
     const { data: user } = await supabase.from('users').select('role').eq('id', req.userId).single();
     if (!user || user.role !== 'dgca') return res.status(403).json({ message: 'Forbidden' });
 
-    // Finalize the selected set
     const newHistory = (paper.workflow_history || []).concat([{ action: 'finalized', by: req.userId, at: new Date().toISOString() }]);
     const { error: updErr } = await supabase
       .from('papers')
@@ -422,76 +399,11 @@ router.post('/:id/finalize', auth, async (req, res) => {
       .eq('id', req.params.id);
     if (updErr) throw updErr;
 
-    // Lock other sets in the same batch
-    if (paper.base_title) {
-      const { data: otherSets } = await supabase
-        .from('papers')
-        .select('id')
-        .eq('base_title', paper.base_title)
-        .neq('id', req.params.id);
+    // Optionally could notify external users here (omitted for brevity)
 
-      if (otherSets && otherSets.length > 0) {
-        for (const other of otherSets) {
-          const { data: otherPaper } = await supabase.from('papers').select('workflow_history').eq('id', other.id).single();
-          const otherHistory = (otherPaper.workflow_history || []).concat([{ action: 'locked_by_batch_finalization', by: req.userId, at: new Date().toISOString() }]);
-          await supabase.from('papers').update({ status: 'discarded', workflow_history: otherHistory }).eq('id', other.id);
-        }
-      }
-    }
-
-    res.json({ message: 'Paper finalized. Other sets in this batch are now locked.', status: 'finalized' });
+    res.json({ message: 'Finalized', status: 'finalized' });
   } catch (err) {
     console.error('❌ Finalize Error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// POST /api/papers/:id/send-to-external - DGCA forwards finalized paper to external
-router.post('/:id/send-to-external', auth, async (req, res) => {
-  try {
-    const { data: paper } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
-    if (!paper) return res.status(404).json({ message: 'Not found' });
-
-    const { data: user } = await supabase.from('users').select('role').eq('id', req.userId).single();
-    if (!user || user.role !== 'dgca') return res.status(403).json({ message: 'Forbidden' });
-
-    if (paper.status !== 'finalized') {
-      return res.status(400).json({ message: 'Paper must be finalized before sending to external' });
-    }
-
-    const newHistory = (paper.workflow_history || []).concat([{ action: 'sent_to_external', by: req.userId, at: new Date().toISOString() }]);
-    const { error: updErr } = await supabase
-      .from('papers')
-      .update({ status: 'sent_to_external', workflow_history: newHistory })
-      .eq('id', req.params.id);
-    if (updErr) throw updErr;
-
-    res.json({ message: 'Paper sent to External', status: 'sent_to_external' });
-  } catch (err) {
-    console.error('❌ Send Error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// POST /api/papers/:id/approve - External approves the paper
-router.post('/:id/approve', auth, async (req, res) => {
-  try {
-    const { data: paper } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
-    if (!paper) return res.status(404).json({ message: 'Not found' });
-
-    const { data: user } = await supabase.from('users').select('role').eq('id', req.userId).single();
-    if (!user || user.role !== 'external') return res.status(403).json({ message: 'Forbidden' });
-
-    const newHistory = (paper.workflow_history || []).concat([{ action: 'approved_by_external', by: req.userId, at: new Date().toISOString() }]);
-    const { error: updErr } = await supabase
-      .from('papers')
-      .update({ status: 'approved_by_external', workflow_history: newHistory })
-      .eq('id', req.params.id);
-    if (updErr) throw updErr;
-
-    res.json({ message: 'Paper approved', status: 'approved_by_external' });
-  } catch (err) {
-    console.error('❌ Approve Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

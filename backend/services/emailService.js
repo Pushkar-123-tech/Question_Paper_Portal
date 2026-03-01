@@ -1,46 +1,66 @@
 const nodemailer = require('nodemailer');
 
-// Verify environment variables are set
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-  console.warn('⚠️  EMAIL_USER and EMAIL_PASSWORD environment variables are not configured. Emails will not be sent.');
+// Support flexible SMTP env vars for deployment
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT;
+const SMTP_SECURE = process.env.SMTP_SECURE;
+const SMTP_USER = process.env.SMTP_USER || process.env.EMAIL_USER;
+const SMTP_PASS = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+
+const isEmailConfigured = Boolean(
+  (SMTP_HOST && SMTP_USER && SMTP_PASS) ||
+  (EMAIL_SERVICE && SMTP_USER && SMTP_PASS)
+);
+
+let transporter;
+if (isEmailConfigured) {
+  if (SMTP_HOST) {
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT ? parseInt(SMTP_PORT, 10) : 587,
+      secure: SMTP_SECURE === 'true' || (SMTP_PORT && Number(SMTP_PORT) === 465),
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      }
+    });
+  } else {
+    transporter = nodemailer.createTransport({
+      service: EMAIL_SERVICE || 'gmail',
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    });
+  }
+
+  transporter.verify(function(error, success) {
+    if (error) {
+      console.error('❌ Email Service Error:', error && error.message ? error.message : error);
+      console.log('📋 Check your SMTP_* or EMAIL_* environment variables (SMTP_USER/SMTP_PASS).');
+    } else {
+      console.log('✅ Email Service Ready - Emails will be sent from', SMTP_USER);
+    }
+  });
+} else {
+  console.warn('⚠️  Email transport not configured. Set SMTP_HOST/SMTP_USER/SMTP_PASS or EMAIL_SERVICE/EMAIL_USER/EMAIL_PASSWORD. Emails will be skipped.');
+  // fallback to a no-op JSON transport so sendMail doesn't throw
+  transporter = nodemailer.createTransport({ jsonTransport: true });
 }
-
-// Initialize transporter - configure with your email service
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
-
-// Test transporter connection on startup
-transporter.verify(function(error, success) {
-  if (error) {
-    console.error('❌ Email Service Error:', error.message);
-    console.log('📋 Check your EMAIL_USER and EMAIL_PASSWORD in .env file');
-    console.log('📋 Gmail: Use app password, not regular password');
-  } else if (success) {
-    // console.log('✅ Email Service Ready - Emails will be sent');
-    // console.log(`📧 Sender: ${process.env.EMAIL_USER}`);
-  }
-});
 
 /**
  * Send registration welcome email
  * @param {Object} user - User object with email, name, role
  */
 const sendWelcomeEmail = async (user) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${user.email} - EMAIL_USER not configured`);
-      return false;
-    }
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${user.email} - email transport not configured`);
+        return false;
+      }
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Welcome to Test Creator Platform',
+      const mailOptions = {
+        from: SMTP_USER,
+        to: user.email,
+        subject: 'Welcome to Test Creator Platform',
       html: `
         <h2>Welcome, ${user.name}!</h2>
         <p>Your account has been successfully created on the Test Creator Platform.</p>
@@ -60,10 +80,10 @@ const sendWelcomeEmail = async (user) => {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Welcome email sent to ${user.email}`);
     return true;
-  } catch (err) {
-    console.error(`❌ Error sending welcome email to ${user.email}:`, err.message);
-    return false;
-  }
+    } catch (err) {
+      console.error(`❌ Error sending welcome email to ${user.email}:`, err && err.message ? err.message : err);
+      return false;
+    }
 };
 
 /**
@@ -71,18 +91,18 @@ const sendWelcomeEmail = async (user) => {
  * @param {Object} options - { userEmail, userName, paperTitle, recipientEmail, recipientRole }
  */
 const sendPaperCreationEmail = async (options) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${options.recipientEmail} - EMAIL_USER not configured`);
-      return false;
-    }
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${options.recipientEmail} - email transport not configured`);
+        return false;
+      }
 
-    const { userEmail, userName, paperTitle, recipientEmail, recipientRole } = options;
-    
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: recipientEmail,
-      subject: `New Question Paper Created: ${paperTitle}`,
+      const { userEmail, userName, paperTitle, recipientEmail, recipientRole } = options;
+      
+      const mailOptions = {
+        from: SMTP_USER,
+        to: recipientEmail,
+        subject: `New Question Paper Created: ${paperTitle}`,
       html: `
         <h2>Question Paper Created</h2>
         <p>A new question paper has been created on the Test Creator Platform.</p>
@@ -102,10 +122,10 @@ const sendPaperCreationEmail = async (options) => {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Paper creation email sent to ${recipientEmail}`);
     return true;
-  } catch (err) {
-    console.error(`❌ Error sending paper creation email to ${recipientEmail}:`, err.message);
-    return false;
-  }
+    } catch (err) {
+      console.error(`❌ Error sending paper creation email to ${options.recipientEmail}:`, err && err.message ? err.message : err);
+      return false;
+    }
 };
 
 /**
@@ -116,8 +136,13 @@ const sendRoleChangeEmail = async (options) => {
   try {
     const { userEmail, userName, newRole, adminName } = options;
     
+    if (!isEmailConfigured) {
+      console.log(`⏭️  Role change email not sent to ${userEmail} - email transport not configured`);
+      return false;
+    }
+
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: SMTP_USER,
       to: userEmail,
       subject: 'Your Role Has Been Updated',
       html: `
@@ -141,7 +166,7 @@ const sendRoleChangeEmail = async (options) => {
     console.log(`✅ Role change email sent to ${userEmail}`);
     return true;
   } catch (err) {
-    console.error(`❌ Error sending role change email to ${userEmail}:`, err.message);
+    console.error(`❌ Error sending role change email to ${userEmail}:`, err && err.message ? err.message : err);
     return false;
   }
 };
@@ -151,17 +176,17 @@ const sendRoleChangeEmail = async (options) => {
  * @param {Object} options - { senderName, senderEmail, recipientEmail, paperTitle, message }
  */
 const sendPaperSharingEmail = async (options) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${options.recipientEmail} - EMAIL_USER not configured`);
-      return false;
-    }
-    const { senderName, senderEmail, recipientEmail, paperTitle, message } = options;
-    
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: recipientEmail,
-      subject: `Question Paper Shared: ${paperTitle}`,
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${options.recipientEmail} - email transport not configured`);
+        return false;
+      }
+      const { senderName, senderEmail, recipientEmail, paperTitle, message } = options;
+      
+      const mailOptions = {
+        from: SMTP_USER,
+        to: recipientEmail,
+        subject: `Question Paper Shared: ${paperTitle}`,
       html: `
         <h2>Question Paper Shared With You</h2>
         <p>A question paper has been shared with you.</p>
@@ -181,10 +206,10 @@ const sendPaperSharingEmail = async (options) => {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Paper sharing email sent to ${recipientEmail}`);
     return true;
-  } catch (err) {
-    console.error(`❌ Error sending paper sharing email to ${recipientEmail}:`, err.message);
-    return false;
-  }
+    } catch (err) {
+      console.error(`❌ Error sending paper sharing email to ${options.recipientEmail}:`, err && err.message ? err.message : err);
+      return false;
+    }
 };
 
 /**
@@ -192,16 +217,16 @@ const sendPaperSharingEmail = async (options) => {
  * @param {Object} user - User object with email, name, role
  */
 const sendLoginEmail = async (user) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${user.email} - EMAIL_USER not configured`);
-      return false;
-    }
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${user.email} - email transport not configured`);
+        return false;
+      }
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Login Notification - Test Creator Platform',
+      const mailOptions = {
+        from: SMTP_USER,
+        to: user.email,
+        subject: 'Login Notification - Test Creator Platform',
       html: `
         <h2>Login Detected</h2>
         <p>Hello ${user.name},</p>
@@ -222,10 +247,10 @@ const sendLoginEmail = async (user) => {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Login email sent to ${user.email} (${user.role})`);
     return true;
-  } catch (err) {
-    console.error(`❌ Error sending login email to ${user.email}:`, err.message);
-    return false;
-  }
+    } catch (err) {
+      console.error(`❌ Error sending login email to ${user.email}:`, err && err.message ? err.message : err);
+      return false;
+    }
 };
 
 /**
@@ -233,33 +258,33 @@ const sendLoginEmail = async (user) => {
  * @param {Object} options - { to, subject, message }
  */
 const sendNotificationEmail = async (options) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${options.to} - EMAIL_USER not configured`);
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${options.to} - email transport not configured`);
+        return false;
+      }
+      const { to, subject, message } = options;
+      
+      const mailOptions = {
+        from: SMTP_USER,
+        to,
+        subject,
+        html: `
+          <div style="font-family: Arial, sans-serif;">
+            ${message}
+            <br/><br/>
+            <p>Best regards,<br/>Test Creator Team</p>
+          </div>
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Notification email sent to ${to}`);
+      return true;
+    } catch (err) {
+      console.error(`❌ Error sending notification email to ${options.to}:`, err && err.message ? err.message : err);
       return false;
     }
-    const { to, subject, message } = options;
-    
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          ${message}
-          <br/><br/>
-          <p>Best regards,<br/>Test Creator Team</p>
-        </div>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Notification email sent to ${to}`);
-    return true;
-  } catch (err) {
-    console.error(`❌ Error sending notification email to ${to}:`, err.message);
-    return false;
-  }
 };
 
 /**
@@ -268,37 +293,38 @@ const sendNotificationEmail = async (options) => {
  * @param {string} token
  */
 const sendPasswordResetEmail = async (email, token) => {
-  try {
-    if (!process.env.EMAIL_USER) {
-      console.log(`⏭️  Email not sent to ${email} - EMAIL_USER not configured`);
+    try {
+      if (!isEmailConfigured) {
+        console.log(`⏭️  Email not sent to ${email} - email transport not configured`);
+        return false;
+      }
+
+      const resetBase = process.env.APP_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
+      const resetLink = `${resetBase.replace(/\/$/, '')}/resetpassword.html?token=${token}`;
+
+      const mailOptions = {
+        from: SMTP_USER,
+        to: email,
+        subject: 'Password Reset Request',
+        html: `
+          <h2>Password Reset Request</h2>
+          <p>You requested a password reset for your account.</p>
+          <p>Click the link below to reset your password:</p>
+          <p><a href="${resetLink}">Reset Password</a></p>
+          <p>This link will expire in 1 hour.</p>
+          <p>If you did not request this, please ignore this email.</p>
+          <br/>
+          <p>Best regards,<br/>Test Creator Team</p>
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Password reset email sent to ${email}`);
+      return true;
+    } catch (err) {
+      console.error(`❌ Error sending password reset email to ${email}:`, err && err.message ? err.message : err);
       return false;
     }
-
-    const resetLink = `http://localhost:3000/resetpassword.html?token=${token}`;
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Password Reset Request',
-      html: `
-        <h2>Password Reset Request</h2>
-        <p>You requested a password reset for your account.</p>
-        <p>Click the link below to reset your password:</p>
-        <p><a href="${resetLink}">Reset Password</a></p>
-        <p>This link will expire in 1 hour.</p>
-        <p>If you did not request this, please ignore this email.</p>
-        <br/>
-        <p>Best regards,<br/>Test Creator Team</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Password reset email sent to ${email}`);
-    return true;
-  } catch (err) {
-    console.error(`❌ Error sending password reset email to ${email}:`, err.message);
-    return false;
-  }
 };
 
 module.exports = {

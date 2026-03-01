@@ -285,7 +285,7 @@ td,th{border:1.5px solid black}
     <div id="pCOList" class="co-list-items" style="position: relative;left: 10px;"></div>
   </section>
 
-  <section class="instruction-box">
+  <section class="instruction-box" id="pInstructionSection">
     <div class="ins-title">Instruction to the Candidates</div>
     <div id="pInstructionList" class="inst-list" style="margin-top:6px"></div>
   </section>
@@ -315,31 +315,41 @@ function renderPaper(){
   setText('pTotalQ', paper.totalQuestions || '');
   setText('pTitle', paper.paperTitle || '');
 
-  // Render COs as styled items
+  // Render COs as styled items (hide section if all empty)
   const coList = document.getElementById('pCOList');
-  if(coList) {
+  if (coList) {
     const coSection = document.getElementById('pCOSection');
-    const list = paper.courseOutcomes || [];
+    const list = (paper.courseOutcomes || []).map(String);
+    const nonEmpty = list.filter(co => co && co.trim().length > 0);
 
-    if(list.length === 0) {
+    if (nonEmpty.length === 0) {
       coList.innerHTML = '';
-      if(coSection) coSection.style.display = 'none';
+      if (coSection) coSection.style.display = 'none';
     } else {
-      if(coSection) coSection.style.display = '';
+      if (coSection) coSection.style.display = '';
       coList.innerHTML = '';
-      list.forEach(co => { 
-        coList.innerHTML += `<div class="co-list-item"><span class="co-list">${co.split(':')[0] || ''}:</span> ${co.split(':').slice(1).join(':') || ''}</div>`; 
+      nonEmpty.forEach(co => {
+        const parts = co.split(':');
+        coList.innerHTML += `<div class="co-list-item"><span class="co-list">${parts[0] || ''}:</span> ${parts.slice(1).join(':') || ''}</div>`;
       });
     }
   }
 
-  // Render Instructions
+  // Render Instructions (hide if all empty)
   const insList = document.getElementById('pInstructionList');
-  if(insList) {
-    insList.innerHTML = '';
-    (paper.instructions || []).forEach(ins => { 
-      insList.innerHTML += `<div class="int-list-item">${ins}</div>`; 
-    });
+  const insSection = document.getElementById('pInstructionSection');
+  if (insList) {
+    const nonEmptyIns = (paper.instructions || []).filter(i => i && String(i).trim().length > 0);
+    if (nonEmptyIns.length === 0) {
+      insList.innerHTML = '';
+      if (insSection) insSection.style.display = 'none';
+    } else {
+      if (insSection) insSection.style.display = '';
+      insList.innerHTML = '';
+      nonEmptyIns.forEach(ins => {
+        insList.innerHTML += `<div class="int-list-item">${ins}</div>`;
+      });
+    }
   }
 
   // Render Sections & Questions (match newquestionpaper table layout)
@@ -347,6 +357,17 @@ function renderPaper(){
   if(secContainer) {
     secContainer.innerHTML = '';
     (paper.sections || []).forEach((sec) => {
+      // skip section if it contains no meaningful questions
+      const questions = sec.questions || [];
+      const hasContent = (q) => {
+        if (q.text && String(q.text).trim().length > 0) return true;
+        if (Array.isArray(q.subQuestions) && q.subQuestions.some(sq => sq.text && String(sq.text).trim().length > 0)) return true;
+        if (Array.isArray(q.orOptions) && q.orOptions.some(o => o.text && String(o.text).trim().length > 0)) return true;
+        return false;
+      };
+      const validQuestions = questions.filter(hasContent);
+      if (!validQuestions.length) return; // skip this section
+      
       const secHtml = document.createElement('div');
       secHtml.innerHTML = `<h3 style="width: 100%;display: flex;justify-content: center;">SECTION-${sec.title}</h3>`;
       const tbl = document.createElement('table'); tbl.style.width = '100%'; tbl.style.marginTop = '10px';
@@ -362,7 +383,8 @@ function renderPaper(){
         </tr>
       `;
 
-      (sec.questions || []).forEach(q => {
+      // iterate only validQuestions
+      validQuestions.forEach(q => {
         if(q.isOrWithPrevious) {
           const orRow = document.createElement('tr');
           orRow.innerHTML = `<td></td><td></td><td style="text-align:center;font-weight:bold;">OR</td><td></td><td></td><td></td>`;
