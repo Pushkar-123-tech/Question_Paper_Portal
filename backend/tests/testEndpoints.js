@@ -52,27 +52,27 @@
     const paperId = created.paper._id || created.paper.id;
     log('  ok, created id', paperId);
 
-    log('4.1) submit paper to DGCA');
+    log('4.1) submit paper to DQCA');
     r = await fetch(base + `/api/papers/${paperId}/submit`, { method:'POST', headers:{ 'Authorization': 'Bearer '+token } });
     const subRes = await r.json();
     if (!r.ok) { console.error(subRes); throw new Error('submit failed'); }
     log('  ok, status', subRes.status);
 
-    // create a DGCA user and finalize
-    log('4.2) create DGCA user');
-    r = await fetch(base + '/api/auth/signup', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'DGCA User', email:`dgca${rand}@example.com`, password:'password123', role:'dgca' }) });
-    const dgcaSignup = await r.json();
-    if(!r.ok){ console.error(dgcaSignup); throw new Error('DGCA signup failed'); }
-    log('  ok, dgca email', dgcaSignup.user.email);
+    // create a DQCA user and finalize
+    log('4.2) create DQCA user');
+    r = await fetch(base + '/api/auth/signup', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'DQCA User', email:`dqca${rand}@example.com`, password:'password123', role:'dqca' }) });
+    const dqcaSignup = await r.json();
+    if(!r.ok){ console.error(dqcaSignup); throw new Error('DQCA signup failed'); }
+    log('  ok, dqca email', dqcaSignup.user.email);
 
-    log('4.3) login as DGCA');
-    r = await fetch(base + '/api/auth/login', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: dgcaSignup.user.email, password:'password123' }) });
-    const dgcaLogin = await r.json(); if(!r.ok){ console.error(dgcaLogin); throw new Error('dgca login failed'); }
-    const dgcaToken = dgcaLogin.token;
-    log('  ok, dgca token received');
+    log('4.3) login as DQCA');
+    r = await fetch(base + '/api/auth/login', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: dqcaSignup.user.email, password:'password123' }) });
+    const dqcaLogin = await r.json(); if(!r.ok){ console.error(dqcaLogin); throw new Error('dqca login failed'); }
+    const dqcaToken = dqcaLogin.token;
+    log('  ok, dqca token received');
 
-    log('4.4) finalize paper as DGCA');
-    r = await fetch(base + `/api/papers/${paperId}/finalize`, { method:'POST', headers:{ 'Authorization': 'Bearer '+dgcaToken } });
+    log('4.4) finalize paper as DQCA');
+    r = await fetch(base + `/api/papers/${paperId}/finalize`, { method:'POST', headers:{ 'Authorization': 'Bearer '+dqcaToken } });
     const finRes = await r.json();
     if(!r.ok){ console.error(finRes); throw new Error('finalize failed'); }
     log('  ok, finalized status', finRes.status);

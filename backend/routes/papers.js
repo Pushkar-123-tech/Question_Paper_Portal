@@ -9,57 +9,74 @@ const { sendPaperCreationEmail } = require('../services/emailService');
 
 
 
-const toSnake = (p) => ({
-  owner: p.owner,
-  paper_title: p.paperTitle,
-  base_title: p.baseTitle, 
-  examination: p.examination,
-  semester: p.semester,
-  academic_year: p.academicYear,
-  program: p.program,
-  program_name: p.programName,
-  course_code: p.courseCode,
-  course_name: p.courseName,
-  duration: p.duration,
-  max_marks: p.maxMarks,
-  total_questions: p.totalQuestions,
-  course_outcomes: p.courseOutcomes,
-  instructions: p.instructions,
-  sections: p.sections,
-  qp_code: p.qpCode,
-  prn_no: p.prnNo,
-  status: p.status,
-  comments: p.comments,
-  workflow_history: p.workflowHistory,
-});
+const toSnake = (p) => {
+  const obj = {
+    owner: p.owner && typeof p.owner === 'object' ? p.owner.id : p.owner,
+    paper_title: p.paperTitle, // Always use paperTitle from the request
+    base_title: p.baseTitle,
+    set_name: p.setName,
+    examination: p.examination,
+    semester: p.semester,
+    academic_year: p.academicYear,
+    program: p.program,
+    program_name: p.programName,
+    course_code: p.courseCode,
+    course_name: p.courseName,
+    duration: p.duration,
+    max_marks: p.maxMarks,
+    total_questions: p.totalQuestions,
+    course_outcomes: p.courseOutcomes,
+    instructions: p.instructions,
+    sections: p.sections,
+    qp_code: p.qpCode,
+    prn_no: p.prnNo,
+    status: p.status,
+    comments: p.comments,
+    workflow_history: p.workflowHistory,
+  };
+  if (p.id) {
+    obj.id = p.id;
+  }
+  return obj;
+};
 
 // convert snake_case DB rows to camelCase expected by frontend
-const toCamel = (r = {}) => ({
-  id: r.id,
-  owner: r.owner,
-  paperTitle: r.paper_title || r.paperTitle || '',
-  examination: r.examination || r.examination || '',
-  semester: r.semester || '',
-  academicYear: r.academic_year || r.academicYear || '',
-  program: r.program || '',
-  programName: r.program_name || r.programName || '',
-  courseCode: r.course_code || r.courseCode || '',
-  courseName: r.course_name || r.courseName || '',
-  duration: r.duration || '',
-  maxMarks: r.max_marks || r.maxMarks || 0,
-  totalQuestions: r.total_questions || r.totalQuestions || 0,
-  courseOutcomes: r.course_outcomes || r.courseOutcomes || [],
-  instructions: r.instructions || r.instructions || [],
-  sections: r.sections || r.sections || [],
-  qpCode: r.qp_code || r.qpCode || '',
-  prnNo: r.prn_no || r.prnNo || '',
-  status: r.status || '',
-  comments: r.comments || r.comments || [],
-  baseTitle: r.base_title || r.baseTitle || '',
-  workflowHistory: r.workflow_history || r.workflowHistory || [],
-  createdAt: r.created_at || r.createdAt,
-  updatedAt: r.updated_at || r.updatedAt,
-});
+const toCamel = (r = {}) => {
+  // For paperTitle and courseName, check both snake_case and camelCase,
+  // preferring camelCase if already explicitly set
+  const paperTitle = r.paperTitle || r.paper_title || '';
+  const courseName = r.courseName || r.course_name || '';
+
+  return {
+    id: r.id,
+    owner: r.owner,
+    paperTitle: paperTitle || '',
+    examination: r.examination || r.examination || '',
+    semester: r.semester || '',
+    academicYear: r.academic_year || r.academicYear || '',
+    program: r.program || '',
+    programName: r.program_name || r.programName || '',
+    courseCode: r.course_code || r.courseCode || '',
+    courseName: courseName || '',
+    duration: r.duration || '',
+    maxMarks: r.max_marks || r.maxMarks || 0,
+    totalQuestions: r.total_questions || r.totalQuestions || 0,
+    courseOutcomes: r.course_outcomes || r.courseOutcomes || [],
+    instructions: r.instructions || r.instructions || [],
+    sections: r.sections || r.sections || [],
+    qpCode: r.qp_code || r.qpCode || '',
+    prnNo: r.prn_no || r.prnNo || '',
+    status: r.status || '',
+    comments: r.comments || r.comments || [],
+    baseTitle: r.base_title || r.baseTitle || '',
+    setName: r.set_name || r.setName || '',
+    workflowHistory: r.workflow_history || r.workflowHistory || [],
+    createdAt: r.created_at || r.createdAt,
+    updatedAt: r.updated_at || r.updatedAt,
+    sharedAt: r.sharedAt,
+    sharedBy: r.sharedBy
+  };
+};
 
 
 // simple auth middleware
@@ -80,6 +97,8 @@ function auth(req, res, next) {
 // router.post('/', auth, async (req, res) => {
 //   try {
 //     const data = req.body;
+
+
 //     // Ensure logos are not saved — ignore any provided logo fields
 //     if (data.jspmLogo) delete data.jspmLogo;
 //     if (data.rscoeLogo) delete data.rscoeLogo;
@@ -187,7 +206,15 @@ router.use((req, res, next) => {
 router.post('/', auth, async (req, res) => {
   try {
     const data = req.body;
+
     data.owner = req.userId; // ensure owner is always set
+
+    // For new papers without title, assign sequential set names
+    if (!data.id && !data.paperTitle) {
+      const { count } = await supabase.from('papers').select('*', { count: 'exact', head: true }).eq('owner', req.userId);
+      const setLetter = String.fromCharCode(65 + (count || 0)); // A, B, C, ...
+      data.paperTitle = `Set ${setLetter}`;
+    }
 
     // If an `id` is provided in the payload, update the existing paper
     if (data.id) {
@@ -284,16 +311,91 @@ router.get('/stats', auth, async (req, res) => {
 
 router.get('/', auth, async (req, res) => {
   try {
-    const { data: papers, error } = await supabase
+    // Get current user to check role and email
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', req.userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(401).json({ message: 'Invalid user' });
+    }
+
+    // Fetch papers owned by the user
+    const { data: ownedPapers, error: ownedError } = await supabase
       .from('papers')
       .select('*')
       .eq('owner', req.userId)
-     .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
 
+    if (ownedError) throw ownedError;
 
-    if (error) throw error;
+    let allPapers = ownedPapers || [];
+    const paperIds = new Set(allPapers.map(p => p.id)); // Track owned paper IDs
 
-    res.json({ papers: (papers || []).map(toCamel) });
+    // If user is external, also fetch papers shared with them
+    if (user.role === 'external') {
+      const { data: sharedRecords, error: sharedError } = await supabase
+        .from('shared')
+        .select('*')
+        .eq('recipient_email', user.email)
+        .order('created_at', { ascending: false });
+
+      if (sharedError) throw sharedError;
+
+      // Extract paper snapshots from shared records and add them to the list
+      if (sharedRecords && sharedRecords.length > 0) {
+        const sharedPapers = sharedRecords
+          // Only include shared papers not already owned
+          .filter(record => !paperIds.has(record.paper_id))
+          .map(record => {
+            const paperData = record.paper_snapshot || {};
+            // Ensure title fields are properly set from snapshot
+            const paperTitle = paperData.paperTitle || paperData.paper_title || '';
+            const courseName = paperData.courseName || paperData.course_name || '';
+
+            return {
+              ...paperData,
+              id: record.paper_id,
+              paperTitle: paperTitle,
+              courseName: courseName,
+              owner: {
+                id: record.sender_id,
+                name: record.sender_name,
+                email: record.sender_email
+              },
+              created_at: record.created_at,
+              sharedAt: record.created_at,
+              sharedBy: record.sender_name
+            };
+          });
+        allPapers = [...allPapers, ...sharedPapers];
+      }
+    }
+
+    if (user.role === 'dqca') {
+      const { data: dqcaPapers, error: dqcaError } = await supabase
+        .from('papers')
+        .select('*')
+        .in('status', ['submitted_to_dqca', 'finalized', 'sent_to_external', 'approved_by_external'])
+        .order('created_at', { ascending: false });
+
+      if (!dqcaError && dqcaPapers) {
+        // filter out ones we might somehow already have
+        const newDqcaPapers = dqcaPapers.filter(p => !paperIds.has(p.id));
+        allPapers = [...allPapers, ...newDqcaPapers];
+      }
+    }
+
+    // Sort all papers by created_at descending
+    allPapers.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+
+    res.json({ papers: allPapers.map(p => toCamel(p)) });
 
   } catch (err) {
     console.error("❌ Fetch Error:", err);
@@ -329,6 +431,12 @@ router.get('/:id', auth, async (req, res) => {
       if (shared) return res.json({ paper: toCamel(paper) });
     }
 
+    if (user && user.role === 'dqca') {
+      if (['submitted_to_dqca', 'finalized', 'sent_to_external', 'approved_by_external'].includes(paper.status)) {
+        return res.json({ paper: toCamel(paper) });
+      }
+    }
+
     // Forbidden otherwise
     return res.status(403).json({ message: 'Forbidden' });
 
@@ -360,37 +468,47 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// POST /api/papers/:id/submit - faculty submits to DGCA
+// POST /api/papers/:id/submit - faculty submits to DQCA
 router.post('/:id/submit', auth, async (req, res) => {
   try {
     // ensure paper exists and user owns it
-    const { data: paper, error } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
+    const { data: paper, error } = await supabase.from('papers').select('owner, workflow_history, status').eq('id', req.params.id).single();
     if (error || !paper) return res.status(404).json({ message: 'Not found' });
     if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden' });
 
-    const newHistory = (paper.workflow_history || []).concat([{ action: 'submitted_to_dgca', by: req.userId, at: new Date().toISOString() }]);
+    // A paper must be in 'draft' state to be submitted
+    if (paper.status !== 'draft') {
+      return res.status(400).json({ message: 'Only draft papers can be submitted.' });
+    }
+
+    const newHistory = (paper.workflow_history || []).concat([{ action: 'submitted_to_dqca', by: req.userId, at: new Date().toISOString() }]);
     const { error: updErr } = await supabase
       .from('papers')
-      .update({ status: 'submitted_to_dgca', workflow_history: newHistory })
+      .update({ status: 'submitted_to_dqca', workflow_history: newHistory })
       .eq('id', req.params.id);
     if (updErr) throw updErr;
 
-    res.json({ message: 'Submitted', status: 'submitted_to_dgca' });
+    res.json({ message: 'Submitted', status: 'submitted_to_dqca' });
   } catch (err) {
     console.error('❌ Submit Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// POST /api/papers/:id/finalize - DGCA finalizes and notifies external
+// POST /api/papers/:id/finalize - DQCA finalizes and notifies external
 router.post('/:id/finalize', auth, async (req, res) => {
   try {
     const { data: paper } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
     if (!paper) return res.status(404).json({ message: 'Not found' });
 
+    // A paper must be submitted before it can be finalized
+    if (paper.status !== 'submitted_to_dqca') {
+      return res.status(400).json({ message: 'Paper must be submitted before finalizing.' });
+    }
+
     // fetch user role
     const { data: user } = await supabase.from('users').select('role').eq('id', req.userId).single();
-    if (!user || user.role !== 'dgca') return res.status(403).json({ message: 'Forbidden' });
+    if (!user || user.role !== 'dqca') return res.status(403).json({ message: 'Forbidden' });
 
     const newHistory = (paper.workflow_history || []).concat([{ action: 'finalized', by: req.userId, at: new Date().toISOString() }]);
     const { error: updErr } = await supabase
@@ -404,6 +522,33 @@ router.post('/:id/finalize', auth, async (req, res) => {
     res.json({ message: 'Finalized', status: 'finalized' });
   } catch (err) {
     console.error('❌ Finalize Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/papers/:id/approve - External user approves paper
+router.post('/:id/approve', auth, async (req, res) => {
+  try {
+    const { data: paper } = await supabase.from('papers').select('*').eq('id', req.params.id).single();
+    if (!paper) return res.status(404).json({ message: 'Not found' });
+
+    if (paper.status !== 'sent_to_external') {
+      return res.status(400).json({ message: 'Paper is not pending external approval.' });
+    }
+
+    const { data: user } = await supabase.from('users').select('*').eq('id', req.userId).single();
+    if (!user || user.role !== 'external') return res.status(403).json({ message: 'Forbidden' });
+
+    const newHistory = (paper.workflow_history || []).concat([{ action: 'approved_by_external', by: req.userId, at: new Date().toISOString() }]);
+    const { error: updErr } = await supabase
+      .from('papers')
+      .update({ status: 'approved_by_external', workflow_history: newHistory })
+      .eq('id', req.params.id);
+    if (updErr) throw updErr;
+
+    res.json({ message: 'Approved', status: 'approved_by_external' });
+  } catch (err) {
+    console.error('❌ Approve Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

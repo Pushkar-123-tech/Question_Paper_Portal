@@ -1,323 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Question Paper Workflow - Portal</title>
-    <link rel="stylesheet" href="/public/ui.css">
-    <style>
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --primary: #7b0000;
-            --accent: #ff4d4d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Question Paper Workflow</title>
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #7b0000 100%);
-            min-height: 100vh;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-        .header {
-            text-align: center;
-            padding: 60px 20px;
-            animation: fadeInDown 0.8s ease-out;
-        }
+<style>
+:root{
+    --primary:#8b0000;
+    --blue:#0a1f44;
+}
 
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, #fff, #ff9999);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
 
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
+body{
+    background: linear-gradient(135deg, #eef2f9 0%, #f8f9fc 100%);
+}
 
-        .roles-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            width: 90%;
-            max-width: 1400px;
-            padding: 20px;
-            margin-bottom: 60px;
-        }
+/* ================= HEADER ================= */
 
-        .role-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-        }
+.top-strip{
+    height:6px;
+    background:#2c2c2c;
+}
 
-        .role-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
+.college-header{
+    background:#efefef;
+    border-bottom:4px solid #b30000;
+    padding:15px 40px;
+}
 
-        .role-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transition: 0.5s;
-        }
+.header-row{
+    display:grid;
+    grid-template-columns:130px 1fr 130px;
+    align-items:center;
+}
 
-        .role-card:hover::before {
-            left: 100%;
-        }
+.header-logo img{
+    max-height:85px;
+}
 
-        .role-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: var(--accent);
-        }
+.header-center{
+    text-align:center;
+    color:var(--primary);
+}
 
-        .role-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
+.header-center h1{
+    font-family:"Times New Roman",serif;
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
 
-        .role-card p {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 25px;
-            opacity: 0.8;
-        }
+.header-center p{
+    font-size:14px;
+    color:#8b0000;
+    line-height:1.6;
+}
 
-        .btn-enter {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
+/* ================= MAIN CONTENT ================= */
 
-        .role-card:hover .btn-enter {
-            background: var(--accent);
-            color: white;
-            transform: scale(1.05);
-        }
+.container{
+    max-width:1200px;
+    margin:60px auto;
+    padding:0 20px;
+}
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.portal-header{
+    text-align:center;
+    margin-bottom:60px;
+}
 
-        @media (max-width: 1024px) {
-            .header {
-                padding: 40px 16px;
-            }
-            .header h1 {
-                font-size: 2.5rem;
-            }
-            .header p {
-                font-size: 1rem;
-            }
-            .roles-container {
-                width: 95%;
-                gap: 20px;
-                padding: 16px;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-            .role-card {
-                padding: 20px;
-            }
-            .role-icon {
-                font-size: 2.5rem;
-                margin-bottom: 15px;
-            }
-            .role-card h3 {
-                font-size: 1.3rem;
-            }
-            .role-card p {
-                font-size: 0.9rem;
-                margin-bottom: 20px;
-            }
-        }
+.portal-header h2{
+    font-size:32px;
+    font-weight:700;
+    color:var(--blue);
+    margin-bottom:10px;
+}
 
-        @media (max-width: 768px) {
-            .header {
-                padding: 30px 12px;
-            }
-            .header h1 {
-                font-size: 2rem;
-                margin-bottom: 8px;
-            }
-            .header p {
-                font-size: 0.95rem;
-            }
-            .roles-container {
-                width: 100%;
-                grid-template-columns: 1fr;
-                gap: 15px;
-                padding: 12px;
-                margin-bottom: 40px;
-            }
-            .role-card {
-                padding: 18px;
-                border-radius: 15px;
-            }
-            .role-icon {
-                font-size: 2.2rem;
-                margin-bottom: 12px;
-            }
-            .role-card h3 {
-                font-size: 1.2rem;
-                margin-bottom: 10px;
-            }
-            .role-card p {
-                font-size: 0.85rem;
-                line-height: 1.4;
-                margin-bottom: 15px;
-            }
-            .btn-enter {
-                padding: 10px 20px;
-                font-size: 0.8rem;
-                letter-spacing: 0.5px;
-            }
-        }
+.portal-header p{
+    font-size:16px;
+    color:#555;
+}
 
-        @media (max-width: 480px) {
-            body {
-                background: linear-gradient(135deg, #1a1a1a 0%, #7b0000 100%);
-            }
-            .header {
-                padding: 20px 12px;
-            }
-            .header h1 {
-                font-size: 1.6rem;
-                margin-bottom: 6px;
-            }
-            .header p {
-                font-size: 0.85rem;
-            }
-            .roles-container {
-                width: 100%;
-                grid-template-columns: 1fr;
-                gap: 12px;
-                padding: 10px;
-                margin-bottom: 30px;
-            }
-            .role-card {
-                padding: 14px;
-                border-radius: 12px;
-                gap: 10px;
-            }
-            .role-icon {
-                font-size: 1.8rem;
-                margin-bottom: 8px;
-            }
-            .role-card h3 {
-                font-size: 1rem;
-                margin-bottom: 8px;
-                font-weight: 600;
-            }
-            .role-card p {
-                font-size: 0.75rem;
-                line-height: 1.3;
-                margin-bottom: 10px;
-            }
-            .btn-enter {
-                padding: 8px 16px;
-                font-size: 0.75rem;
-                letter-spacing: 0.3px;
-            }
-            .role-card:hover {
-                transform: translateY(-5px);
-            }
-        }
-    </style>
+/* Grid */
+.roles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:30px;
+}
+
+/* Card */
+.card{
+    background:white;
+    border-radius:14px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.05);
+    border-top:4px solid #c1121f;
+
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.08);
+}
+
+.card-content{
+    flex:1;
+    text-align:center;
+}
+
+.icon{
+    font-size:40px;
+    margin-bottom:20px;
+}
+
+.card h3{
+    font-size:20px;
+    color:var(--blue);
+    margin-bottom:15px;
+}
+
+.card p{
+    font-size:14px;
+    color:#666;
+    line-height:1.6;
+}
+
+/* Button */
+.btn{
+    background:linear-gradient(135deg,#c1121f,var(--blue));
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:30px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+    width:100%;
+    margin-top:auto;
+}
+
+.btn:hover{
+    transform:scale(1.03);
+    opacity:0.95;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:768px){
+
+    .header-row{
+        grid-template-columns:70px 1fr 70px;
+    }
+
+    .header-logo img{
+        max-height:50px;
+    }
+
+    .header-center h1{
+        font-size:18px;
+    }
+
+    .header-center p{
+        font-size:11px;
+    }
+
+    .portal-header h2{
+        font-size:24px;
+    }
+}
+
+</style>
 </head>
+
 <body>
-    <div class="header">
-        <h1>College Question Paper Portal</h1>
-        <p>Streamlined workflow for creation, review, and finalization</p>
-    </div>
 
-    <div class="roles-container">
-        <!-- Admin -->
-        <div class="role-card" onclick="goToLogin('admin')">
-            <div class="role-icon">🛡️</div>
-            <h3>Admin / Principal</h3>
-            <p>User management, role assignments, and full system activity monitoring.</p>
-            <a href="/login.html?role=admin" class="btn-enter">Enter Portal</a>
+<!-- Top Strip -->
+<div class="top-strip"></div>
+
+<!-- College Header -->
+<header class="college-header">
+    <div class="header-row">
+        <div class="header-logo">
+            <img src="../public/image1.png"  width="125" height="145" alt="JSPM Logo " style=" mix-blend-mode: multiply;">
         </div>
 
-        <!-- DGCA -->
-        <div class="role-card" onclick="goToLogin('dgca')">
-            <div class="role-icon">⚖️</div>
-            <h3>DGCA</h3>
-            <p>Review 3 sets of question papers, finalize one, and forward to external.</p>
-            <a href="/login.html?role=dgca" class="btn-enter">Enter Portal</a>
+        <div class="header-center">
+            <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+            <p>
+                Empowered Autonomous Institute • Affiliated to SPPU • Approved by AICTE<br>
+                NBA (UG) • NAAC “A” Grade • NIRF 151–200
+            </p>
         </div>
 
-        <!-- Faculty -->
-        <div class="role-card" onclick="goToLogin('faculty')">
-            <div class="role-icon">🏛️</div>
-            <h3>Faculty / Department</h3>
-            <p>Create 3 sets of question papers (Set A, B, C) and submit for DGCA review.</p>
-            <a href="/login.html?role=faculty" class="btn-enter">Enter Portal</a>
-        </div>
-
-        <!-- Teacher -->
-        <div class="role-card" onclick="goToLogin('external')">
-            <div class="role-icon">👨‍🏫</div>
-            <h3>External</h3>
-            <p>Create question papers, receive notifications, and access shared documents.</p>
-            <a href="/login.html?role=external" class="btn-enter">Enter Portal</a>
+        <div class="header-logo" style="text-align:right;">
+            <img src="../public/image2.png" width="125" height="145" alt="RSCOE Logo">
         </div>
     </div>
+</header>
 
-    <script>
-        function goToLogin(role) {
-            window.location.href = `/login.html?role=${role}`;
-        }
-    </script>
+<!-- Main Portal Section -->
+<div class="container">
+
+    <div class="portal-header">
+        <h2>College Question Paper Portal</h2>
+        <p>Secure and structured workflow for paper creation, review, and finalization</p>
+    </div>
+
+    <div class="roles">
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">🛡️</div>
+                <h3>Admin</h3>
+                <p>Manage users, assign roles, and monitor full system activity.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('admin')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">⚖️</div>
+                <h3>DQCA</h3>
+                <p>Review 3 sets (A, B, C), finalize one, and forward to External examiner.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('dqca')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">🏛️</div>
+                <h3>Faculty</h3>
+                <p>Create three question paper sets and submit to DQCA for approval.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('faculty')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">👨‍🏫</div>
+                <h3>External</h3>
+                <p>Access finalized papers and complete external verification process.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('external')">Enter Portal</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function goToLogin(role){
+    window.location.href = `/login.html?role=${role}`;
+}
+</script>
+
 </body>
 </html>

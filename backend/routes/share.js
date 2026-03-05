@@ -37,14 +37,27 @@ router.post('/send', auth, async (req, res) => {
       .single();
 
     if (paperError || !paper) return res.status(404).json({ message: 'Paper not found' });
-    
-    // Check paper owner - paper.owner is a UUID string in DB
-    if (String(paper.owner) !== String(req.userId)) return res.status(403).json({ message: 'Forbidden: You do not own this paper' });
+
+    // Check access
+    const isOwner = String(paper.owner) === String(req.userId);
+    const isDqcaSharingFinalized = user.role === 'dqca' && paper.status === 'finalized';
+
+    if (!isOwner && !isDqcaSharingFinalized) {
+      return res.status(403).json({ message: 'Forbidden: You do not have permission to share this paper' });
+    }
+
+    let updatedStatus = paper.status;
+    if (isDqcaSharingFinalized) {
+      updatedStatus = 'sent_to_external';
+      const newHistory = (paper.workflow_history || []).concat([{ action: 'sent_to_external', by: req.userId, at: new Date().toISOString() }]);
+      await supabase.from('papers').update({ status: updatedStatus, workflow_history: newHistory }).eq('id', paperId);
+    }
 
     // ensure snapshot includes camelCase title fields so frontend can read `paperTitle` / `courseName`
     const snapshot = Object.assign({}, paper, {
       paperTitle: paper.paper_title || paper.paperTitle || '',
-      courseName: paper.course_name || paper.courseName || ''
+      courseName: paper.course_name || paper.courseName || '',
+      status: updatedStatus
     });
 
     const { data: shared, error: shareError } = await supabase

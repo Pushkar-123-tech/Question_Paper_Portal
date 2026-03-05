@@ -41,7 +41,7 @@ async function seedAdmin() {
           password: hashedPassword,
           role: 'admin'
         }]);
-      
+
       if (insertError) throw insertError;
       console.log('👤 Predefined Admin created: admin@rscoe.in / admin123');
     } else {
@@ -50,9 +50,9 @@ async function seedAdmin() {
         .from('users')
         .update({ password: hashedPassword, role: 'admin' })
         .eq('email', 'admin@rscoe.in');
-      
+
       if (updateError) throw updateError;
-    
+
     }
   } catch (err) {
     console.error('Error seeding admin:', err);

@@ -500,7 +500,7 @@
         </div>
         <button class="btn primary" onclick="savePaper()">Save Draft</button>
         <button class="btn primary" id="submitToChairmanBtn" style="display:none;"
-          onclick="submitToDGCAFromForm()">Submit to DGCA</button>
+          onclick="submitToDQCAFromForm()">Submit to DQCA</button>
         <button class="btn" onclick="previewPaper()">Preview & Download</button>
       </div>
 
@@ -1019,9 +1019,10 @@
     function getCleanPaperData() {
       // Clone data
       const cleanData = JSON.parse(JSON.stringify(paperData));
+      console.log('Clean data before sending:', cleanData); // Add this line for logging
 
       // Gather form data into the clone
-      cleanData.paperTitle = document.getElementById('paperTitle').value || '';
+      cleanData.paperTitle = document.getElementById('paperTitle').value || paperData.paperTitle || '';
       cleanData.examination = '';
       cleanData.semester = document.getElementById('semester').value || '';
       cleanData.academicYear = document.getElementById('academicYear').value || '';
@@ -1084,13 +1085,13 @@
         }
 
         showToast('Saved!', 'success');
-        paperData.id = data.paper.id;
-        paperData.status = data.paper.status;
+        paperData = data.paper;
 
         // Clear draft after successful save
         localStorage.removeItem('formDraft');
 
         updateStatusUI();
+        loadMyPapers(); // Refresh the saved papers list
 
         // Add to recent activity
         try {
@@ -1152,11 +1153,11 @@
       }
     }
 
-    async function submitToDGCAFromForm() {
+    async function submitToDQCAFromForm() {
       if (!paperData.id) return showToast('Save as draft first', 'warn');
       
       const isBatch = !!paperData.baseTitle;
-      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paperData.baseTitle}" to DGCA?` : 'Submit this paper to DGCA for review?';
+      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paperData.baseTitle}" to DQCA?` : 'Submit this paper to DQCA for review?';
       
       if (!confirm(confirmMsg)) return;
       
@@ -1179,18 +1180,19 @@
               headers: { 'Authorization': 'Bearer ' + token }
             });
           }
-          showToast(`Batch "${paperData.baseTitle}" submitted to DGCA!`, 'success');
+          showToast(`Batch "${paperData.baseTitle}" submitted to DQCA!`, 'success');
         } else {
           const res = await fetch(`/api/papers/${paperData.id}/submit`, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token }
           });
           if (!res.ok) throw new Error('Submit failed');
-          showToast('Submitted to DGCA!', 'success');
+          showToast('Submitted to DQCA!', 'success');
         }
         
-        paperData.status = 'submitted_to_dgca';
+        paperData.status = 'submitted_to_dqca';
         updateStatusUI();
+        loadMyPapers();
       } catch (err) {
         showToast(err.message, 'error');
       }

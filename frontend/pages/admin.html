@@ -658,8 +658,8 @@
             <p>Faculty</p>
           </div>
           <div class="stat-card">
-            <h3 id="statDGCA">0</h3>
-            <p>DGCA</p>
+            <h3 id="statDQCA">0</h3>
+            <p>DQCA</p>
           </div>
           <div class="stat-card">
             <h3 id="statAdmin">0</h3>
@@ -678,7 +678,7 @@
           <select id="regRole">
             <option value="external">External</option>
             <option value="faculty">Faculty</option>
-            <option value="dgca">DGCA</option>
+            <option value="dqca">DQCA</option>
             <option value="admin">Admin</option>
           </select>
           <button class="btn btn-primary" onclick="registerUser()">Register User</button>
@@ -771,7 +771,7 @@
         document.getElementById('statTotalUsers').innerText = data.totalUsers;
         document.getElementById('statExternals').innerText = data.externals;
         document.getElementById('statFaculty').innerText = data.faculty;
-        document.getElementById('statDGCA').innerText = data.dgca || 0;
+        document.getElementById('statDQCA').innerText = data.dqca || 0;
         document.getElementById('statAdmin').innerText = data.admins || 0;
       } catch (err) { console.error(err); }
     }
@@ -782,7 +782,7 @@
 
       users.forEach(u => {
         const tr = document.createElement('tr');
-        const roleLabel = u.role === 'dgca' ? 'DGCA' : u.role.charAt(0).toUpperCase() + u.role.slice(1);
+        const roleLabel = u.role === 'dqca' ? 'DQCA' : u.role.charAt(0).toUpperCase() + u.role.slice(1);
         tr.innerHTML = `
             <td><strong>${u.name}</strong></td>
             <td>${u.email}</td>
@@ -801,7 +801,7 @@
       document.getElementById('statTotalUsers').innerText = users.length;
       document.getElementById('statExternals').innerText = users.filter(u => u.role === 'external').length;
       document.getElementById('statFaculty').innerText = users.filter(u => u.role === 'faculty').length;
-      document.getElementById('statDGCA').innerText = users.filter(u => u.role === 'dgca').length;
+      document.getElementById('statDQCA').innerText = users.filter(u => u.role === 'dqca').length;
       document.getElementById('statAdmin').innerText = users.filter(u => u.role === 'admin').length;
     }
 

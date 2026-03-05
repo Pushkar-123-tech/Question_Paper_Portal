@@ -655,8 +655,8 @@
       const sidebarTitle = sidebar.querySelector('h3');
       const mainTitle = document.querySelector('.main h2');
 
-      sidebarTitle.innerText = (role === 'dgca' ? 'DGCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')) + ' Panel';
-      mainTitle.innerText = `Welcome, ${role === 'dgca' ? 'DGCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')} 👋`;
+      sidebarTitle.innerText = (role === 'dqca' ? 'DQCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')) + ' Panel';
+      mainTitle.innerText = `Welcome, ${role === 'dqca' ? 'DQCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')} 👋`;
 
       // Redirect external users to their dedicated page
       if (role === 'external') {
@@ -718,25 +718,25 @@
           showToast('Please enter a batch name', 'warn');
           return;
         }
-        
+
         const btn = overlay.querySelector('#confirmCreateBatch');
         btn.disabled = true;
         btn.innerText = 'Creating...';
-        
+
         try {
           // We'll create the first set and redirect to it, 
           // but the user expects 3 sets. We can create them one by one or 
           // just redirect to Set A and the user can see B and C created in dashboard.
           // Let's create Set A, B, C as drafts.
-          
+
           let firstSetId = null;
           for (const setLetter of ['A', 'B', 'C']) {
-            const paperTitle = `${batchName} - Set ${setLetter}`;
+            const paperTitle = `${batchName} Set ${setLetter}`;
             const res = await fetch('/api/papers', {
               method: 'POST',
-              headers: { 
+              headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token 
+                'Authorization': 'Bearer ' + token
               },
               body: JSON.stringify({
                 paperTitle: paperTitle,
@@ -750,14 +750,14 @@
             if (!res.ok) throw new Error(`Failed to create Set ${setLetter}`);
             if (setLetter === 'A') firstSetId = data.paper.id;
           }
-          
+
           showToast('Batch created successfully! Redirecting to Set A...', 'success');
           closeModal(overlay);
-          
+
           // Clear any draft data to ensure fresh load
           localStorage.removeItem('formDraft');
           sessionStorage.removeItem('previewPaper');
-          
+
           if (firstSetId) {
             setTimeout(() => {
               window.location.href = `/questionpaperform.html?edit=${firstSetId}`;
@@ -812,15 +812,21 @@
 
       Object.keys(groups).forEach(groupKey => {
         if (groupKey !== 'Individual Papers') {
-          const groupDiv = document.createElement('div');
-          groupDiv.className = 'card';
-          groupDiv.style.borderLeft = '5px solid var(--primary)';
-          groupDiv.innerHTML = `<h3 style="margin-bottom:10px; color:var(--primary);">${groupKey}</h3>`;
-          
+          const groupContainer = document.createElement('div');
+          groupContainer.style.borderLeft = '5px solid var(--primary)';
+          groupContainer.style.paddingLeft = '15px';
+          groupContainer.style.marginBottom = '20px';
+          groupContainer.style.borderRadius = '8px 0 0 8px';
+
+          const groupHeader = document.createElement('h3');
+          groupHeader.style.cssText = 'margin:15px 0 10px 0; color:var(--primary); font-size:16px; border-bottom:1px solid #ddd; padding-bottom:5px;';
+          groupHeader.innerText = groupKey;
+          groupContainer.appendChild(groupHeader);
+
           groups[groupKey].forEach(p => {
-            groupDiv.appendChild(createPaperRow(p));
+            groupContainer.appendChild(createPaperRow(p));
           });
-          container.appendChild(groupDiv);
+          container.appendChild(groupContainer);
         } else {
           groups[groupKey].forEach(p => {
             container.appendChild(createPaperRow(p));
@@ -831,8 +837,9 @@
 
     function createPaperRow(p) {
       const d = document.createElement('div');
-      d.style.padding = '10px 0';
-      d.style.borderBottom = '1px solid #eee';
+      d.className = 'card';
+      d.style.marginBottom = '10px';
+
       const date = new Date(p.created_at || p.createdAt || Date.now()).toLocaleString();
       const title = (p.paperTitle || p.paper_title || p.courseName || p.course_name || 'Untitled').trim();
       const rawStatus = (p.status || p.paper_status || 'draft').toString();
@@ -849,18 +856,25 @@
       const st = (p.status || p.paper_status || 'draft');
       const isLocked = ['finalized', 'sent_to_external', 'approved_by_external', 'discarded'].includes(st);
 
+      // Check if any other paper in this batch is already finalized (blocks finalization of this one)
+      const isBatchFinalized = currentDashboardPapers.some(other => other.baseTitle && other.baseTitle === p.baseTitle && ['finalized', 'sent_to_external', 'approved_by_external'].includes(other.status) && other.id !== p.id);
+
       // Workflow actions
       if (currentUser.role === 'faculty') {
         if (st === 'draft') {
           const editBtnText = isEmpty ? 'Create' : 'Edit';
-          
-          actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit Batch to DGCA</button>`;
+
+          actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit Batch to DQCA</button>`;
           actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p.id}')">${editBtnText}</button>`;
           actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p.id}')">Delete</button>`;
         }
-      } else if (currentUser.role === 'dgca') {
-        if (st === 'submitted_to_dgca') {
-          actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p.id}')">Finalize This Set</button>`;
+      } else if (currentUser.role === 'dqca') {
+        if (st === 'submitted_to_dqca') {
+          if (!isBatchFinalized) {
+            actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p.id}')">Finalize This Set</button>`;
+          } else {
+            actionsHtml += `<span class="muted" style="font-size:12px; font-style:italic;">Another set finalized</span>`;
+          }
         } else if (st === 'finalized') {
           actionsHtml += `<button class="btn primary" onclick="sendToExternal('${p.id}')">Send to External</button>`;
         }
@@ -894,8 +908,8 @@
       if (!paper) return;
 
       const isBatch = !!paper.baseTitle;
-      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paper.baseTitle}" to DGCA?` : 'Submit this paper to DGCA?';
-      
+      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paper.baseTitle}" to DQCA?` : 'Submit this paper to DQCA?';
+
       if (!confirm(confirmMsg)) return;
 
       try {
@@ -906,11 +920,11 @@
             const res = await fetch(`/api/papers/${p.id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
             if (!res.ok) throw new Error(`Submit failed for ${p.paperTitle}`);
           }
-          showToast(`Batch "${paper.baseTitle}" submitted to DGCA`, 'success');
+          showToast(`Batch "${paper.baseTitle}" submitted to DQCA`, 'success');
         } else {
           const res = await fetch(`/api/papers/${id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
           if (!res.ok) throw new Error('Submit failed');
-          showToast('Submitted to DGCA', 'success');
+          showToast('Submitted to DQCA', 'success');
         }
         loadMyPapersDashboard();
       } catch (err) { showToast(err.message, 'error'); }
@@ -927,13 +941,72 @@
     }
 
     async function sendToExternal(id) {
-      if (!confirm('Forward this finalized paper to External role?')) return;
       try {
-        const res = await fetch(`/api/papers/${id}/send-to-external`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-        if (!res.ok) throw new Error('Send failed');
-        showToast('Paper sent to External', 'success');
-        loadMyPapersDashboard();
-      } catch (err) { showToast(err.message, 'error'); }
+        // 1. Fetch available external users
+        const res = await fetch('/api/auth/users?role=external', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Could not fetch external users.');
+        const { users } = await res.json();
+
+        if (!users || users.length === 0) {
+          return showToast('No external examiners found to send the paper to.', 'warn');
+        }
+
+        // 2. Show a selection modal
+        let options = users.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
+        const modalHtml = `
+          <h3>Send to External Examiner</h3>
+          <p class="muted">Select an external examiner to send this paper to.</p>
+          <select id="externalUserSelect" style="width:100%; padding:12px; margin-top:15px; border:1px solid #ddd; border-radius:8px;">
+            ${options}
+          </select>
+          <div style="margin-top:20px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+            <button class="btn" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+            <button class="btn primary" id="confirmSendToExternal">Send</button>
+          </div>
+        `;
+        const overlay = showModal(modalHtml);
+
+        // 3. Handle the confirmation and API call
+        overlay.querySelector('#confirmSendToExternal').onclick = async () => {
+          const recipientEmail = document.getElementById('externalUserSelect').value;
+          if (!recipientEmail) return showToast('Please select a recipient.', 'warn');
+
+          const btn = overlay.querySelector('#confirmSendToExternal');
+          btn.disabled = true;
+          btn.innerText = 'Sending...';
+
+          try {
+            const sendRes = await fetch(`/api/share/send`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({ paperId: id, recipientEmail, message: 'Please review this question paper.' })
+            });
+
+            if (!sendRes.ok) {
+              const errData = await sendRes.json();
+              throw new Error(errData.message || 'Failed to send paper.');
+            }
+
+            showToast('Paper sent to external examiner successfully!', 'success');
+            closeModal(overlay);
+            loadMyPapersDashboard(); // Refresh the dashboard to show updated status
+            loadMyPapersDashboard(); // Refresh the dashboard to show updated status
+
+          } catch (err) {
+            showToast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerText = 'Send';
+          }
+        };
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     async function approvePaper(id) {
@@ -1124,7 +1197,7 @@
         showToast('Deleted', 'success');
         addActivity(`Deleted paper: ${id}`);
         // Clear cached saved paper if it matches the deleted paper ID
-        try { 
+        try {
           const last = JSON.parse(localStorage.getItem('lastSavedPaper') || 'null');
           if (last && String(last.id) === String(id)) {
             localStorage.removeItem('lastSavedPaper');

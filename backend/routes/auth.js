@@ -17,7 +17,7 @@ router.post('/signup', async (req, res) => {
     if (exists) return res.status(400).json({ message: 'Email already in use' });
 
     const hashed = await bcrypt.hash(password, 10);
-    
+
     // Insert user into Supabase - use provided role or default to 'external'
     const { data: user, error } = await supabase
       .from('users')
@@ -98,9 +98,9 @@ router.post('/forgot-password', async (req, res) => {
     // Save token to user
     const { error: updateError } = await supabase
       .from('users')
-      .update({ 
-        reset_token: token, 
-        reset_token_expiry: expiry.toISOString() 
+      .update({
+        reset_token: token,
+        reset_token_expiry: expiry.toISOString()
       })
       .eq('id', user.id);
 
@@ -138,7 +138,7 @@ router.post('/reset-password', async (req, res) => {
 
     const now = new Date();
     const expiry = new Date(user.reset_token_expiry);
-    
+
     if (now > expiry) {
       return res.status(400).json({ message: 'Token has expired' });
     }
@@ -148,7 +148,7 @@ router.post('/reset-password', async (req, res) => {
     // Update password and clear token
     const { error: updateError } = await supabase
       .from('users')
-      .update({ 
+      .update({
         password: hashedPassword,
         reset_token: null,
         reset_token_expiry: null
@@ -165,7 +165,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // simple auth middleware for protected routes
-function auth(req, res, next){
+function auth(req, res, next) {
   const header = req.headers.authorization;
   if (!header) return res.status(401).json({ message: 'Unauthorized' });
   const token = header.split(' ')[1];
@@ -180,62 +180,78 @@ function auth(req, res, next){
 
 // GET /api/auth/me - get profile
 router.get('/me', auth, async (req, res) => {
-  try{
+  try {
     const { data: user, error } = await supabase.from('users').select('*').eq('id', req.userId).single();
-    if(!user || error) return res.status(404).json({ message: 'Not found' });
+    if (!user || error) return res.status(404).json({ message: 'Not found' });
     res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-  }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
 
 // PUT /api/auth/me - update profile
 router.put('/me', auth, async (req, res) => {
-  try{
+  try {
     const { name, email } = req.body;
     const { data: user, error } = await supabase.from('users').select('*').eq('id', req.userId).single();
-    if(!user || error) return res.status(404).json({ message: 'Not found' });
-    
-    if(email && email !== user.email){ 
+    if (!user || error) return res.status(404).json({ message: 'Not found' });
+
+    if (email && email !== user.email) {
       const { data: exists } = await supabase.from('users').select('*').eq('email', email).single();
-      if(exists) return res.status(400).json({ message: 'Email already in use' });
+      if (exists) return res.status(400).json({ message: 'Email already in use' });
     }
-    
+
     const updates = {};
-    if(name) updates.name = name;
-    if(email) updates.email = email;
-    
+    if (name) updates.name = name;
+    if (email) updates.email = email;
+
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
       .update(updates)
       .eq('id', req.userId)
       .select()
       .single();
-    
-    if(updateError) return res.status(500).json({ message: 'Update failed' });
+
+    if (updateError) return res.status(500).json({ message: 'Update failed' });
     res.json({ user: { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role } });
-  }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
 });
 
 // PUT /api/auth/me/password - change password
 router.put('/me/password', auth, async (req, res) => {
-  try{
+  try {
     const { currentPassword, newPassword } = req.body;
-    if(!currentPassword || !newPassword) return res.status(400).json({ message: 'Missing fields' });
-    
+    if (!currentPassword || !newPassword) return res.status(400).json({ message: 'Missing fields' });
+
     const { data: user, error } = await supabase.from('users').select('*').eq('id', req.userId).single();
-    if(!user || error) return res.status(404).json({ message: 'Not found' });
-    
+    if (!user || error) return res.status(404).json({ message: 'Not found' });
+
     const ok = await bcrypt.compare(currentPassword, user.password);
-    if(!ok) return res.status(400).json({ message: 'Invalid current password' });
-    
+    if (!ok) return res.status(400).json({ message: 'Invalid current password' });
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const { error: updateError } = await supabase
       .from('users')
       .update({ password: hashedPassword })
       .eq('id', req.userId);
-    
-    if(updateError) return res.status(500).json({ message: 'Password update failed' });
+
+    if (updateError) return res.status(500).json({ message: 'Password update failed' });
     res.json({ message: 'Password updated' });
-  }catch(err){ console.error(err); res.status(500).json({ message: 'Server error' }); }
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Server error' }); }
+});
+
+// GET /api/auth/users - list users (optionally by role)
+router.get('/users', auth, async (req, res) => {
+  try {
+    const { role } = req.query;
+    let query = supabase.from('users').select('id, name, email, role');
+    if (role) query = query.eq('role', role);
+
+    const { data: users, error } = await query;
+    if (error) throw error;
+    res.json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;
