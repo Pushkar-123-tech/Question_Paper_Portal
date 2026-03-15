@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Teacher Dashboard | Question Paper Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/public/ui.css">
+
+  <style>
+    :root {
+      --primary: #7b0000;
+      --sidebar: #1f2937;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 8px;
+      --border: #d1d5db;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: block;
+    }
+
+    /* Main */
+    .main {
+      padding: 28px;
+      overflow-y: auto;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      padding: 18px 22px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 18px;
+      transition: 0.3s;
+      border: 1px solid var(--border);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .card .muted {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Question Boxes */
+    .question-item {
+      border: 1px dashed var(--border);
+      padding: 14px;
+      border-radius: 6px;
+      background: #fafafa;
+      margin-bottom: 14px;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .flex-row>div {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .row input,
+    .row select {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    textarea {
+      min-height: 56px;
+      height: auto;
+      resize: vertical;
+    }
+
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #e5e7eb;
+      color: black;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: none;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .btn.secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    .sub-container {
+      margin-top: 14px;
+      padding-left: 18px;
+      border-left: 2px solid var(--primary);
+      margin-left: 6px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      gap: 20px;
+      margin: 10px 0;
+    }
+
+    .checkbox-row label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .sub-box {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 3px solid var(--primary);
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 1024px) {
+      .main {
+        padding: 20px 16px;
+      }
+
+      .card {
+        padding: 14px 16px;
+        max-width: 100%;
+      }
+
+      .flex-row {
+        gap: 12px;
+      }
+
+      .flex-row > div {
+        min-width: 200px;
+      }
+
+      .row input,
+      .row select {
+        min-width: 150px;
+      }
+
+      input, select, textarea {
+        padding: 10px;
+        font-size: 13px;
+      }
+
+      .btn {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main {
+        padding: 16px 12px;
+      }
+
+      .card {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .flex-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .flex-row > div {
+        min-width: unset;
+      }
+
+      .row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .row input,
+      .row select {
+        width: 100%;
+        min-width: unset;
+      }
+
+      input, select, textarea {
+        padding: 12px;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      textarea {
+        min-height: 50px;
+      }
+
+      .btn {
+        padding: 10px 12px;
+        font-size: 12px;
+        width: 100%;
+      }
+
+      .delete-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .question-item {
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .sub-container {
+        margin-top: 10px;
+        padding-left: 12px;
+      }
+
+      .checkbox-row {
+        gap: 12px;
+      }
+
+      .sub-box {
+        padding: 10px;
+        margin: 8px 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main {
+        padding: 12px 8px;
+      }
+
+      .card {
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .card h2 {
+        font-size: 16px;
+      }
+
+      .muted {
+        font-size: 12px;
+      }
+
+      input, select, textarea {
+        padding: 10px;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .btn {
+        padding: 10px;
+        font-size: 11px;
+        width: 100%;
+      }
+
+      .delete-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+
+      .question-item {
+        padding: 10px;
+        margin-bottom: 8px;
+      }
+
+      .checkbox-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .checkbox-row label {
+        gap: 8px;
+      }
+
+      .sub-box {
+        padding: 8px;
+        margin: 6px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <main class="main">
+
+    <section id="dashboardSection">
+      <div class="card">
+        <h2>My Saved Papers</h2>
+        <p class="muted">Recently saved or downloaded question papers.</p>
+        <div style="margin-top:10px; display:flex; gap:8px;">
+          <button class="btn" onclick="loadMyPapers()">Refresh</button>
+          <button class="btn" onclick="clearMyPapers()">Clear Cache</button>
+        </div>
+        <div id="myPapersContainer" style="margin-top:12px;"></div>
+      </div>
+    </section>
+
+    <section id="formSection" style="display:none">
+
+      <div class="card">
+        <button class="btn secondary" onclick="backToDashboard()">← Back to Dashboard</button>
+      </div>
+
+      <div class="card">
+        <h2>Examination Form</h2>
+        <div class="flex-row">
+          <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title" /></div>
+          <div><label>Semester</label>
+            <select id="semester">
+              <option value="">Select</option>
+              <option>I</option>
+              <option>II</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-row">
+          <div><label>Academic Year</label>
+            <select id="academicYear">
+              <option value="">Select</option>
+              <option>2024-25</option>
+              <option>2025-26</option>
+              <option>2026-27</option>
+              <option>2027-28</option>
+            </select>
+          </div>
+          <div><label>Program</label>
+            <select id="program">
+              <option value="">Select</option>
+              <option>B.Tech Computer Engineering</option>
+              <option>B.Tech Information Technology</option>
+              <option>B.Tech Computer Science & Business Systems</option>
+              <option>B.Tech Automation & Robotics</option>
+              <option>B.Tech Electronics & Telecommunication Engineering</option>
+              <option>B.Tech Mechanical Engineering</option>
+              <option>B.Tech Civil Engineering</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex-row">
+          <div><label>Course Code</label><input id="courseCode" placeholder="CS2203T" /></div>
+          <div><label>Course Name</label><input id="courseName" placeholder="Data Structures [2023 Pattern]" /></div>
+          <div><label>PRN No.</label><input id="prnNo" placeholder="PRN No." readonly
+              style="background:#e5e7eb;cursor:not-allowed;" /></div>
+          <div><label>QP Code</label><input id="qpCode" placeholder="QP Code" readonly
+       style="background:#e5e7eb;cursor:not-allowed;" /></div>
+        </div>
+        <div class="flex-row">
+          <div><label>Duration</label>
+            <select id="duration">
+              <option value="">Select</option>
+              <option>1.5 Hours</option>
+              <option>2 Hours</option>
+              <option>2.5 Hours</option>
+              <option>3 Hours</option>
+            </select>
+          </div>
+          <div><label>Max Marks</label>
+            <select id="maxMarks">
+              <option value="">Select</option>
+              <option>30</option>
+              <option>50</option>
+            </select>
+          </div>
+          <div><label>Total Questions</label>
+            <select id="totalQuestions">
+              <option value="">Select</option>
+              <option>6</option>
+              <option>7</option>
+              <option>8</option>
+              <option>9</option>
+              <option>10</option>
+              <option>11</option>
+              <option>12</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:6px;">
+          <strong class="muted">Preset Instructions</strong>
+          <div id="presetInstructions" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" value="Answer all questions" style="width:auto;margin:0;" />
+              <span>Answer all questions</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" value="Each question carries equal marks" style="width:auto;margin:0;" />
+              <span>Each question carries equal marks</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" value="Use of non-programmable calculator allowed" style="width:auto;margin:0;" />
+              <span>Use of non-programmable calculator allowed</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" value="Write your answers clearly" style="width:auto;margin:0;" />
+              <span>Write your answers clearly</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" value="Time management is essential" style="width:auto;margin:0;" />
+              <span>Time management is essential</span>
+            </label>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;"><button class="btn" onclick="addSelectedInstructions()">+
+              Add Selected Instructions</button> <button class="btn small secondary" onclick="addInstruction()">+ Add
+              Custom Instruction</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Course Outcomes</h2>
+        <div id="coContainer"></div><button class="btn small" onclick="addCO()">+ Add CO</button>
+      </div>
+      <div class="card">
+        <h2>Instructions</h2>
+        <div id="instructionContainer"></div><button class="btn small secondary" onclick="addInstruction()">+ Add
+          Instruction</button>
+      </div>
+      <div class="card">
+        <h2>Question Sections</h2>
+        <div id="sectionContainer"></div>
+      </div>
+      <div class="card">
+        <div id="paperStatusContainer" style="margin-bottom:10px; font-weight:bold; color:var(--primary);"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="btn secondary" onclick="document.getElementById('importFile').click()">
+            <i class="fa-solid fa-upload"></i> Import JSON
+          </button>
+          <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importFromFile(event)" />
+        </div>
+        <button class="btn primary" onclick="savePaper()">Save Draft</button>
+        <button class="btn primary" id="submitToChairmanBtn" style="display:none;"
+          onclick="submitToDQCAFromForm()">Submit to DQCA</button>
+        <button class="btn" onclick="previewPaper()">Preview & Download</button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const CO_OPTIONS = ["CO1", "CO2", "CO3", "CO4", "CO5", "CO6"];
+    let paperData = {
+      paperTitle: '',
+      semester: '',
+      academicYear: '',
+      program: '',
+      courseCode: '',
+      courseName: '',
+      duration: '',
+      maxMarks: 0,
+      totalQuestions: 0,
+      courseOutcomes: [],
+      instructions: [],
+      sections: [
+        { title: "A", questions: [] },
+        { title: "B", questions: [] },
+        { title: "C", questions: [] }
+      ]
+    };
+
+    /* Sidebar active */
+    function setActive(btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Require auth
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showToast('Please login to create papers', 'warn');
+      window.location.href = '/login.html';
+    }
+
+    /* Navigation */
+    function navigate(sec, skipLoadDraft = false) {
+      document.getElementById("dashboardSection").style.display = sec === "dashboard" ? "block" : "none";
+      document.getElementById("formSection").style.display = sec === "form" ? "block" : "none";
+      if (sec === 'dashboard') {
+        loadMyPapers(); // refresh list when user navigates to dashboard
+      } else if (sec === 'form' && !skipLoadDraft) {
+        // Load any saved form data when navigating to form
+        loadFormData();
+      }
+    }
+
+    // Redirect to dashboard page (full page) when user clicks Back
+    function backToDashboard() {
+      window.location.href = '/dashboard.html';
+    }
+
+    /* Save form data to localStorage */
+    function saveFormData() {
+      try {
+        const formData = {
+          id: paperData.id || '',
+          paperTitle: document.getElementById('paperTitle').value,
+          semester: document.getElementById('semester').value,
+          academicYear: document.getElementById('academicYear').value,
+          program: document.getElementById('program').value,
+          courseCode: document.getElementById('courseCode').value,
+          courseName: document.getElementById('courseName').value,
+          prnNo: document.getElementById('prnNo') ? document.getElementById('prnNo').value : '',
+          qpCode: document.getElementById('qpCode') ? document.getElementById('qpCode').value : '',
+          duration: document.getElementById('duration').value,
+          maxMarks: document.getElementById('maxMarks').value,
+          totalQuestions: document.getElementById('totalQuestions').value,
+          courseOutcomes: paperData.courseOutcomes,
+          instructions: paperData.instructions,
+          sections: paperData.sections,
+          status: paperData.status || 'draft',
+          baseTitle: paperData.baseTitle || '',
+          setName: paperData.setName || ''
+        };
+        localStorage.setItem('formDraft', JSON.stringify(formData));
+      } catch (e) {
+        console.error('Failed to save form data:', e);
+      }
+    }
+
+    /* Load form data from localStorage */
+    function loadFormData() {
+      try {
+        const saved = localStorage.getItem('formDraft');
+        if (saved) {
+          const formData = JSON.parse(saved);
+
+          // Populate paperData object
+          paperData.id = formData.id || '';
+          paperData.status = formData.status || 'draft';
+          paperData.baseTitle = formData.baseTitle || '';
+          paperData.setName = formData.setName || '';
+          paperData.paperTitle = formData.paperTitle || '';
+          paperData.semester = formData.semester || '';
+          paperData.academicYear = formData.academicYear || '';
+          paperData.program = formData.program || '';
+          paperData.courseCode = formData.courseCode || '';
+          paperData.courseName = formData.courseName || '';
+          paperData.prnNo = formData.prnNo || '';
+          paperData.qpCode = formData.qpCode || '';
+          paperData.duration = formData.duration || '';
+          paperData.maxMarks = formData.maxMarks || '';
+          paperData.totalQuestions = formData.totalQuestions || '';
+          paperData.courseOutcomes = formData.courseOutcomes || [];
+          paperData.instructions = formData.instructions || [];
+          paperData.sections = formData.sections || [
+            { title: 'A', questions: [] },
+            { title: 'B', questions: [] },
+            { title: 'C', questions: [] }
+          ];
+
+          // Populate basic form fields in DOM
+          document.getElementById('paperTitle').value = paperData.paperTitle;
+          document.getElementById('semester').value = paperData.semester;
+          document.getElementById('academicYear').value = paperData.academicYear;
+          document.getElementById('program').value = paperData.program;
+          document.getElementById('courseCode').value = paperData.courseCode;
+          document.getElementById('courseName').value = paperData.courseName;
+          if (document.getElementById('prnNo')) document.getElementById('prnNo').value = paperData.prnNo;
+          if (document.getElementById('qpCode')) document.getElementById('qpCode').value = paperData.qpCode;
+          document.getElementById('duration').value = paperData.duration;
+          document.getElementById('maxMarks').value = paperData.maxMarks;
+          document.getElementById('totalQuestions').value = paperData.totalQuestions;
+
+          // Render all components
+          renderCO();
+          renderInstructions();
+          renderSections();
+          updateStatusUI();
+        }
+      } catch (e) {
+        console.error('Failed to load form data:', e);
+      }
+    }
+
+    /* Import JSON test case */
+    function importFromFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+
+          // Populate form fields
+          document.getElementById('paperTitle').value = importedData.paperTitle || '';
+          document.getElementById('semester').value = importedData.semester || '';
+          document.getElementById('academicYear').value = importedData.academicYear || '';
+          document.getElementById('program').value = importedData.program || '';
+          document.getElementById('courseCode').value = importedData.courseCode || '';
+          document.getElementById('courseName').value = importedData.courseName || '';
+          document.getElementById('prnNo').value = importedData.prnNo || '';
+          document.getElementById('qpCode').value = importedData.qpCode || '';
+          document.getElementById('duration').value = importedData.duration || '';
+          document.getElementById('maxMarks').value = importedData.maxMarks || '';
+          document.getElementById('totalQuestions').value = importedData.totalQuestions || '';
+
+          // Load data into paperData
+          paperData.paperTitle = importedData.paperTitle || '';
+          paperData.semester = importedData.semester || '';
+          paperData.academicYear = importedData.academicYear || '';
+          paperData.program = importedData.program || '';
+          paperData.courseCode = importedData.courseCode || '';
+          paperData.courseName = importedData.courseName || '';
+          paperData.prnNo = importedData.prnNo || '';
+          paperData.qpCode = importedData.qpCode || '';
+          paperData.duration = importedData.duration || '';
+          paperData.maxMarks = importedData.maxMarks || '';
+          paperData.totalQuestions = importedData.totalQuestions || '';
+
+          if (importedData.courseOutcomes) {
+            paperData.courseOutcomes = importedData.courseOutcomes;
+            renderCO();
+          }
+          if (importedData.instructions) {
+            paperData.instructions = importedData.instructions;
+            renderInstructions();
+          }
+          if (importedData.sections) {
+            paperData.sections = importedData.sections;
+            renderSections();
+          }
+
+          saveFormData();
+          showToast('Test case imported successfully!', 'success');
+
+          // Reset file input
+          event.target.value = '';
+        } catch (err) {
+          console.error('Import failed:', err);
+          showToast('Failed to import JSON. Please check the file format.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* CO */
+    function addCO() {
+      const next = paperData.courseOutcomes.length + 1;
+      if (next > 6) return;
+      paperData.courseOutcomes.push(`CO${next}: `);
+      renderCO();
+      saveFormData();
+    }
+    function renderCO() {
+      const c = document.getElementById("coContainer"); c.innerHTML = "";
+      paperData.courseOutcomes.forEach((co, i) => {
+        c.innerHTML += `<div class='question-box'><textarea oninput='paperData.courseOutcomes[${i}]=this.value;saveFormData()'>${co}</textarea>
+    <button class='delete-btn' onclick='deleteCO(${i})'>Delete CO</button></div>`;
+      });
+    }
+    function deleteCO(i) {
+      paperData.courseOutcomes.splice(i, 1);
+      renderCO();
+      saveFormData();
+    }
+
+    /* Instructions */
+    function addInstruction() {
+      paperData.instructions.push('');
+      renderInstructions();
+      saveFormData();
+    }
+    function addSelectedInstructions() {
+      const boxes = document.querySelectorAll('#presetInstructions input[type="checkbox"]:checked');
+      boxes.forEach(b => {
+        paperData.instructions.push(b.value);
+        b.checked = false;
+      });
+      renderInstructions();
+      saveFormData();
+    }
+    function renderInstructions() {
+      const c = document.getElementById("instructionContainer"); c.innerHTML = "";
+      paperData.instructions.forEach((ins, i) => {
+        c.innerHTML += `<div class='question-box'><div style="font-weight:600;margin-bottom:6px">Instruction ${i + 1}</div><textarea oninput='paperData.instructions[${i}]=this.value;saveFormData()'>${ins}</textarea>
+    <button class='delete-btn' onclick='deleteInstruction(${i})'>Delete</button></div>`;
+      });
+    }
+    function deleteInstruction(i) {
+      paperData.instructions.splice(i, 1);
+      renderInstructions();
+      saveFormData();
+    }
+
+    function updateQuestionNumbers() {
+      let globalCount = 1;
+      paperData.sections.forEach(sec => {
+        sec.questions.forEach(q => {
+          q.qno = globalCount++;
+        });
+      });
+    }
+
+    function renderSections() {
+      updateQuestionNumbers(); // Ensure numbers are correct before rendering
+      const c = document.getElementById("sectionContainer"); 
+      if (!c) return;
+      c.innerHTML = "";
+      
+      if (!paperData.sections || paperData.sections.length === 0) {
+        c.innerHTML = '<div class="card"><p class="muted">No sections defined for this paper.</p></div>';
+        return;
+      }
+
+      paperData.sections.forEach((sec, i) => {
+        const secDiv = document.createElement('div');
+        secDiv.className = 'card';
+        secDiv.innerHTML = `<h3>Section ${sec.title}</h3><button class='btn small secondary' onclick='addMainQuestion(${i})'>+ Add Question</button><div id='qSec${i}'></div>`;
+        c.appendChild(secDiv);
+        renderMainQuestions(i);
+      });
+    }
+
+    function addMainQuestion(sIdx) {
+      const sec = paperData.sections[sIdx];
+
+      sec.questions.push({
+        qno: 0, // Will be updated
+        text: "",
+        marks: "",
+        bl: "",
+        co: "",
+        subQuestions: [],
+        isOrWithPrevious: false
+      });
+
+      updateQuestionNumbers();
+      // We need to re-render ALL sections because numbers in subsequent sections shift
+      renderSections();
+      saveFormData();
+    }
+
+    function appendSingleQuestion(sIdx, qIdx) {
+      renderMainQuestions(sIdx);
+    }
+
+    function renderMainQuestions(sIdx) {
+      const sec = paperData.sections[sIdx];
+      const c = document.getElementById(`qSec${sIdx}`);
+      if (!c) {
+        // Retry once after DOM update if needed
+        setTimeout(() => {
+          const retryC = document.getElementById(`qSec${sIdx}`);
+          if (retryC) renderMainQuestions(sIdx);
+        }, 0);
+        return;
+      }
+
+      c.innerHTML = "";
+
+      if (!sec.questions || sec.questions.length === 0) {
+        c.innerHTML = '<div class="muted" style="padding:10px;">No questions in this section.</div>';
+        return;
+      }
+
+      sec.questions.forEach((q, qIdx) => {
+        if (q.isOrWithPrevious) {
+          const orDiv = document.createElement('div');
+          orDiv.innerHTML = `<div style="text-align:center;font-weight:bold;margin:10px 0;color:#7b0000;">OR</div>`;
+          c.appendChild(orDiv);
+        }
+
+        const div = document.createElement('div');
+        div.innerHTML = getQuestionHTML(sIdx, qIdx, q);
+        c.appendChild(div);
+
+        renderSubQuestions(sIdx, qIdx);
+      });
+    }
+
+    function getQuestionHTML(sIdx, qIdx, q) {
+      const isSplit = q.subQuestions && q.subQuestions.length > 0;
+
+
+      return `
+  <div class='question-item'>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <label><strong>Q${q.qno}</strong></label>
+      <button class='or-button' onclick='insertOrAfter(${sIdx},${qIdx})'>OR</button>
+    </div>
+
+   <textarea
+  ${isSplit ? 'disabled style="background:#e5e7eb;cursor:not-allowed"' : ''}
+  oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value;saveFormData()'
+>${q.text || ''}</textarea>
+
+
+    <div class='row'>
+      <input type='number' placeholder='Marks' value="${q.marks || ''}"
+  ${isSplit ? 'disabled style="background:#e5e7eb;cursor:not-allowed"' : ''}
+
+        oninput='paperData.sections[${sIdx}].questions[${qIdx}].marks=this.value;saveFormData()'/>
+
+      <select 
+  ${isSplit ? 'disabled style="background:#e5e7eb;cursor:not-allowed"' : ''}
+  onchange='paperData.sections[${sIdx}].questions[${qIdx}].bl=this.value;saveFormData()'>
+
+        <option value=''>BL Level</option>
+        <option ${q.bl === 'BL 1' ? 'selected' : ''}>BL 1</option>
+        <option ${q.bl === 'BL 2' ? 'selected' : ''}>BL 2</option>
+        <option ${q.bl === 'BL 3' ? 'selected' : ''}>BL 3</option>
+        <option ${q.bl === 'BL 4' ? 'selected' : ''}>BL 4</option>
+        <option ${q.bl === 'BL 5' ? 'selected' : ''}>BL 5</option>
+        <option ${q.bl === 'BL 6' ? 'selected' : ''}>BL 6</option>
+      </select>
+
+     <select 
+  ${isSplit ? 'disabled style="background:#e5e7eb;cursor:not-allowed"' : ''}
+  onchange='paperData.sections[${sIdx}].questions[${qIdx}].co=this.value;saveFormData()'>
+
+        <option value=''>CO</option>
+        ${CO_OPTIONS.map(co => `<option ${q.co === co ? 'selected' : ''}>${co}</option>`).join("")}
+      </select>
+    </div>
+
+    <div style="margin-top:8px">
+      <label class="muted">SubQuestions:</label>
+      <select onchange='setSubOptions(${sIdx},${qIdx},this.value)'>
+        <option value="">None</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="A,B">A & B</option>
+      </select>
+    </div>
+
+    <button class='delete-btn'
+      onclick='deleteMainQuestion(${sIdx}, ${qIdx})'>
+      Delete
+    </button>
+
+    <div id='subQ${sIdx}-${qIdx}' class='sub-container'></div>
+  </div>`;
+    }
+
+
+
+    function deleteMainQuestion(sIdx, qIdx) {
+      paperData.sections[sIdx].questions.splice(qIdx, 1);
+      updateQuestionNumbers();
+      renderSections();
+      saveFormData();
+    }
+
+    function insertOrAfter(sIdx, qIdx) {
+      const sec = paperData.sections[sIdx];
+      
+      // If next question doesn't exist, push new one
+      if (!sec.questions[qIdx + 1]) {
+        sec.questions.push({
+          qno: 0, // updateQuestionNumbers will fix this
+          text: "",
+          marks: "",
+          bl: "",
+          co: "",
+          subQuestions: [],
+          isOrWithPrevious: true
+        });
+      } else {
+        // If it exists, just mark it as OR (logic from before)
+        // But wait, if I insert an OR, I probably want to INSERT it, not just flag the existing next one?
+        // The original code was: sec.questions[qIdx + 1].isOrWithPrevious = true;
+        // This implies turning the NEXT question into an OR option.
+        // If that's the intended behavior, I'll keep it.
+        sec.questions[qIdx + 1].isOrWithPrevious = true;
+      }
+      
+      updateQuestionNumbers();
+      renderSections();
+      saveFormData();
+    }
+
+
+
+
+    function setSubOptions(sIdx, qIdx, val) {
+      const q = paperData.sections[sIdx].questions[qIdx];
+
+      const needed = val.split(','); // ['A'] or ['A','B']
+
+      // Keep existing data if already present
+      const existing = {};
+      q.subQuestions.forEach(sq => existing[sq.label] = sq);
+
+      q.subQuestions = needed.map(label => {
+        return existing[label] || {
+          label,
+          text: '',
+          marks: '',
+          bl: '',
+          co: ''
+        };
+      });
+
+      renderMainQuestions(sIdx);   // VERY IMPORTANT
+      saveFormData();
+
+    }
+
+    function renderSubQuestions(sIdx, qIdx) {
+      const q = paperData.sections[sIdx].questions[qIdx];
+      const subs = q.subQuestions || [];
+      const c = document.getElementById(`subQ${sIdx}-${qIdx}`);
+      if (!c) return;
+
+      c.innerHTML = "";
+
+      subs.forEach((sq, i) => {
+        c.innerHTML += `
+    <div class='question-box'>
+      <label>${sq.label})</label>
+      <textarea 
+        oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].text=this.value;saveFormData()'
+      >${sq.text || ''}</textarea>
+
+      <div class='row'>
+        <input type='number' placeholder='Marks' value='${sq.marks || ""}'
+          oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].marks=this.value;saveFormData()'/>
+
+        <select onchange='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].bl=this.value;saveFormData()'>
+          <option value=''>BL Level</option>
+          <option ${sq.bl === 'BL 1' ? 'selected' : ''}>BL 1</option>
+          <option ${sq.bl === 'BL 2' ? 'selected' : ''}>BL 2</option>
+          <option ${sq.bl === 'BL 3' ? 'selected' : ''}>BL 3</option>
+          <option ${sq.bl === 'BL 4' ? 'selected' : ''}>BL 4</option>
+          <option ${sq.bl === 'BL 5' ? 'selected' : ''}>BL 5</option>
+          <option ${sq.bl === 'BL 6' ? 'selected' : ''}>BL 6</option>
+        </select>
+
+        <select onchange='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].co=this.value;saveFormData()'>
+          <option value=''>CO</option>
+          ${CO_OPTIONS.map(co => `<option ${sq.co === co ? 'selected' : ''}>${co}</option>`).join("")}
+        </select>
+      </div>
+
+      <button class='delete-btn' onclick='deleteSubQuestion(${sIdx},${qIdx},${i})'>Delete</button>
+    </div>`;
+      });
+    }
+
+
+    function deleteSubQuestion(s, q, sq) {
+      paperData.sections[s].questions[q].subQuestions.splice(sq, 1);
+      renderSubQuestions(s, q);
+      saveFormData();
+    }
+
+    function getCleanPaperData() {
+      // Clone data
+      const cleanData = JSON.parse(JSON.stringify(paperData));
+      console.log('Clean data before sending:', cleanData); // Add this line for logging
+
+      // Gather form data into the clone
+      cleanData.paperTitle = document.getElementById('paperTitle').value || paperData.paperTitle || '';
+      cleanData.examination = '';
+      cleanData.semester = document.getElementById('semester').value || '';
+      cleanData.academicYear = document.getElementById('academicYear').value || '';
+      cleanData.program = document.getElementById('program').value || '';
+      cleanData.courseCode = document.getElementById('courseCode').value || '';
+      cleanData.courseName = document.getElementById('courseName').value || '';
+      cleanData.prnNo = document.getElementById('prnNo') ? document.getElementById('prnNo').value : '';
+      cleanData.qpCode = document.getElementById('qpCode') ? document.getElementById('qpCode').value : '';
+      cleanData.duration = document.getElementById('duration').value || '';
+      cleanData.maxMarks = Number(document.getElementById('maxMarks').value) || 0;
+      cleanData.totalQuestions = Number(document.getElementById('totalQuestions').value) || 0;
+      cleanData.baseTitle = paperData.baseTitle || '';
+      cleanData.setName = paperData.setName || '';
+
+      // We preserve all sections (A, B, C) even if empty for batch sets.
+      // But we can still filter empty questions if needed, or just leave them.
+      // Let's just keep everything to avoid losing structural data.
+      
+      // Re-number questions continuously for those that exist
+      let globalCount = 1;
+      cleanData.sections.forEach(sec => {
+        if (sec.questions) {
+          sec.questions.forEach(q => {
+            q.qno = globalCount++;
+          });
+        }
+      });
+
+      return cleanData;
+    }
+
+    async function savePaper() {
+      if (paperData.status && paperData.status !== 'draft') {
+        showToast('Paper is locked and cannot be edited', 'warn');
+        return;
+      }
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Please login first', 'error');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const finalData = getCleanPaperData();
+
+      try {
+        const res = await fetch('/api/papers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(finalData)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || 'Failed to save', 'error');
+          return;
+        }
+
+        showToast('Saved!', 'success');
+        paperData = data.paper;
+
+        // Clear draft after successful save
+        localStorage.removeItem('formDraft');
+
+        updateStatusUI();
+        loadMyPapers(); // Refresh the saved papers list
+
+        // Add to recent activity
+        try {
+          const name = paperData.paperTitle || paperData.courseName || 'Untitled';
+          const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+          list.unshift({ text: `Saved paper: ${name}`, time: Date.now() });
+          if (list.length > 50) list.length = 50;
+          localStorage.setItem('recentActivity', JSON.stringify(list));
+        } catch (e) {/* ignore */ }
+
+      } catch (err) {
+        console.error(err);
+        showToast('Network error', 'error');
+      }
+    }
+
+    async function previewPaper() {
+      // Save current form state
+      saveFormData();
+
+      // Get clean data for preview
+      const cleanData = getCleanPaperData();
+
+      // Use sessionStorage and navigate to template page
+      try {
+        sessionStorage.setItem('previewPaper', JSON.stringify(cleanData));
+        window.location.href = '/template.html?preview=1&download=1';
+      } catch (e) {
+        // fallback to old behaviour
+        const w = window.open('/template.html', '_blank');
+        const send = () => w.postMessage(cleanData, window.location.origin);
+        const t = setInterval(() => { try { send(); clearInterval(t); } catch (e) { } }, 200);
+      }
+    }
+
+    function updateStatusUI() {
+      const container = document.getElementById('paperStatusContainer');
+      const submitBtn = document.getElementById('submitToChairmanBtn');
+      const saveBtn = document.querySelector('button[onclick="savePaper()"]');
+      
+      if (paperData.id && paperData.status) {
+        const st = paperData.status;
+        container.innerText = 'Status: ' + st.toUpperCase().replace(/_/g, ' ');
+        
+        if (st === 'draft') {
+          submitBtn.style.display = 'inline-flex';
+          if (saveBtn) saveBtn.style.display = 'inline-flex';
+        } else {
+          submitBtn.style.display = 'none';
+          if (saveBtn) saveBtn.style.display = 'none';
+          // Disable all inputs if locked
+          document.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.id !== 'importFile') el.disabled = true;
+          });
+        }
+      } else {
+        container.innerText = '';
+        submitBtn.style.display = 'none';
+      }
+    }
+
+    async function submitToDQCAFromForm() {
+      if (!paperData.id) return showToast('Save as draft first', 'warn');
+      
+      const isBatch = !!paperData.baseTitle;
+      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paperData.baseTitle}" to DQCA?` : 'Submit this paper to DQCA for review?';
+      
+      if (!confirm(confirmMsg)) return;
+      
+      try {
+        if (isBatch) {
+          // We need to fetch all papers in the batch to get their IDs
+          // Or just submit the current one and let the user submit others from dashboard.
+          // But the requirement says "Once completed, all three sets should be submitted".
+          // To be safe and efficient, we'll fetch all papers with the same baseTitle.
+          
+          const resBatch = await fetch('/api/papers', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const dataBatch = await resBatch.json();
+          const batchPapers = (dataBatch.papers || []).filter(p => p.baseTitle === paperData.baseTitle);
+          
+          for (const p of batchPapers) {
+            await fetch(`/api/papers/${p.id}/submit`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+          }
+          showToast(`Batch "${paperData.baseTitle}" submitted to DQCA!`, 'success');
+        } else {
+          const res = await fetch(`/api/papers/${paperData.id}/submit`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (!res.ok) throw new Error('Submit failed');
+          showToast('Submitted to DQCA!', 'success');
+        }
+        
+        paperData.status = 'submitted_to_dqca';
+        updateStatusUI();
+        loadMyPapers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Initialize form
+    renderSections();
+    renderInstructions();
+    renderCO();
+    updateStatusUI();
+
+    // If this page is opened directly, show the form section by default
+    if (window.location.pathname && window.location.pathname.endsWith('questionpaperform.html')) {
+      const qp = new URLSearchParams(window.location.search);
+      
+      // Handle ?title=...&batch=...&set=...
+      const title = qp.get('title');
+      const batch = qp.get('batch');
+      const setLetter = qp.get('set');
+      
+      if (title) {
+        document.getElementById('paperTitle').value = title;
+        paperData.paperTitle = title;
+      }
+      if (batch) {
+        paperData.baseTitle = batch; // Store batch name
+      }
+      if (setLetter) {
+        // You could store the set letter in paperData if needed
+        paperData.setName = setLetter;
+      }
+
+      if (qp.get('list') === '1') {
+        navigate('dashboard');
+      } else {
+        navigate('form');
+      }
+
+      // Support ?edit=<id>
+      const editId = qp.get('edit');
+      if (editId) {
+        setTimeout(() => editPaper(editId), 200);
+      }
+
+      // Support ?test=1 for loading test data
+      const testMode = qp.get('test');
+      if (testMode === '1') {
+        setTimeout(() => loadTestData(), 300);
+      }
+    } else {
+      loadFormData(); // Load any saved draft data only if not in form.html directly or handled by params
+    }
+
+    // Load test data from sessionStorage/localStorage
+    function loadTestData() {
+      const testData = sessionStorage.getItem('testQuestionsData') || localStorage.getItem('testQuestionsData');
+
+      if (!testData) {
+        showToast('No test data found. Please use the test page.', 'error');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(testData);
+
+        // Load into paperData
+        paperData.paperTitle = data.paperTitle || '';
+        paperData.semester = data.semester || '';
+        paperData.academicYear = data.academicYear || '';
+        paperData.program = data.program || '';
+        paperData.courseCode = data.courseCode || '';
+        paperData.courseName = data.courseName || '';
+        paperData.prnNo = data.prnNo || '';
+        paperData.qpCode = data.qpCode || '';
+        paperData.duration = data.duration || '';
+        paperData.maxMarks = data.maxMarks || 0;
+        paperData.totalQuestions = data.totalQuestions || 0;
+        paperData.courseOutcomes = data.courseOutcomes || [];
+        paperData.instructions = data.instructions || [];
+        paperData.sections = data.sections || [
+          { title: 'A', questions: [] },
+          { title: 'B', questions: [] },
+          { title: 'C', questions: [] }
+        ];
+
+
+
+        // Populate form fields
+        document.getElementById('paperTitle').value = paperData.paperTitle || '';
+        document.getElementById('semester').value = paperData.semester || '';
+        document.getElementById('academicYear').value = paperData.academicYear || '';
+        document.getElementById('program').value = paperData.program || '';
+        document.getElementById('courseCode').value = paperData.courseCode || '';
+        document.getElementById('courseName').value = paperData.courseName || '';
+        if (document.getElementById('prnNo')) document.getElementById('prnNo').value = paperData.prnNo || '';
+        if (document.getElementById('qpCode')) document.getElementById('qpCode').value = paperData.qpCode || '';
+        document.getElementById('duration').value = paperData.duration || '';
+        document.getElementById('maxMarks').value = paperData.maxMarks || '';
+        document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
+
+        // Render all components
+        renderCO();
+        renderInstructions();
+        renderSections();
+        updateStatusUI();
+
+        // Save as draft
+        saveFormData();
+
+        showToast('✅ Test data loaded! 12 questions ready.', 'success');
+      } catch (error) {
+        console.error('Error loading test data:', error);
+        showToast('Error loading test data: ' + error.message, 'error');
+      }
+    }
+
+    // ------- My Papers: load & render -------
+    async function loadMyPapers() {
+      const container = document.getElementById('myPapersContainer');
+      if (!container) return;
+      container.innerHTML = 'Loading...';
+      const token = localStorage.getItem('token');
+      if (!token) {
+        container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/papers', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        const data = await res.json();
+        if (!res.ok) {
+          container.innerHTML = 'Failed to load papers';
+          return;
+        }
+
+        renderMyPapers(data.papers || []);
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = 'Network error';
+      }
+    }
+
+    function clearMyPapers() {
+      const c = document.getElementById('myPapersContainer');
+      if (c) c.innerHTML = '';
+    }
+
+    function renderMyPapers(papers) {
+      const container = document.getElementById('myPapersContainer');
+      if (!container) return;
+
+      if (!papers || papers.length === 0) {
+        container.innerHTML = '<div class="muted">No saved papers yet.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      papers.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        const date = new Date(p.createdAt || p.updatedAt || Date.now()).toLocaleString();
+        div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+          <strong>${p.paperTitle || p.courseName || 'Untitled'}</strong>
+          <div class="muted" style="font-size:12px">${p.program || ''} • ${date}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn" onclick="viewPaper('${p.id}')">View</button>
+          <button class="btn" onclick="downloadPaper('${p.id}')">Download</button>
+          <button class="btn" onclick="openSendModal('${p.id}')">Send</button>
+          <button class="btn" onclick="editPaper('${p.id}')">Edit</button>
+          <button class="btn" onclick="deletePaper('${p.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+        container.appendChild(div);
+      });
+    }
+
+    async function fetchPaperById(id) {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+      const r = await fetch('/api/papers/' + id, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!r.ok) return null;
+      const d = await r.json();
+      return d.paper;
+    }
+
+    async function editPaper(id, retryCount = 0) {
+      console.log(`Editing paper ID: ${id}, retry: ${retryCount}`);
+      const paper = await fetchPaperById(id);
+      
+      if (!paper) {
+        if (retryCount < 2) {
+          console.warn('Paper not found, retrying...');
+          setTimeout(() => editPaper(id, retryCount + 1), 500);
+          return;
+        }
+        return showToast('Unable to load paper. Please try again from the dashboard.', 'error');
+      }
+
+      // Load into form
+      paperData = paper;
+      paperData.courseOutcomes = paperData.courseOutcomes || [];
+      paperData.instructions = paperData.instructions || [];
+      if (!paperData.sections || paperData.sections.length === 0) {
+        paperData.sections = [
+          { title: 'A', questions: [] },
+          { title: 'B', questions: [] },
+          { title: 'C', questions: [] }
+        ];
+      }
+
+
+
+      // Navigate to form, skipping the load draft from localStorage
+      navigate('form', true);
+
+      // Populate form fields after navigation to ensure elements are visible
+      document.getElementById('paperTitle').value = paperData.paperTitle || '';
+      document.getElementById('semester').value = paperData.semester || '';
+      document.getElementById('academicYear').value = paperData.academicYear || '';
+      document.getElementById('program').value = paperData.program || '';
+      document.getElementById('courseCode').value = paperData.courseCode || '';
+      document.getElementById('courseName').value = paperData.courseName || '';
+      if (document.getElementById('prnNo')) document.getElementById('prnNo').value = paperData.prnNo || '';
+      if (document.getElementById('qpCode')) document.getElementById('qpCode').value = paperData.qpCode || '';
+      document.getElementById('duration').value = paperData.duration || '';
+      document.getElementById('maxMarks').value = paperData.maxMarks || '';
+      document.getElementById('totalQuestions').value = paperData.totalQuestions || '';
+
+      renderCO();
+      renderInstructions();
+      renderSections();
+      updateStatusUI();
+
+      // Save as draft
+      saveFormData();
+    }
+
+    async function deletePaper(id) {
+      const ok = await showConfirm('Delete this paper?');
+      if (!ok) return;
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Not logged in', 'error');
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/papers/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        if (!r.ok) {
+          const dd = await r.json();
+          return showToast(dd.message || 'Delete failed', 'error');
+        }
+
+        showToast('Deleted', 'success');
+        loadMyPapers();
+      } catch (e) {
+        console.error(e);
+        showToast('Network error', 'error');
+      }
+    }
+
+    // Load papers when section loads
+    loadMyPapers();
+
+    // Send modal
+    async function openSendModal(paperId) {
+      const fromEmail = localStorage.getItem('userEmail') || '';
+      const fromName = localStorage.getItem('userName') || '';
+      const html = `<h3>Send Paper</h3>
+    <div class="muted">From (your email)</div>
+    <input id="sendFromEmail" value="${fromEmail}" readonly>
+    <div class="muted">From (name)</div>
+    <input id="sendFromName" value="${fromName}" readonly>
+    <div class="muted">Recipient email</div>
+    <input id="sendToEmail" placeholder="recipient@example.com">
+    <div class="muted">Message (optional)</div>
+    <textarea id="sendMessage" rows="4" placeholder="Add a short message"></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="sendCancel">Cancel</button><button class="btn primary" id="sendSend">Send</button></div>`;
+      const overlay = showModal(html);
+      overlay.querySelector('#sendCancel').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#sendSend').addEventListener('click', async () => {
+        const to = overlay.querySelector('#sendToEmail').value.trim();
+        const msg = overlay.querySelector('#sendMessage').value.trim();
+        if (!to) return showToast('Enter recipient email', 'warn');
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return window.location.href = '/login.html';
+          const r = await fetch('/api/share/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+              paperId,
+              recipientEmail: to,
+              message: msg
+            })
+          });
+          const d = await r.json();
+          if (!r.ok) {
+            showToast(d.message || 'Send failed', 'error');
+            return;
+          }
+          showToast('Shared successfully', 'success');
+          overlay.remove();
+        } catch (e) {
+          console.error(e);
+          showToast('Network error', 'error');
+        }
+      });
+    }
+
+    // Helper functions for UI
+    function showToast(message, type = 'info') {
+      // Simple toast implementation
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = `
+    position:fixed; bottom:20px; right:20px; background:${type === 'error' ? '#dc2626' : type === 'success' ? '#10b981' : '#3b82f6'}; 
+    color:white; padding:12px 16px; border-radius:6px; z-index:1000; font-size:14px;
+  `;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function showConfirm(message) {
+      return confirm(message);
+    }
+
+    function showModal(html) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000;';
+      overlay.innerHTML = `
+    <div style="background:white; padding:24px; border-radius:12px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto;">
+      ${html}
+    </div>
+  `;
+      document.body.appendChild(overlay);
+      return overlay;
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      window.location.href = '/login.html';
+    }
+
+    function loadRecentActivity() {
+      // Implementation for loading recent activity
+      showToast('Recent activity feature coming soon', 'info');
+    }
+
+    function viewPaper(id) {
+      window.open(`/template.html?view=${id}`, '_blank');
+    }
+
+    function downloadPaper(id) {
+      window.open(`/template.html?download=${id}`, '_blank');
+    }
+  </script>
+  <script src="/public/ui.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+{
+  "paperTitle": "Data Structures - End Semester Examination",
+  "semester": "II",
+  "academicYear": "2025-26",
+  "program": "B.Tech Computer Engineering",
+  "courseCode": "CS2203T",
+  "courseName": "Data Structures [2023 Pattern]",
+  "prnNo": "12345",
+  "qpCode": "CS2203T-ESE-2026",
+  "duration": "2 Hours",
+  "maxMarks": "50",
+  "totalQuestions": "8",
+  "courseOutcomes": [
+    "CO1: Understand fundamental data structures and their operations",
+    "CO2: Analyze and compare different data structure implementations",
+    "CO3: Apply data structures to solve real-world problems",
+    "CO4: Evaluate the efficiency of data structure algorithms"
+  ],
+  "instructions": [
+    "Answer all questions",
+    "Each question carries equal marks",
+    "Use of non-programmable calculator allowed",
+    "Draw neat diagrams wherever necessary",
+    "Write your answers clearly"
+  ],
+  "sections": [
+    {
+      "title": "A",
+      "questions": [
+        {
+          "qno": 1,
+          "text": "Define Data Structure. Classify different types of data structures with examples.",
+          "marks": "5",
+          "bl": "BL 1",
+          "co": "CO1",
+          "subQuestions": [],
+          "orOptions": []
+        },
+        {
+          "qno": 2,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Write the algorithm for push operation in a stack",
+              "marks": "2.5",
+              "bl": "BL 2",
+              "co": "CO1"
+            },
+            {
+              "label": "B",
+              "text": "Write the algorithm for pop operation in a stack",
+              "marks": "2.5",
+              "bl": "BL 2",
+              "co": "CO1"
+            }
+          ],
+          "orOptions": []
+        },
+        {
+          "qno": 3,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Compare arrays and linked lists in terms of time and space complexity",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Implement insertion operation in a singly linked list",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "B",
+      "questions": [
+        {
+          "qno": 4,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Describe the structure and operations of a circular queue",
+              "marks": "5",
+              "bl": "BL 2",
+              "co": "CO1"
+            },
+            {
+              "label": "B",
+              "text": "Write the enqueue and dequeue operations for a circular queue",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO1"
+            }
+          ],
+          "orOptions": []
+        },
+        {
+          "qno": 5,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Implement In-order, Pre-order, and Post-order traversal for a binary tree",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Draw and explain the difference between depth-first search (DFS) and breadth-first search (BFS)",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO3"
+            }
+          ]
+        },
+        {
+          "qno": 6,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Design and implement a hash table with collision handling using open addressing",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Compare linear probing and quadratic probing in hash tables with suitable examples",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "C",
+      "questions": [
+        {
+          "qno": 7,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Compare the time and space complexity of Quicksort and Mergesort",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Explain when to use each sorting algorithm based on data characteristics",
+              "marks": "5",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ],
+          "orOptions": []
+        },
+        {
+          "qno": 8,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Explain the concept of recursion. Write a recursive algorithm to calculate factorial of a number.",
+              "marks": "10",
+              "bl": "BL 2",
+              "co": "CO3"
+            },
+            {
+              "label": "B",
+              "text": "Explain the working of a binary search algorithm. Analyze its time complexity.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

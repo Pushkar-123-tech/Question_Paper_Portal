@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title> Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/public/ui.css">
+
+  <style>
+    :root {
+      --primary: #7b0000;
+      --sidebar: #1f2937;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 8px;
+    }
+
+    html,
+    body {
+      display: block !important;
+      visibility: visible !important;
+      background: var(--bg);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* HEADER */
+    .college-header {
+      background: white;
+      border-bottom: 4px solid var(--primary);
+      padding: 12px 30px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .header-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 120px;
+      align-items: center;
+    }
+
+    .header-logo img {
+      max-height: 80px;
+    }
+
+    .header-center {
+      text-align: center;
+      color: var(--primary);
+    }
+
+    .header-center h1 {
+      font-family: "Times New Roman", serif;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .header-center p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    /* LAYOUT */
+    .dashboard-container {
+      display: flex;
+      height: calc(100vh - 110px);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar h3 {
+      font-size: 12px;
+      color: #d1d5db;
+      text-transform: uppercase;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: white;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(4px);
+      border-left: 3px solid #ffb3b3;
+    }
+
+    .nav-btn.primary {
+      background: var(--primary);
+      color: white;
+      justify-content: center;
+      font-weight: 600;
+      box-shadow: 0 2px 10px rgba(123, 0, 0, 0.3);
+    }
+
+    .nav-btn.primary:hover {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 18px 22px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 1100px;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .card .muted {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 16px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: 0.25s;
+    }
+
+    .stat-card:hover {
+      transform: scale(1.03);
+    }
+
+    .stat-card h3 {
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-card p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* BUTTONS */
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #e5e7eb;
+      color: black;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.06);
+      opacity: 0.9;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    /* ACTIVITY */
+    .activity {
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .activity li {
+      padding: 8px 6px;
+      border-bottom: 1px solid #e5e7eb;
+      transition: 0.3s;
+    }
+
+    .activity li:hover {
+      background: rgba(123, 0, 0, 0.05);
+      padding-left: 12px;
+      border-radius: 4px;
+    }
+
+    .activity li:last-child {
+      border-bottom: none;
+    }
+
+    /* MOBILE RESPONSIVE */
+    .sidebar-toggle {
+      display: none;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 1001;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    @media (max-width: 1024px) {
+      .college-header {
+        padding: 10px 16px;
+      }
+
+      .header-row {
+        grid-template-columns: 80px 1fr 80px;
+      }
+
+      .header-logo img {
+        max-height: 60px;
+      }
+
+      .header-center h1 {
+        font-size: 22px;
+      }
+
+      .header-center p {
+        font-size: 11px;
+      }
+
+      .main {
+        padding: 20px 16px;
+        gap: 14px;
+      }
+
+      .card {
+        padding: 14px 16px;
+        max-width: 100%;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 12px;
+      }
+
+      .stat-card h3 {
+        font-size: 20px;
+      }
+
+      .actions {
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .dashboard-container {
+        height: calc(100vh - 50px);
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 50px;
+        width: 260px;
+        height: calc(100vh - 50px);
+        z-index: 1000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        border-right: 1px solid #333;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .main {
+        width: 100%;
+        padding: 16px 12px;
+        margin-top: 0;
+      }
+
+      .header-row {
+        grid-template-columns: 70px 1fr 70px;
+      }
+
+      .header-logo img {
+        max-height: 50px;
+      }
+
+      .header-center h1 {
+        font-size: 18px;
+      }
+
+      .header-center p {
+        font-size: 10px;
+      }
+
+      .college-header {
+        padding: 8px 12px;
+      }
+
+      .card {
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-width: 100%;
+      }
+
+      .stat-card {
+        padding: 10px;
+      }
+
+      .stat-card h3 {
+        font-size: 18px;
+      }
+
+      .stat-card p {
+        font-size: 11px;
+      }
+
+      .actions {
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        flex: 1;
+        min-width: 100px;
+      }
+
+      .nav-btn {
+        padding: 12px;
+        font-size: 13px;
+        min-height: 44px;
+      }
+
+      .sidebar h3 {
+        font-size: 11px;
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .header-logo {
+        display: none;
+      }
+
+      .header-center {
+        grid-column: 1;
+      }
+
+      .header-center h1 {
+        font-size: 16px;
+        margin-bottom: 3px;
+      }
+
+      .header-center p {
+        font-size: 9px;
+        line-height: 1.3;
+      }
+
+      .sidebar {
+        width: 100%;
+        left: -100%;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .main {
+        padding: 12px 8px;
+        gap: 10px;
+      }
+
+      .card {
+        padding: 10px;
+      }
+
+      .card h2 {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .card p {
+        font-size: 13px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+
+      .stat-card {
+        padding: 8px;
+      }
+
+      .stat-card h3 {
+        font-size: 16px;
+      }
+
+      .stat-card p {
+        font-size: 10px;
+      }
+
+      .btn {
+        padding: 10px 8px;
+        font-size: 11px;
+        flex: 0 1 48%;
+      }
+
+      .actions {
+        gap: 4px;
+      }
+
+      .activity {
+        font-size: 12px;
+      }
+
+      .activity li {
+        padding: 6px 4px;
+      }
+
+      .nav-btn {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+
+      .sidebar h3 {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+
+  <header class="college-header">
+    <div class="header-row">
+      <div class="header-logo"><img src="/public/image1.png" id="jspmLogo" alt="JSPM Logo"></div>
+      <div class="header-center">
+        <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+        <p>
+          Empowered Autonomous Institute • Affiliated to SPPU • Approved by AICTE<br />
+          NBA (UG) • NAAC “A” Grade • NIRF 151–200
+        </p>
+      </div>
+      <div class="header-logo"><img src="/public/image2.png" id="rscoeLogo" alt="RSCOE Logo"></div>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+
+    <aside class="sidebar">
+      <h3>Teacher Panel</h3>
+      <button class="nav-btn" onclick="dashboardView()"><i class="fa-solid fa-gauge"></i> Dashboard</button>
+      <button class="nav-btn" onclick="createPaper()"><i class="fa-solid fa-file-circle-plus"></i> Create Question
+        Paper</button>
+      <button class="nav-btn" onclick="myPapers()"><i class="fa-solid fa-clipboard-list"></i> My Question
+        Papers</button>
+      <button class="nav-btn" onclick="openProfile()"><i class="fa-solid fa-user"></i> Profile</button>
+      <button class="nav-btn" onclick="openSecurity()"><i class="fa-solid fa-gear"></i> Security Settings</button>
+      <button class="nav-btn primary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </aside>
+
+    <main class="main">
+      <div class="card">
+        <h2>Welcome, Teacher 👋</h2>
+        <p class="muted">Create, manage & share question papers securely.</p>
+        <div style="margin-top:10px;">
+          <strong id="userName">Teacher</strong>
+          <div style="font-size:12px;color:#6b7280;" id="userEmail">example@mail.com</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="totalPapers">0</h3>
+          <p>Total Papers</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="draftPapers">0</h3>
+          <p>Draft Papers</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="sharedPapers">0</h3>
+          <p>Shared Papers</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="receivedPapers">0</h3>
+          <p>Received Papers</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Actions</h2>
+        <div class="actions">
+          <button id="createPaperBtn" class="btn primary"><i class="fa-solid fa-file-circle-plus"></i> Create
+            Paper</button>
+          <button id="myPapersBtn" class="btn"><i class="fa-solid fa-files"></i> My Papers</button>
+          <!-- <button class="btn"><i class="fa-solid fa-download"></i> Download PDFs</button>
+        <button class="btn"><i class="fa-solid fa-bell"></i> Alerts</button> -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>My Saved Papers</h2>
+        <p class="muted">Recently saved question papers.</p>
+        <div style="margin-top:10px; display:flex; gap:8px;">
+          <button class="btn" onclick="loadMyPapersDashboard()">Refresh</button>
+          <button class="btn" onclick="clearMyPapersDashboard()">Clear</button>
+        </div>
+        <div id="myPapersContainerDashboard" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>Recent Activity</h2>
+        <ul class="activity" id="recentActivity"></ul>
+        <div style="margin-top:8px;"><button class="btn" onclick="clearActivity()">Clear Activity</button></div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // show user info
+    const token = localStorage.getItem('token');
+    let currentUser = null;
+
+    async function initDashboard() {
+      if (!token) { window.location.href = '/login.html'; return; }
+
+      try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) {
+          console.error('Auth failed:', res.status);
+          logout();
+          return;
+        }
+        const data = await res.json();
+        currentUser = data.user;
+
+        document.getElementById('userName').innerText = currentUser.name;
+        document.getElementById('userEmail').innerText = currentUser.email;
+
+        updateUIForRole(currentUser.role);
+        loadMyPapersDashboard();
+        loadStats();
+        renderActivity();
+      } catch (err) {
+        console.error('Init error:', err);
+        showToast('Session expired', 'error');
+        logout();
+      }
+    }
+
+    function updateUIForRole(role) {
+      const sidebar = document.querySelector('.sidebar');
+      const sidebarTitle = sidebar.querySelector('h3');
+      const mainTitle = document.querySelector('.main h2');
+
+      sidebarTitle.innerText = (role === 'dqca' ? 'DQCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')) + ' Panel';
+      mainTitle.innerText = `Welcome, ${role === 'dqca' ? 'DQCA' : role.charAt(0).toUpperCase() + role.slice(1).replace(/_/g, ' ')} 👋`;
+
+      // Redirect external users to their dedicated page
+      if (role === 'external') {
+        window.location.href = '/externalhome.html';
+        return;
+      }
+
+      // Hide/Show role specific buttons
+      if (role === 'admin') {
+        const adminBtn = document.createElement('button');
+        adminBtn.className = 'nav-btn';
+        adminBtn.innerHTML = '<i class="fa-solid fa-users-gear"></i> Admin Panel';
+        adminBtn.onclick = () => window.location.href = '/admin.html';
+        sidebar.insertBefore(adminBtn, sidebar.querySelector('button[onclick="logout()"]'));
+      }
+
+      const createBtn = document.getElementById('createPaperBtn');
+      // Only Faculty and Admin can create papers
+      if (role !== 'faculty' && role !== 'admin') {
+        if (createBtn) createBtn.style.display = 'none';
+        const sidebarCreate = sidebar.querySelector('button[onclick="createPaper()"]');
+        if (sidebarCreate) sidebarCreate.style.display = 'none';
+      }
+    }
+
+    async function fetchMyPapers() {
+      if (!token) { showToast('Not logged in', 'error'); return; }
+      const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/login.html'; return; }
+      if (!res.ok) { showToast('Failed to fetch papers', 'error'); return; }
+      const data = await res.json();
+      document.getElementById('totalPapers').innerText = data.papers.length;
+      // show list in a small modal for convenience
+      const list = data.papers.map(p => `${p.paperTitle || p.courseName || 'Untitled'}`).join('\n') || 'No papers';
+      showModal(`<h3>My Papers</h3><pre style="white-space:pre-wrap;">${list}</pre>`);
+    }
+
+    document.getElementById('createPaperBtn').addEventListener('click', () => {
+      if (!token) return window.location.href = '/login.html';
+      showCreatePaperSetsModal();
+    });
+
+    function showCreatePaperSetsModal() {
+      const html = `
+        <h3>Create Question Paper Batch</h3>
+        <p class="muted">Enter a common name for this batch (e.g., SE IT Mid Term Exam 2026). The system will automatically generate 3 sets (A, B, C).</p>
+        <div class="input-box" style="margin-top:15px;">
+          <input id="batchName" type="text" placeholder="Batch Name (e.g. Maths-Unit1-2026)" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+        </div>
+        <div style="margin-top:20px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+          <button class="btn primary" id="confirmCreateBatch">Create Batch</button>
+        </div>
+      `;
+      const overlay = showModal(html);
+      overlay.querySelector('#confirmCreateBatch').onclick = async () => {
+        const batchName = document.getElementById('batchName').value.trim();
+        if (!batchName) {
+          showToast('Please enter a batch name', 'warn');
+          return;
+        }
+
+        const btn = overlay.querySelector('#confirmCreateBatch');
+        btn.disabled = true;
+        btn.innerText = 'Creating...';
+
+        try {
+          // We'll create the first set and redirect to it, 
+          // but the user expects 3 sets. We can create them one by one or 
+          // just redirect to Set A and the user can see B and C created in dashboard.
+          // Let's create Set A, B, C as drafts.
+
+          let firstSetId = null;
+          for (const setLetter of ['A', 'B', 'C']) {
+            const paperTitle = `${batchName} Set ${setLetter}`;
+            const res = await fetch('/api/papers', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({
+                paperTitle: paperTitle,
+                courseName: batchName, // Fallback course name
+                baseTitle: batchName,
+                setName: setLetter,
+                status: 'draft'
+              })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(`Failed to create Set ${setLetter}`);
+            if (setLetter === 'A') firstSetId = data.paper.id;
+          }
+
+          showToast('Batch created successfully! Redirecting to Set A...', 'success');
+          closeModal(overlay);
+
+          // Clear any draft data to ensure fresh load
+          localStorage.removeItem('formDraft');
+          sessionStorage.removeItem('previewPaper');
+
+          if (firstSetId) {
+            setTimeout(() => {
+              window.location.href = `/questionpaperform.html?edit=${firstSetId}`;
+            }, 800);
+          } else {
+            loadMyPapersDashboard();
+          }
+        } catch (err) {
+          showToast(err.message, 'error');
+          btn.disabled = false;
+          btn.innerText = 'Create Batch';
+        }
+      };
+    }
+
+    // show papers in UI
+    document.getElementById('myPapersBtn').addEventListener('click', () => {
+      if (!token) return window.location.href = '/login.html';
+      loadMyPapersDashboard();
+    });
+
+    // Dashboard My Papers functions
+    let currentDashboardPapers = [];
+    async function loadMyPapersDashboard() {
+      const container = document.getElementById('myPapersContainerDashboard');
+      container.innerHTML = 'Loading...';
+      if (!token) { container.innerHTML = 'Please <a href="/login.html">login</a> to view your papers.'; return; }
+      try {
+        const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/login.html'; return; }
+        const data = await res.json();
+        if (!res.ok) { container.innerHTML = 'Failed to load papers'; return; }
+        currentDashboardPapers = data.papers || [];
+        renderMyPapersDashboard(data.papers || []);
+      } catch (e) { console.error(e); container.innerHTML = 'Network error'; }
+    }
+
+    function clearMyPapersDashboard() { document.getElementById('myPapersContainerDashboard').innerHTML = ''; }
+
+    function renderMyPapersDashboard(papers) {
+      const container = document.getElementById('myPapersContainerDashboard');
+      if (!papers || papers.length === 0) { container.innerHTML = '<div class="muted">No papers found in your workflow.</div>'; return; }
+      container.innerHTML = '';
+
+      // Group papers by baseTitle (batch name)
+      const groups = {};
+      papers.forEach(p => {
+        const groupKey = p.baseTitle || 'Individual Papers';
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push(p);
+      });
+
+      Object.keys(groups).forEach(groupKey => {
+        if (groupKey !== 'Individual Papers') {
+          const groupContainer = document.createElement('div');
+          groupContainer.style.borderLeft = '5px solid var(--primary)';
+          groupContainer.style.paddingLeft = '15px';
+          groupContainer.style.marginBottom = '20px';
+          groupContainer.style.borderRadius = '8px 0 0 8px';
+
+          const groupHeader = document.createElement('h3');
+          groupHeader.style.cssText = 'margin:15px 0 10px 0; color:var(--primary); font-size:16px; border-bottom:1px solid #ddd; padding-bottom:5px;';
+          groupHeader.innerText = groupKey;
+          groupContainer.appendChild(groupHeader);
+
+          groups[groupKey].forEach(p => {
+            groupContainer.appendChild(createPaperRow(p));
+          });
+          container.appendChild(groupContainer);
+        } else {
+          groups[groupKey].forEach(p => {
+            container.appendChild(createPaperRow(p));
+          });
+        }
+      });
+    }
+
+    function createPaperRow(p) {
+      const d = document.createElement('div');
+      d.className = 'card';
+      d.style.marginBottom = '10px';
+
+      const date = new Date(p.created_at || p.createdAt || Date.now()).toLocaleString();
+      const title = (p.paperTitle || p.paper_title || p.courseName || p.course_name || 'Untitled').trim();
+      const rawStatus = (p.status || p.paper_status || 'draft').toString();
+      const statusText = rawStatus.toUpperCase().replace(/_/g, ' ');
+      const ownerName = p.owner ? (typeof p.owner === 'object' ? p.owner.name : 'Unknown') : 'Unknown';
+
+      const isEmpty = !p.courseCode && !p.program && !p.courseName;
+
+      let actionsHtml = `
+        <button class="btn" onclick="viewPaperDashboard('${p.id}')">View</button>
+        <button class="btn" onclick="downloadPaperDashboard('${p.id}')">Download</button>
+      `;
+
+      const st = (p.status || p.paper_status || 'draft');
+      const isLocked = ['finalized', 'sent_to_external', 'approved_by_external', 'discarded'].includes(st);
+
+      // Check if any other paper in this batch is already finalized (blocks finalization of this one)
+      const isBatchFinalized = currentDashboardPapers.some(other => other.baseTitle && other.baseTitle === p.baseTitle && ['finalized', 'sent_to_external', 'approved_by_external'].includes(other.status) && other.id !== p.id);
+
+      // Workflow actions
+      if (currentUser.role === 'faculty') {
+        if (st === 'draft') {
+          const editBtnText = isEmpty ? 'Create' : 'Edit';
+
+          actionsHtml += `<button class="btn primary" onclick="submitPaper('${p.id}')">Submit Batch to DQCA</button>`;
+          actionsHtml += `<button class="btn" onclick="editPaperDashboard('${p.id}')">${editBtnText}</button>`;
+          actionsHtml += `<button class="btn" onclick="deletePaperDashboard('${p.id}')">Delete</button>`;
+        }
+      } else if (currentUser.role === 'dqca') {
+        if (st === 'submitted_to_dqca') {
+          if (!isBatchFinalized) {
+            actionsHtml += `<button class="btn primary" onclick="finalizePaper('${p.id}')">Finalize This Set</button>`;
+          } else {
+            actionsHtml += `<span class="muted" style="font-size:12px; font-style:italic;">Another set finalized</span>`;
+          }
+        } else if (st === 'finalized') {
+          actionsHtml += `<button class="btn primary" onclick="sendToExternal('${p.id}')">Send to External</button>`;
+        }
+      } else if (currentUser.role === 'external') {
+        if (st === 'sent_to_external') {
+          actionsHtml += `<button class="btn primary" onclick="approvePaper('${p.id}')">Approve Paper</button>`;
+        }
+      }
+
+      // Add "Locked" badge if needed
+      const lockedBadge = isLocked ? `<span style="background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">LOCKED</span>` : '';
+
+      d.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div>
+            <strong>${title}</strong> 
+            <span class="muted" style="background:#e5e7eb; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:8px;">${statusText}</span>
+            ${lockedBadge}
+            <div class="muted" style="font-size:12px">${p.program || ''} • By: ${ownerName} • ${date}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${actionsHtml}
+          </div>
+        </div>
+      `;
+      return d;
+    }
+
+    async function submitPaper(id) {
+      const paper = currentDashboardPapers.find(p => p.id === id);
+      if (!paper) return;
+
+      const isBatch = !!paper.baseTitle;
+      const confirmMsg = isBatch ? `Submit all 3 sets of batch "${paper.baseTitle}" to DQCA?` : 'Submit this paper to DQCA?';
+
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        if (isBatch) {
+          // Find all papers in the batch
+          const batchPapers = currentDashboardPapers.filter(p => p.baseTitle === paper.baseTitle);
+          for (const p of batchPapers) {
+            const res = await fetch(`/api/papers/${p.id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) throw new Error(`Submit failed for ${p.paperTitle}`);
+          }
+          showToast(`Batch "${paper.baseTitle}" submitted to DQCA`, 'success');
+        } else {
+          const res = await fetch(`/api/papers/${id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+          if (!res.ok) throw new Error('Submit failed');
+          showToast('Submitted to DQCA', 'success');
+        }
+        loadMyPapersDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function finalizePaper(id) {
+      if (!confirm('Finalize this paper? This will lock other sets in the same batch and mark this set as ready for External.')) return;
+      try {
+        const res = await fetch(`/api/papers/${id}/finalize`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) throw new Error('Finalize failed');
+        showToast('Paper finalized and batch locked.', 'success');
+        loadMyPapersDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function sendToExternal(id) {
+      try {
+        // 1. Fetch available external users
+        const res = await fetch('/api/auth/users?role=external', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Could not fetch external users.');
+        const { users } = await res.json();
+
+        if (!users || users.length === 0) {
+          return showToast('No external examiners found to send the paper to.', 'warn');
+        }
+
+        // 2. Show a selection modal
+        let options = users.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
+        const modalHtml = `
+          <h3>Send to External Examiner</h3>
+          <p class="muted">Select an external examiner to send this paper to.</p>
+          <select id="externalUserSelect" style="width:100%; padding:12px; margin-top:15px; border:1px solid #ddd; border-radius:8px;">
+            ${options}
+          </select>
+          <div style="margin-top:20px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+            <button class="btn" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+            <button class="btn primary" id="confirmSendToExternal">Send</button>
+          </div>
+        `;
+        const overlay = showModal(modalHtml);
+
+        // 3. Handle the confirmation and API call
+        overlay.querySelector('#confirmSendToExternal').onclick = async () => {
+          const recipientEmail = document.getElementById('externalUserSelect').value;
+          if (!recipientEmail) return showToast('Please select a recipient.', 'warn');
+
+          const btn = overlay.querySelector('#confirmSendToExternal');
+          btn.disabled = true;
+          btn.innerText = 'Sending...';
+
+          try {
+            const sendRes = await fetch(`/api/share/send`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({ paperId: id, recipientEmail, message: 'Please review this question paper.' })
+            });
+
+            if (!sendRes.ok) {
+              const errData = await sendRes.json();
+              throw new Error(errData.message || 'Failed to send paper.');
+            }
+
+            showToast('Paper sent to external examiner successfully!', 'success');
+            closeModal(overlay);
+            loadMyPapersDashboard(); // Refresh the dashboard to show updated status
+            loadMyPapersDashboard(); // Refresh the dashboard to show updated status
+
+          } catch (err) {
+            showToast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerText = 'Send';
+          }
+        };
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function approvePaper(id) {
+      if (!confirm('Approve this question paper?')) return;
+      try {
+        const res = await fetch(`/api/papers/${id}/approve`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) throw new Error('Approve failed');
+        showToast('Paper approved successfully', 'success');
+        loadMyPapersDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function openCommentModal(id) {
+      const html = `<h3>Add Comment</h3>
+    <textarea id="commentText" rows="4" style="width:100%; padding:10px; margin-top:10px;" placeholder="Suggest changes..."></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="commentCancel">Cancel</button><button class="btn primary" id="commentSave">Post Comment</button></div>`;
+      const overlay = showModal(html);
+      overlay.querySelector('#commentCancel').onclick = () => overlay.remove();
+      overlay.querySelector('#commentSave').onclick = async () => {
+        const text = document.getElementById('commentText').value.trim();
+        if (!text) return showToast('Enter comment', 'warn');
+        try {
+          const res = await fetch(`/api/papers/${id}/comment`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ text })
+          });
+          if (!res.ok) throw new Error('Comment failed');
+          showToast('Comment added', 'success');
+          overlay.remove();
+          loadMyPapersDashboard();
+        } catch (err) { showToast(err.message, 'error'); }
+      };
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      showToast('Logged out', 'success');
+      window.location.href = '/login.html';
+    }
+
+    // Sidebar actions
+    function dashboardView() {
+      setHeader('Dashboard');
+      // scroll or refresh dashboard list
+      loadMyPapersDashboard();
+    }
+    function createPaper() { if (!token) return window.location.href = '/login.html'; showCreatePaperSetsModal(); }
+    function myPapers() { if (!token) return window.location.href = '/login.html'; loadMyPapersDashboard(); }
+    async function receivedPapers() {
+      if (!token) return window.location.href = '/login.html';
+      try {
+        const res = await fetch('/api/share/received', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+        if (!res.ok) { showToast('Failed to load received items', 'error'); return; }
+        const d = await res.json();
+        const rows = d.list.map(it => {
+          const dt = new Date(it.created_at || it.createdAt).toLocaleString();
+          const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Untitled';
+          return `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message || ''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
+        }).join('') || '<div class="muted">No items</div>';
+        showModal(`<h3>Received Papers</h3><div>${rows}</div>`);
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+
+    async function viewReceived(id) {
+      try {
+        const res = await fetch('/api/share/' + id, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+        if (!res.ok) return showToast('Unable to load item', 'error');
+        const d = await res.json();
+        const paper = d.shared.paper_snapshot;
+        sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+        showToast('Opening received paper', 'info');
+        window.open(`/template.html?preview=1&view=${paper.id}`, '_blank');
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+    async function downloadReceived(id) {
+      try {
+        const res = await fetch('/api/share/' + id, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } });
+        if (!res.ok) return showToast('Unable to load item', 'error');
+        const d = await res.json();
+        const paper = d.shared.paper_snapshot;
+        sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+        showToast('Downloading received paper', 'info');
+        window.open(`/template.html?preview=1&download=1&view=${paper.id}`, '_blank');
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+    function pdfDownloads() { window.location.href = '/template.html'; }
+    async function notifications() {
+      if (!token) return window.location.href = '/login.html';
+      try {
+        const res = await fetch('/api/share/received', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) return showToast('Failed to load notifications', 'error');
+        const d = await res.json();
+        const list = d.list || [];
+        if (!list.length) return showModal('<h3>Notifications</h3><p class="muted">No notifications</p>');
+        let rows = '';
+        list.forEach(it => {
+          const dt = new Date(it.created_at || it.createdAt).toLocaleString();
+          const title = (it.paper_snapshot && (it.paper_snapshot.paperTitle || it.paper_snapshot.courseName)) || 'Shared Paper';
+          rows += `<div style="border-bottom:1px solid #eee;padding:8px 0;"><strong>${title}</strong><div class="muted">From: ${it.sender_name} &lt;${it.sender_email}&gt; • ${dt}</div><div style="margin-top:6px">${it.message || ''}</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="viewReceived('${it.id}')">View</button><button class="btn" onclick="downloadReceived('${it.id}')">Download</button></div></div>`;
+        });
+        showModal(`<h3>Notifications</h3><div>${rows}</div>`);
+        // mark notifications as seen up to the latest received
+        try {
+          const latestFromList = list && list.length ? (list[0].created_at || list[0].createdAt) : new Date().toISOString();
+          localStorage.setItem('notifSeenAt', latestFromList);
+          const b = document.getElementById('notifBadge'); if (b) b.style.display = 'none';
+          // notify other tabs that notifications were seen
+          try { localStorage.setItem('notifSeenAtUpdated', Date.now()); } catch (e) { }
+        } catch (e) { }
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+    function openTemplate() { window.location.href = '/template.html'; }
+
+
+    // Activity helpers (shared via localStorage)
+    function addActivity(text) {
+      try {
+        const key = 'recentActivity';
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.unshift({ text, time: Date.now() });
+        if (list.length > 50) list.length = 50;
+        localStorage.setItem(key, JSON.stringify(list));
+        renderActivity();
+      } catch (e) { console.error(e) }
+    }
+    function renderActivity() {
+      const ul = document.getElementById('recentActivity');
+      if (!ul) return;
+      const list = JSON.parse(localStorage.getItem('recentActivity') || '[]');
+      if (list.length === 0) { ul.innerHTML = '<li class="muted">No recent activity</li>'; return; }
+      ul.innerHTML = '';
+      list.slice(0, 20).forEach(it => {
+        const li = document.createElement('li');
+        const dt = new Date(it.time).toLocaleString();
+        li.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="max-width:75%">${it.text}</div>
+        <div class="muted" style="font-size:11px">${dt}</div>
+      </div>`;
+        ul.appendChild(li);
+      });
+    }
+    function clearActivity() { localStorage.removeItem('recentActivity'); renderActivity(); }
+
+    // Saved-paper helpers for dashboard
+    async function fetchPaperByIdDashboard(id) {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+      const r = await fetch('/api/papers/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!r.ok) return null;
+      const d = await r.json();
+      return d.paper;
+    }
+    async function viewPaperDashboard(id) {
+      let paper = await fetchPaperByIdDashboard(id);
+      if (!paper) {
+        paper = (currentDashboardPapers || []).find(p => String(p.id) === String(id)) || null;
+      }
+      if (!paper) return showToast('Unable to load paper', 'error');
+      sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+      addActivity(`Viewed paper: ${paper.paperTitle || paper.courseName || 'Untitled'}`);
+      window.open(`/template.html?preview=1&view=${paper.id}`, '_blank');
+    }
+    async function downloadPaperDashboard(id) {
+      let paper = await fetchPaperByIdDashboard(id);
+      if (!paper) {
+        paper = (currentDashboardPapers || []).find(p => String(p.id) === String(id)) || null;
+      }
+      if (!paper) return showToast('Unable to load paper', 'error');
+      sessionStorage.setItem('previewPaper', JSON.stringify(paper));
+      addActivity(`Downloaded paper: ${paper.paperTitle || paper.courseName || 'Untitled'}`);
+      window.open(`/template.html?preview=1&download=1&view=${paper.id}`, '_blank');
+    }
+    async function editPaperDashboard(id) {
+      addActivity(`Opened for edit: ${id}`);
+      window.location.href = '/questionpaperform.html?edit=' + id;
+    }
+    async function deletePaperDashboard(id) {
+      const ok = await showConfirm('Delete this paper?');
+      if (!ok) return;
+      const token = localStorage.getItem('token');
+      if (!token) { showToast('Not logged in', 'error'); return; }
+      try {
+        const r = await fetch('/api/papers/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        if (!r.ok) { const dd = await r.json(); showToast(dd.message || 'Delete failed', 'error'); return; }
+        showToast('Deleted', 'success');
+        addActivity(`Deleted paper: ${id}`);
+        // Clear cached saved paper if it matches the deleted paper ID
+        try {
+          const last = JSON.parse(localStorage.getItem('lastSavedPaper') || 'null');
+          if (last && String(last.id) === String(id)) {
+            localStorage.removeItem('lastSavedPaper');
+          }
+        } catch (e) { }
+        loadMyPapersDashboard();
+        try { localStorage.setItem('papersUpdated', Date.now()); } catch (e) { }
+        if (typeof loadStats === 'function') loadStats();
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+
+    // Send modal
+    async function openSendModal(paperId) {
+      const fromEmail = localStorage.getItem('userEmail') || '';
+      const fromName = localStorage.getItem('userName') || '';
+      const html = `<h3>Send Paper</h3>
+    <div class="muted">From (your email)</div>
+    <input id="sendFromEmail" value="${fromEmail}" readonly>
+    <div class="muted">From (name)</div>
+    <input id="sendFromName" value="${fromName}" readonly>
+    <div class="muted">Recipient email</div>
+    <input id="sendToEmail" placeholder="recipient@example.com">
+    <div class="muted">Message (optional)</div>
+    <textarea id="sendMessage" rows="4" placeholder="Add a short message"></textarea>
+    <div class="modal-actions"><button class="btn ghost" id="sendCancel">Cancel</button><button class="btn primary" id="sendSend">Send</button></div>`;
+      const overlay = showModal(html);
+      overlay.querySelector('#sendCancel').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#sendSend').addEventListener('click', async () => {
+        const to = overlay.querySelector('#sendToEmail').value.trim();
+        const msg = overlay.querySelector('#sendMessage').value.trim();
+        if (!to) return showToast('Enter recipient email', 'warn');
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return window.location.href = '/login.html';
+          const r = await fetch('/api/share/send', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ paperId, recipientEmail: to, message: msg }) });
+          const d = await r.json();
+          if (!r.ok) { showToast(d.message || 'Send failed', 'error'); return; }
+          showToast('Shared successfully', 'success');
+          addActivity(`Shared paper to ${to}`);
+          overlay.remove(); try { localStorage.setItem('sharedUpdated', Date.now()); } catch (e) { } if (typeof loadStats === 'function') loadStats();
+        } catch (e) { console.error(e); showToast('Network error', 'error'); }
+      });
+    }
+    async function loadStats() {
+      if (!token) return;
+      try {
+        const r = await fetch('/api/papers/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('totalPapers').innerText = d.total || 0;
+        document.getElementById('draftPapers').innerText = d.drafts || 0;
+        document.getElementById('sharedPapers').innerText = d.shared || 0;
+        document.getElementById('receivedPapers').innerText = d.received || 0;
+        // update notif badge (hide if user already saw latest)
+        try {
+          const b = document.getElementById('notifBadge');
+          if (b) {
+            const latest = d.latestReceivedAt ? Date.parse(d.latestReceivedAt) : 0;
+            const seen = localStorage.getItem('notifSeenAt') ? Date.parse(localStorage.getItem('notifSeenAt')) : 0;
+            if (d.received && d.received > 0 && latest > seen) { b.style.display = 'inline-block'; b.innerText = d.received; }
+            else { b.style.display = 'none'; }
+          }
+        } catch (e) { }
+      } catch (e) { console.error(e); }
+    }
+
+    async function openProfile() {
+      if (!token) return window.location.href = '/login.html';
+      try {
+        const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!r.ok) return showToast('Failed to load profile', 'error');
+        const d = await r.json(); const u = d.user;
+        const html = `<h3>Profile</h3><div class="muted">Name</div><input id="pfName" value="${u.name}"><div class="muted">Email</div><input id="pfEmail" value="${u.email}"><div class="modal-actions"><button class="btn ghost" id="pfCancel">Cancel</button><button class="btn primary" id="pfSave">Save</button></div>`;
+        const overlay = showModal(html);
+        overlay.querySelector('#pfCancel').addEventListener('click', () => overlay.remove());
+        overlay.querySelector('#pfSave').addEventListener('click', async () => {
+          const name = overlay.querySelector('#pfName').value.trim();
+          const email = overlay.querySelector('#pfEmail').value.trim();
+          try {
+            const r2 = await fetch('/api/auth/me', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ name, email }) });
+            const d2 = await r2.json();
+            if (!r2.ok) { showToast(d2.message || 'Update failed', 'error'); return; }
+            showToast('Profile updated', 'success');
+            localStorage.setItem('userName', d2.user.name); localStorage.setItem('userEmail', d2.user.email);
+            document.getElementById('userName').innerText = d2.user.name;
+            overlay.remove();
+          } catch (e) { console.error(e); showToast('Network error', 'error'); }
+        });
+      } catch (e) { console.error(e); showToast('Network error', 'error'); }
+    }
+
+    async function openSecurity() {
+      if (!token) return window.location.href = '/login.html';
+      const html = `<h3>Security Settings</h3><div class="muted">Change Password</div><input id="curPwd" type="password" placeholder="Current password"><input id="newPwd" type="password" placeholder="New password"><div class="modal-actions"><button class="btn ghost" id="secCancel">Cancel</button><button class="btn primary" id="secSave">Change</button></div>`;
+      const overlay = showModal(html);
+      overlay.querySelector('#secCancel').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#secSave').addEventListener('click', async () => {
+        const cur = overlay.querySelector('#curPwd').value; const np = overlay.querySelector('#newPwd').value;
+        if (!cur || !np) return showToast('Enter both fields', 'warn');
+        try {
+          const r = await fetch('/api/auth/me/password', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ currentPassword: cur, newPassword: np }) });
+          const d = await r.json(); if (!r.ok) return showToast(d.message || 'Change failed', 'error');
+          showToast('Password changed', 'success'); overlay.remove();
+        } catch (e) { console.error(e); showToast('Network error', 'error'); }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Make sure page is visible
+      document.documentElement.style.visibility = 'visible';
+      document.body.style.display = 'block';
+
+      try {
+        renderActivity();
+        initDashboard();
+      } catch (e) {
+        console.error('Initialization error:', e);
+        // Show error but keep page visible
+        if (token) {
+          showToast('Error loading dashboard', 'error');
+        } else {
+          window.location.href = '/login.html';
+        }
+      }
+    });
+
+    // Listen for changes made in other tabs (save/delete/share)
+    window.addEventListener('storage', (e) => {
+      try {
+        if (e.key === 'papersUpdated' || e.key === 'sharedUpdated') {
+          if (token) {
+            loadMyPapersDashboard();
+            if (typeof loadStats === 'function') loadStats();
+            renderActivity();
+          }
+        }
+        if (e.key === 'notifSeenAtUpdated') {
+          // when notifications are seen in another tab, refresh stats and hide badge
+          if (token) { if (typeof loadStats === 'function') loadStats(); }
+        }
+      } catch (err) { console.error(err); }
+    });
+
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+
+      // Close sidebar when clicking a nav button
+      const navBtns = sidebar.querySelectorAll('.nav-btn');
+      navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('active');
+          }
+        });
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+          if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+          }
+        }
+      });
+    }
+  </script>
+  <script src="/public/ui.js"></script>
+
+</body>
+
+</html>

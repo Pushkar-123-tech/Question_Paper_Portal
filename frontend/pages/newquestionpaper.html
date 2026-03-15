@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Question Paper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #2C2C2C;
+            font-family: "Times New Roman", serif;
+
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+        }
+
+        .a4 {
+            background-color: white;
+            position: relative;
+            top: 38px;
+            width: 794px;
+            height: 1123px;
+            border: 2px solid black;
+            padding: 40px;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .left-header {
+            position: relative;
+            top: 23px;
+            left: 14px;
+            display: flex;
+        }
+
+        .right-header {
+            position: relative;
+            left: 16px;
+            top: 23px;
+        }
+
+        .box {
+            border: 1px solid black;
+            height: 31px;
+            width: 131px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+
+            padding-left: 5px;
+        }
+
+        .box1 {
+            border: 1px solid black;
+            height: 31px;
+            width: 160px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+
+            padding-left: 5px;
+        }
+
+        .box-center {
+            justify-content: center;
+            padding-left: 0;
+        }
+
+        .college {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .college h2:first-child {
+            font-size: 16.5px;
+            position: relative;
+            top: 11px;
+            left: 20px;
+            font-weight: 550;
+        }
+
+        .college h2:nth-child(2) {
+            position: relative;
+            left: 3px;
+            top: 11px;
+            font-size: 16px;
+            font-weight: 600;
+
+        }
+
+        .college h3 {
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-top: 2px;
+            position: relative;
+            top: 13px;
+            left: 16px;
+        }
+
+        .exam-title {
+            text-align: center;
+            font-size: 10.5px;
+            font-weight: 500;
+            margin-bottom: 22px;
+            position: relative;
+            left: 18px;
+            top: 6px;
+        }
+
+        .mid-row {
+            position: relative;
+            top: 6px;
+            left: -17px;
+            display: flex;
+            justify-content: center;
+            font-size: 16.5px;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .center-text {
+            text-align: center;
+            font-size: 16.5px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 16.5px;
+            font-weight: 700;
+        }
+
+
+        .outcome-box {
+            border: 1.5px solid black;
+            width: 97%;
+            font-weight: bold;
+            position: relative;
+            top: -23px;
+
+        }
+
+        .instruction-box {
+            border-left: 1.5px solid black;
+            border-right: 1.5px solid black;
+            border-bottom: 1.5px solid black;
+            border-top:1.5px solid black;
+            font-size: 16px;
+            padding: 2px 0px;
+            position: relative;
+            top: -23px;
+            left: 16px;
+            width: 97%;
+        }
+
+        .ins-title {
+            font-weight: bold;
+            padding: 0px 6px;
+        }
+
+        .int-list-item {
+            list-style-type: none;
+            border-top: 1px solid black;
+            padding: 2px 6px;
+        }
+
+
+        .co-list-items {
+            position: relative;
+            left: 28px;
+            font-size: 17px;
+            font-weight: normal;
+            /* margin-top: 8px; */
+            margin-left: 12px;
+            margin-bottom: 12px;
+        }
+
+        .co-list {
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+
+
+
+        table {
+            border: 2px solid black;
+            /* outer border */
+            border-collapse: collapse;
+            /* makes all borders single line */
+        }
+
+        td,
+        th {
+            border: 1.5px solid black;
+            /* inner single-line borders */
+        }
+
+        .question-no {
+            text-align: center;
+            width: 50px;
+        }
+
+        .subquestion-no {
+            width: 40px;
+        }
+
+        .question {
+            width: auto;
+        }
+
+        /* fills remaining space */
+        .marks {
+            width: 50px;
+            font-weight: bold;
+        }
+
+        .bl {
+            width: 40px;
+        }
+
+        .co {
+            width: 60px;
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 1024px) {
+            .a4 {
+                width: 95%;
+                height: auto;
+                padding: 30px 20px;
+            }
+            body {
+                padding-top: 10px;
+            }
+            .college h2:first-child {
+                font-size: 15px;
+            }
+            .college h2:nth-child(2) {
+                font-size: 14px;
+            }
+            .college h3 {
+                font-size: 12px;
+            }
+            .exam-title {
+                font-size: 10px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 14px;
+            }
+            table {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .a4 {
+                width: 100%;
+                height: auto;
+                padding: 20px 15px;
+                margin: 10px auto;
+                border: 1px solid black;
+            }
+            body {
+                background-color: white;
+                padding-top: 0;
+            }
+            .college h2:first-child {
+                font-size: 13px;
+                top: 5px;
+            }
+            .college h2:nth-child(2) {
+                font-size: 12px;
+                top: 5px;
+            }
+            .college h3 {
+                font-size: 11px;
+                top: 7px;
+            }
+            .exam-title {
+                font-size: 9px;
+                top: 0;
+            }
+            header {
+                margin-bottom: 16px;
+            }
+            .left-header {
+                left: 0;
+            }
+            .right-header {
+                left: 0;
+            }
+            .left-header .box {
+                height: 26px;
+                width: 110px;
+                font-size: 12px;
+            }
+            .left-header .box1 {
+                height: 26px;
+                width: 140px;
+                font-size: 12px;
+            }
+            .box1 {
+                height: 26px;
+                width: 140px;
+                font-size: 12px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 12px;
+            }
+            table {
+                font-size: 11px;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .a4 {
+                width: 100%;
+                height: auto;
+                padding: 15px 10px;
+                margin: 5px 0;
+                border: none;
+            }
+            body {
+                background-color: white;
+                padding-top: 0;
+                margin: 0;
+            }
+            .college h2:first-child {
+                font-size: 12px;
+                top: 0;
+                left: 0;
+            }
+            .college h2:nth-child(2) {
+                font-size: 11px;
+                top: 0;
+                left: 0;
+            }
+            .college h3 {
+                font-size: 10px;
+                top: 5px;
+                left: 0;
+            }
+            .college {
+                margin-bottom: 15px;
+            }
+            .exam-title {
+                font-size: 8px;
+                top: 0;
+            }
+            header {
+                margin-bottom: 12px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .left-header, .right-header {
+                left: 0;
+                top: 0;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .left-header .box,
+            .left-header .box1,
+            .box, .box1 {
+                height: 24px;
+                width: 100%;
+                font-size: 11px;
+                padding-left: 3px;
+            }
+            .mid-row, .center-text, .bottom-row {
+                font-size: 11px;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .mid-row > div, .bottom-row > div {
+                left: 0 !important;
+                top: 0 !important;
+                position: relative !important;
+            }
+            .co-list-item {
+                font-size: 10px;
+            }
+            .co-list {
+                font-weight: bold;
+            }
+            .int-list-item {
+                font-size: 10px;
+                padding: 1px 3px;
+            }
+            table {
+                font-size: 9px;
+                width: 100%;
+            }
+            td, th {
+                padding: 2px;
+                border: 1px solid black;
+            }
+            .question-no, .marks, .bl, .co {
+                width: 30px;
+            }
+            .subquestion-no {
+                width: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="a4">
+
+        <header>
+            <div class="left-header">
+                <div class="box"><label for="" style="position: relative; top: -6px ; ">PRN No.</label></div>
+                <div class="box box-center" style="line-height: 0.85;"><label for=""
+                        style="position: relative; left: 6px;">Total No. of Questions: 12</label></div>
+            </div>
+            <div class="box1 right-header">QP Code:</div>
+        </header>
+
+        <section class="college">
+            <h2>JSPM’s</h2>
+            <h2>Rajarshi Shahu College of Engineering, Tathawade, Pune – 411033</h2>
+            <h3>(An autonomous institute affiliated to Savitribai Phule Pune University)</h3>
+        </section>
+
+        <section class="exam-title">
+            <h2>Examination: End Semester Examination (ESE)</h2>
+        </section>
+
+        <section class="mid-row">
+            <div>Semester: I</div>
+            <div style="position: relative;left: 105px; ">Academic Year: 2025–26</div>
+        </section>
+
+        <section class="center-text">
+            <div style="position: relative;top: 3px;left: 15px;">Programme: Computer Engineering</div>
+        </section>
+
+        <section class="center-text">
+
+            <div style="position: relative;top: -17px;left: 15px;">Examination Class: S.Y., B. Tech.</div>
+        </section>
+
+        <section class="center-text" style="display: flex;">
+            <div class="courcecode" style="position: relative;top: -36px;left: 47px;font-size: 16px;">Cource
+                Code:CS2203T</div>
+            <div style="position: relative;top: -36px;left: 130px;font-size: 16px;">Course Name and Pattern: Data
+                Structures [2023 Pattern]</div>
+        </section>
+
+        <section class="bottom-row">
+            <div style="position: relative;top: -37px;left: 13px;">Duration: 2 Hours</div>
+            <div style="position: relative;top: -37px;left: -10px;">Max. Marks: 50 Marks</div>
+        </section>
+
+
+
+        <section class="outcome-box" style="position: relative; left: 16px;">
+            <div class="box-title">Course Outcomes:</div>
+            <div class="co-list-items" style="position: relative;left: 10px;">
+                <div class="co-list-item"><span class="co-list">CO1:</span> Define and explain the basic concepts of
+                    algorithms and data structures.</div>
+                <div class="co-list-item"><span class="co-list">CO2:</span> Implement and perform operations on linear
+                    data structures (array and linked list).</div>
+                <div class="co-list-item"><span class="co-list">CO3:</span> Apply stack and queue data structures in
+                    problem-solving.</div>
+                <div class="co-list-item"><span class="co-list">CO4:</span> Analyze time and space complexity using
+                    asymptotic notations.</div>
+                <div class="co-list-item"><span class="co-list">CO5:</span> Evaluate efficiency of sorting and searching
+                    algorithms.</div>
+                <div class="co-list-item"><span class="co-list">CO6:</span> Demonstrate file organization and perform
+                    basic file operations.</div>
+            </div>
+        </section>
+
+        <section class="instruction-box">
+            <div class="ins-title">Instruction to the Candidates</div>
+            <div class="inst-list">
+                <li class="int-list-item">1. All questions are compulsory.</li>
+                <li class="int-list-item">2. Figures to the right indicate full marks.</li>
+                <li class="int-list-item">3. Assume suitable data if necessary.</li>
+            </div>
+
+        </section>
+
+        <section style="width: 97%; position: relative; left: 16px; top: -10px;">
+            <h3 style="width: 100%;display: flex;justify-content: center;">SECTION-A</h3>
+            <div class="section-A">
+                <table style="width:100%; margin-top:10px;">
+                    <tr>
+                        <th class="question-no">Q. No.</th>
+                        <th class="subquestion-no"></th>
+                        <th class="question" style="text-align:center;">Question</th>
+                        <th class="marks">Marks</th>
+                        <th class="bl">BL</th>
+                        <th class="co">CO</th>
+                    </tr>
+
+
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO1</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO2</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>2</td>
+                        <td>CO3</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td>3M</td>
+                        <td>2</td>
+                        <td>CO6</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">SECTION-B</td>
+                        <!-- <td colspan="3"></td> -->
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">OR</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO3</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>4</td>
+                        <td>CO4</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>B)</td>
+                        <td></td>
+                        <td>4M</td>
+                        <td>3</td>
+                        <td>CO5</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="6" style="text-align:center; font-weight:bold;">OR</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>A)</td>
+                        <td></td>
+                        <td>6M</td>
+                        <td>3</td>
+                        <td>CO4</td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+        </section>
+
+
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+let paperData = {};
+
+// Fill static template with dynamic data
+function fillPaper() {
+  document.getElementById("pTitle").innerText = paperData.paperTitle || "";
+  document.getElementById("pExam").innerText = paperData.examination || "";
+  document.getElementById("pSemester").innerText = paperData.semester || "";
+  document.getElementById("pYear").innerText = paperData.academicYear || "";
+  document.getElementById("pProgram").innerText = paperData.program || "";
+  document.getElementById("pCourseCode").innerText = paperData.courseCode || "";
+  document.getElementById("pCourseName").innerText = paperData.courseName || "";
+  document.getElementById("pDuration").innerText = paperData.duration || "";
+  document.getElementById("pMarks").innerText = paperData.maxMarks || "";
+  document.getElementById("pTotalQ").innerText = paperData.totalQuestions || "";
+
+  // Render CO list
+  const coList = document.getElementById("pCOList");
+  if (coList) {
+    const coSection = coList.parentElement;
+    const list = paperData.courseOutcomes || [];
+
+    if (list.length === 0) {
+      coList.innerHTML = "";
+      if (coSection) coSection.style.display = "none";
+    } else {
+      if (coSection) coSection.style.display = "";
+      coList.innerHTML = "";
+      list.forEach(co => {
+        coList.innerHTML += `<li>${co}</li>`;
+      });
+    }
+  }
+
+  // Render instruction list
+  const insList = document.getElementById("pInstructionList");
+  if (insList) {
+    insList.innerHTML = "";
+    (paperData.instructions || []).forEach(ins => {
+      insList.innerHTML += `<li>${ins}</li>`;
+    });
+  }
+
+  // Render question sections in table
+  const secDiv = document.getElementById("pSections");
+  if (secDiv) {
+    secDiv.innerHTML = "";
+    (paperData.sections || []).forEach(sec => {
+      let html = `<div class="section-title">SECTION-${sec.title}</div>`;
+      html += `<table class="preview-table"><tr>`;
+
+      // Add heading cells exactly same order
+      html += `<th class="question-no">Q. No.</th>`;
+      html += `<th class="subquestion-no"></th>`;
+      html += `<th>Question</th>`;
+      html += `<th class="marks">Marks</th>`;
+      html += `<th class="bl">BL</th>`;
+      html += `<th class="co">CO</th>`;
+      html += `</tr>`;
+
+      // Add questions + sub questions
+      (sec.questions || []).forEach(q => {
+        html += `<tr><td>${q.qno}</td><td></td><td>${q.text}</td><td>${q.marks}</td><td>${q.bl}</td><td>${q.co}</td></tr>`;
+        (q.subQuestions || []).forEach(sq => {
+          html += `<tr><td></td><td>${sq.label}) ${sq.text}</td><td>${sq.marks}</td><td>${sq.bl}</td><td>${sq.co}</td></tr>`;
+        });
+      });
+
+      html += `</table><br/>`;
+      secDiv.innerHTML += html;
+    });
+  }
+}
+
+// Listen for form page data
+window.addEventListener("message", (event) => {
+  paperData = event.data;
+  fillPaper();
+});
+
+// PDF Download function
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const content = document.getElementById("pdfContent");
+
+  const canvas = await html2canvas(content);
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+  pdf.save("Generated_Question_Paper.pdf");
+}
+</script>
+
+
+</body>
+
+</html>

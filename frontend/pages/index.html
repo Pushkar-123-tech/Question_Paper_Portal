@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Question Paper Workflow</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --primary:#8b0000;
+    --blue:#0a1f44;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg, #eef2f9 0%, #f8f9fc 100%);
+}
+
+/* ================= HEADER ================= */
+
+.top-strip{
+    height:6px;
+    background:#2c2c2c;
+}
+
+.college-header{
+    background:#efefef;
+    border-bottom:4px solid #b30000;
+    padding:15px 40px;
+}
+
+.header-row{
+    display:grid;
+    grid-template-columns:130px 1fr 130px;
+    align-items:center;
+}
+
+.header-logo img{
+    max-height:85px;
+}
+
+.header-center{
+    text-align:center;
+    color:var(--primary);
+}
+
+.header-center h1{
+    font-family:"Times New Roman",serif;
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.header-center p{
+    font-size:14px;
+    color:#8b0000;
+    line-height:1.6;
+}
+
+/* ================= MAIN CONTENT ================= */
+
+.container{
+    max-width:1200px;
+    margin:60px auto;
+    padding:0 20px;
+}
+
+.portal-header{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.portal-header h2{
+    font-size:32px;
+    font-weight:700;
+    color:var(--blue);
+    margin-bottom:10px;
+}
+
+.portal-header p{
+    font-size:16px;
+    color:#555;
+}
+
+/* Grid */
+.roles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:30px;
+}
+
+/* Card */
+.card{
+    background:white;
+    border-radius:14px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.05);
+    border-top:4px solid #c1121f;
+
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.08);
+}
+
+.card-content{
+    flex:1;
+    text-align:center;
+}
+
+.icon{
+    font-size:40px;
+    margin-bottom:20px;
+}
+
+.card h3{
+    font-size:20px;
+    color:var(--blue);
+    margin-bottom:15px;
+}
+
+.card p{
+    font-size:14px;
+    color:#666;
+    line-height:1.6;
+}
+
+/* Button */
+.btn{
+    background:linear-gradient(135deg,#c1121f,var(--blue));
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:30px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+    width:100%;
+    margin-top:auto;
+}
+
+.btn:hover{
+    transform:scale(1.03);
+    opacity:0.95;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:768px){
+
+    .header-row{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+   .header-logo{
+    display: none;
+   }
+
+    .header-center h1{
+        font-size:18px;
+    }
+
+    .header-center p{
+        font-size:11px;
+    }
+
+    .portal-header h2{
+        font-size:24px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Top Strip -->
+<div class="top-strip"></div>
+
+<!-- College Header -->
+<header class="college-header">
+    <div class="header-row">
+        <div class="header-logo">
+            <img src="../public/image1.png"  width="125" height="145" alt="JSPM Logo " style=" mix-blend-mode: multiply;">
+        </div>
+
+        <div class="header-center">
+            <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+            <p>
+                Empowered Autonomous Institute • Affiliated to SPPU • Approved by AICTE<br>
+                NBA (UG) • NAAC “A” Grade • NIRF 151–200
+            </p>
+        </div>
+
+        <div class="header-logo" style="text-align:right;">
+            <img src="../public/image2.png" width="125" height="145" alt="RSCOE Logo">
+        </div>
+    </div>
+</header>
+
+<!-- Main Portal Section -->
+<div class="container">
+
+    <div class="portal-header">
+        <h2>College Question Paper Portal</h2>
+        <p>Secure and structured workflow for paper creation, review, and finalization</p>
+    </div>
+
+    <div class="roles">
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">🛡️</div>
+                <h3>Admin</h3>
+                <p>Manage users, assign roles, and monitor full system activity.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('admin')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">⚖️</div>
+                <h3>DQCA</h3>
+                <p>Review 3 sets (A, B, C), finalize one, and forward to External examiner.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('dqca')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">🏛️</div>
+                <h3>Faculty</h3>
+                <p>Create three question paper sets and submit to DQCA for approval.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('faculty')">Enter Portal</button>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="icon">👨‍🏫</div>
+                <h3>External</h3>
+                <p>Access finalized papers and complete external verification process.</p>
+            </div>
+            <button class="btn" onclick="goToLogin('external')">Enter Portal</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function goToLogin(role){
+    window.location.href = `/login.html?role=${role}`;
+}
+</script>
+
+</body>
+</html>

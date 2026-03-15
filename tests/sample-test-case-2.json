@@ -1,0 +1,67 @@
+{
+  "paperTitle": "Mid Semester Examination (MSE)",
+  "semester": "I",
+  "academicYear": "2025-26",
+  "program": "Computer Science and Business System, Information Technology, Electrical Engineering",
+  "examinationClass": "S.Y. B.Tech",
+  "courseCode": "ES2206T",
+  "courseName": "Environmental Science and Engineering [2023 Pattern]",
+  "duration": "1 Hour",
+  "maxMarks": 30,
+  "totalQuestions": 6,
+  "sections": [
+    {
+      "sectionTitle": "SECTION-A",
+      "compulsory": true,
+      "questions": [
+        {
+          "questionNo": 1,
+          "marks": 2,
+          "bl": 1,
+          "co": "CO1",
+          "question": "Define: (i) Pyrolysis (ii) Scoping"
+        },
+        {
+          "questionNo": 2,
+          "marks": 4,
+          "bl": 2,
+          "co": "CO2",
+          "question": "Explain the representation and construction of Polymer Electrolyte Membrane fuel cell with electrode reactions."
+        },
+        {
+          "questionNo": 3,
+          "marks": 4,
+          "bl": 2,
+          "co": "CO2",
+          "question": "Explain the need of Sustainable Development."
+        }
+      ]
+    },
+    {
+      "sectionTitle": "SECTION-B",
+      "compulsory": false,
+      "instruction": "Attempt the questions as per the options provided.",
+      "questions": [
+        {
+          "questionNo": 4,
+          "marks": 5,
+          "bl": 3,
+          "co": "CO3",
+          "question": {
+            "a": "Apply the principle of the p-n junction to explain how a solar cell produces electric current when exposed to sunlight.",
+            "b": "Which type of solar space heating would you apply for a home having south facing window in cold climate?"
+          }
+        },
+        {
+          "questionNo": 5,
+          "marks": 5,
+          "bl": 3,
+          "co": "CO3",
+          "question": {
+            "a": "Apply your understanding of fossil fuel–based energy systems to suggest how they negatively impact the environment."
+          }
+        }
+      ]
+    }
+  ]
+}

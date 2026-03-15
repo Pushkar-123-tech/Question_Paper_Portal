@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Generated Question Paper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<!-- For PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* Adopted styles from `newquestionpaper.html` so the template matches that layout */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background-color:#2C2C2C;font-family:"Times New Roman", serif;display:flex;justify-content:center;padding-top:20px}
+.a4{background-color:white;width:794px;min-height:1123px;border:2px solid black;padding:40px;margin: 20px auto;box-shadow: 0 0 10px rgba(0,0,0,0.5);}
+.no-print{display:none !important;}
+header{display:flex;justify-content:space-between;margin-bottom:24px}
+.left-header{position:relative;top:23px;left:14px;display:flex}
+.right-header{position:relative;left:16px;top:23px}
+.box{border:1px solid black;height:31px;width:131px;display:flex;align-items:center;font-size:14px;padding-left:5px}
+.box1{border:1px solid black;height:31px;width:160px;display:flex;align-items:center;font-size:15px;padding-left:5px}
+.box-center{justify-content:center;padding-left:0}
+.college{text-align:center;margin-bottom:28px}
+.college h2:first-child{font-size:16.5px;position:relative;top:11px;left:20px;font-weight:550}
+.college h2:nth-child(2){position:relative;left:3px;top:11px;font-size:16px;font-weight:600}
+.college h3{font-size:13.5px;font-weight:600;margin-top:2px;position:relative;top:13px;left:16px}
+.exam-title{text-align:center;font-size:10.5px;font-weight:500;margin-bottom:22px;position:relative;left:18px;top:6px}
+.mid-row{position:relative;top:6px;left:-17px;display:flex;justify-content:center;font-size:16.5px;font-weight:600;margin-bottom:18px}
+.center-text{text-align:center;font-size:16.5px;font-weight:700;margin:20px 0}
+.bottom-row{display:flex;justify-content:space-between;text-align:center;font-size:16.5px;font-weight:700}
+.outcome-box{border:1.5px solid black;width:97%;font-weight:bold;position:relative;top:-23px}
+.instruction-box{border-left:1.5px solid black;border-right:1.5px solid black;border-bottom:1.5px solid black;border-top:1.5px solid black;font-size:16px;padding:2px 0px;position:relative;top:-23px;left:16px;width:97%}
+.ins-title{font-weight:bold;padding:0px 6px}
+.int-list-item{list-style-type:none;border-top:1px solid black;padding:2px 6px}
+.co-list-items{position:relative;left:28px;font-size:17px;font-weight:normal;margin-left:12px;margin-bottom:12px}
+.co-list{font-weight:bold;margin-right:6px}
+table{border:2px solid black;border-collapse:collapse}
+td,th{border:1.5px solid black}
+.question-no{text-align:center;width:50px}
+.subquestion-no{width:40px}
+.question{width:auto}
+.marks{width:50px;font-weight:bold}
+.bl{width:40px}
+.co{width:60px}
+/* small tweaks for pdf screenshot consistency */
+.a4 .box .value{font-weight:600}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 1024px) {
+  .a4 {
+    width: 95%;
+    padding: 30px 20px;
+    min-height: auto;
+  }
+  body {
+    padding-top: 10px;
+  }
+  .college h2:first-child {
+    font-size: 15px;
+  }
+  .college h2:nth-child(2) {
+    font-size: 14px;
+  }
+  .college h3 {
+    font-size: 12px;
+  }
+  .exam-title {
+    font-size: 10px;
+  }
+  .mid-row, .center-text, .bottom-row {
+    font-size: 14px;
+  }
+  .box, .box1 {
+    font-size: 12px;
+  }
+  table {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .a4 {
+    width: 100%;
+    padding: 20px 15px;
+    margin: 10px auto;
+    border: 1px solid black;
+  }
+  body {
+    background-color: white;
+    padding-top: 0;
+  }
+  .college h2:first-child {
+    font-size: 13px;
+    top: 5px;
+  }
+  .college h2:nth-child(2) {
+    font-size: 12px;
+    top: 5px;
+  }
+  .college h3 {
+    font-size: 11px;
+    top: 7px;
+  }
+  .exam-title {
+    font-size: 9px;
+    top: 0;
+  }
+  header {
+    margin-bottom: 16px;
+  }
+  .left-header {
+    left: 0;
+  }
+  .right-header {
+    left: 0;
+  }
+  .left-header .box {
+    height: 26px;
+    width: 110px;
+    font-size: 12px;
+  }
+  .left-header .box1 {
+    height: 26px;
+    width: 140px;
+    font-size: 12px;
+  }
+  .box1 {
+    height: 26px;
+    width: 140px;
+    font-size: 12px;
+  }
+  .mid-row, .center-text, .bottom-row {
+    font-size: 12px;
+  }
+  .table {
+    font-size: 11px;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .a4 {
+    width: 100%;
+    padding: 15px 10px;
+    margin: 5px 0;
+    border: none;
+  }
+  body {
+    background-color: white;
+    padding-top: 0;
+    margin: 0;
+  }
+  .college h2:first-child {
+    font-size: 12px;
+    top: 0;
+    left: 0;
+  }
+  .college h2:nth-child(2) {
+    font-size: 11px;
+    top: 0;
+    left: 0;
+  }
+  .college h3 {
+    font-size: 10px;
+    top: 5px;
+    left: 0;
+  }
+  .college {
+    margin-bottom: 15px;
+  }
+  .exam-title {
+    font-size: 8px;
+    top: 0;
+  }
+  header {
+    margin-bottom: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .left-header, .right-header {
+    left: 0;
+    top: 0;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .left-header .box,
+  .left-header .box1,
+  .box, .box1 {
+    height: 24px;
+    width: 100%;
+    font-size: 11px;
+    padding-left: 3px;
+  }
+  .mid-row, .center-text, .bottom-row {
+    font-size: 11px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mid-row > div, .bottom-row > div {
+    left: 0 !important;
+    top: 0 !important;
+    position: relative !important;
+  }
+  .box-title {
+    font-size: 11px;
+  }
+  .co-list-item {
+    font-size: 10px;
+  }
+  .co-list {
+    font-weight: bold;
+  }
+  .inst-list {
+    font-size: 10px;
+  }
+  .int-list-item {
+    font-size: 10px;
+    padding: 1px 3px;
+  }
+  table {
+    font-size: 9px;
+    width: 100%;
+  }
+  td, th {
+    padding: 2px;
+    border: 1px solid black;
+  }
+  .question-no, .marks, .bl, .co {
+    width: 30px;
+  }
+  .subquestion-no {
+    width: 25px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="a4" id="pdfContent">
+
+  <!-- Logos removed by request -->
+  <div style="height:6px;margin-bottom:18px"></div>
+
+  <header>
+    <div class="left-header">
+      <div class="box"><label style="position: relative; top: -6px;">PRN No.</label>&nbsp;<span id="pPRN" class="value"></span></div>
+      <div class="box box-center" style="line-height:0.85;"><label style="position: relative; left: 6px;">Total No. of Questions: <span id="pTotalQ">0</span></label></div>
+    </div>
+    <div class="box1 right-header">QP Code: <span id="pQPCode" class="value" style="margin-left:6px"></span></div>
+  </header>
+
+  <section class="college">
+    <h2>JSPM’s</h2>
+    <h2>Rajarshi Shahu College of Engineering, Tathawade, Pune – 411033</h2>
+    <h3>(An autonomous institute affiliated to Savitribai Phule Pune University)</h3>
+  </section>
+
+  <section class="exam-title"><h2 id="pExam">Examination: End Semester Examination (ESE)</h2></section>
+
+  <section class="mid-row">
+    <div>Semester: <span id="pSemester"></span></div>
+    <div style="position: relative;left: 105px;">Academic Year: <span id="pYear"></span></div>
+  </section>
+
+  <section class="center-text"><div>Programme: <span id="pProgram"></span></div></section>
+
+  <section class="center-text"><div style="position:relative;top:-17px;">Examination Class: <span id="pExamClass"></span></div></section>
+
+  <section class="center-text" style="display:flex;">
+    <div class="courcecode" style="position: relative;top: -36px;left: 47px;font-size: 16px;">Course Code: <span id="pCourseCode"></span></div>
+    <div style="position: relative;top: -36px;left: 130px;font-size: 16px;">Course Name and Pattern: <span id="pCourseName"></span></div>
+  </section>
+
+  <section class="bottom-row">
+    <div style="position: relative;top: -37px;left: 13px;">Duration: <span id="pDuration"></span></div>
+    <div style="position: relative;top: -37px;left: -10px;">Max. Marks: <span id="pMarks"></span></div>
+  </section>
+
+  <section class="outcome-box" id="pCOSection" style="position: relative; left: 16px;">
+    <div class="box-title">Course Outcomes:</div>
+    <div id="pCOList" class="co-list-items" style="position: relative;left: 10px;"></div>
+  </section>
+
+  <section class="instruction-box" id="pInstructionSection">
+    <div class="ins-title">Instruction to the Candidates</div>
+    <div id="pInstructionList" class="inst-list" style="margin-top:6px"></div>
+  </section>
+
+  <section id="pSectionsContainer" style="width: 97%; position: relative; left: 16px; top: -10px;"></section>
+
+  <div style="margin-top:10px;text-align:center" id="downloadBtnContainer"><button class="btn" onclick="downloadPDF()"><i class="fa-solid fa-download"></i> Download PDF</button></div>
+
+</div>
+
+<script>
+let paper = {};
+
+function renderPaper(){
+  // Insert values
+  const setText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = (val ?? '')+''; };
+  setText('pPRN', paper.prnNo || '');
+  setText('pQPCode', paper.qpCode || '');
+  setText('pExam', paper.examination || '');
+  setText('pSemester', paper.semester || '');
+  setText('pYear', paper.academicYear || '');
+  setText('pProgram', paper.program || '');
+  setText('pCourseCode', paper.courseCode || '');
+  setText('pCourseName', paper.courseName || '');
+  setText('pDuration', paper.duration || '');
+  setText('pMarks', paper.maxMarks || '');
+  setText('pTotalQ', paper.totalQuestions || '');
+  setText('pTitle', paper.paperTitle || '');
+
+  // Render COs as styled items (hide section if all empty)
+  const coList = document.getElementById('pCOList');
+  if (coList) {
+    const coSection = document.getElementById('pCOSection');
+    const list = (paper.courseOutcomes || []).map(String);
+    const nonEmpty = list.filter(co => co && co.trim().length > 0);
+
+    if (nonEmpty.length === 0) {
+      coList.innerHTML = '';
+      if (coSection) coSection.style.display = 'none';
+    } else {
+      if (coSection) coSection.style.display = '';
+      coList.innerHTML = '';
+      nonEmpty.forEach(co => {
+        const parts = co.split(':');
+        coList.innerHTML += `<div class="co-list-item"><span class="co-list">${parts[0] || ''}:</span> ${parts.slice(1).join(':') || ''}</div>`;
+      });
+    }
+  }
+
+  // Render Instructions (hide if all empty)
+  const insList = document.getElementById('pInstructionList');
+  const insSection = document.getElementById('pInstructionSection');
+  if (insList) {
+    const nonEmptyIns = (paper.instructions || []).filter(i => i && String(i).trim().length > 0);
+    if (nonEmptyIns.length === 0) {
+      insList.innerHTML = '';
+      if (insSection) insSection.style.display = 'none';
+    } else {
+      if (insSection) insSection.style.display = '';
+      insList.innerHTML = '';
+      nonEmptyIns.forEach(ins => {
+        insList.innerHTML += `<div class="int-list-item">${ins}</div>`;
+      });
+    }
+  }
+
+  // Render Sections & Questions (match newquestionpaper table layout)
+  const secContainer = document.getElementById('pSectionsContainer');
+  if(secContainer) {
+    secContainer.innerHTML = '';
+    (paper.sections || []).forEach((sec) => {
+      // skip section if it contains no meaningful questions
+      const questions = sec.questions || [];
+      const hasContent = (q) => {
+        if (q.text && String(q.text).trim().length > 0) return true;
+        if (Array.isArray(q.subQuestions) && q.subQuestions.some(sq => sq.text && String(sq.text).trim().length > 0)) return true;
+        if (Array.isArray(q.orOptions) && q.orOptions.some(o => o.text && String(o.text).trim().length > 0)) return true;
+        return false;
+      };
+      const validQuestions = questions.filter(hasContent);
+      if (!validQuestions.length) return; // skip this section
+      
+      const secHtml = document.createElement('div');
+      secHtml.innerHTML = `<h3 style="width: 100%;display: flex;justify-content: center;">SECTION-${sec.title}</h3>`;
+      const tbl = document.createElement('table'); tbl.style.width = '100%'; tbl.style.marginTop = '10px';
+      // header
+      tbl.innerHTML = `
+        <tr>
+          <th class="question-no">Q. No.</th>
+          <th class="subquestion-no"></th>
+          <th class="question" style="text-align:center;">Question</th>
+          <th class="marks">Marks</th>
+          <th class="bl">BL</th>
+          <th class="co">CO</th>
+        </tr>
+      `;
+
+      // iterate only validQuestions
+      validQuestions.forEach(q => {
+        if(q.isOrWithPrevious) {
+          const orRow = document.createElement('tr');
+          orRow.innerHTML = `<td></td><td></td><td style="text-align:center;font-weight:bold;">OR</td><td></td><td></td><td></td>`;
+          tbl.appendChild(orRow);
+        }
+        
+        if(q.subQuestions && q.subQuestions.length){
+          // main question row
+          const mainRow = document.createElement('tr');
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          tbl.appendChild(mainRow);
+          q.subQuestions.forEach((sq, sqIdx) => {
+            const r = document.createElement('tr');
+            r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
+            tbl.appendChild(r);
+          });
+        } else if(q.orOptions && q.orOptions.length){
+          // main question with OR options
+          const mainRow = document.createElement('tr');
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          tbl.appendChild(mainRow);
+          q.orOptions.forEach((orOpt, orIdx) => {
+            const orRow = document.createElement('tr');
+            orRow.innerHTML = `<td></td><td></td><td>OR</td><td></td><td></td><td></td>`;
+            tbl.appendChild(orRow);
+            const optRow = document.createElement('tr');
+            optRow.innerHTML = `<td></td><td>${orOpt.label})</td><td>${orOpt.text||''}</td><td>${orOpt.marks||''}</td><td>${orOpt.bl||''}</td><td>${orOpt.co||''}</td>`;
+            tbl.appendChild(optRow);
+          });
+        } else {
+          const r = document.createElement('tr');
+          r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          tbl.appendChild(r);
+        }
+      });
+
+      secHtml.appendChild(tbl);
+      secContainer.appendChild(secHtml);
+    });
+  }
+}
+
+// PDF Download
+async function downloadPDF(){
+  const { jsPDF } = window.jspdf;
+  const content = document.getElementById("pdfContent");
+  const btnContainer = document.getElementById("downloadBtnContainer");
+
+  // Hide download button from PDF
+  if(btnContainer) btnContainer.classList.add('no-print');
+
+  try {
+    const canvas = await html2canvas(content, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff"
+    });
+    
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
+    
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    // Add image
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    
+    const fileName = `Question_Paper_${paper.paperTitle || paper.courseName || Date.now()}.pdf`.replace(/[^a-z0-9_.-]/gi, '_');
+    pdf.save(fileName);
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    if(typeof showToast === 'function') showToast('Download failed', 'error');
+    else alert('Download failed: ' + err.message);
+  } finally {
+    if(btnContainer) btnContainer.classList.remove('no-print');
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const stored = sessionStorage.getItem('previewPaper');
+
+    if (stored) {
+      paper = JSON.parse(stored);
+      sessionStorage.removeItem('previewPaper');
+      renderPaper();
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('download') === '1') {
+        setTimeout(downloadPDF, 800);
+      }
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('view');
+    const downloadId = params.get('download');
+
+    const idToLoad =
+      (viewId && viewId !== '1') ? viewId :
+      (downloadId && downloadId !== '1' ? downloadId : null);
+
+    if (idToLoad) {
+      await loadPaperFromApi(idToLoad);
+      if (downloadId) {
+        setTimeout(downloadPDF, 800);
+      }
+    }
+
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+async function loadPaperFromApi(id) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Please login');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  const res = await fetch(`/api/papers/${id}`, {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+
+  const data = await res.json();
+
+  // ✅ THE REAL FIX
+  paper = data;
+
+  renderPaper();
+}
+
+
+async function loadPaperFromApi(id) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    if(typeof showToast === 'function') showToast('Please login to view paper', 'error');
+    else alert('Please login to view paper');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/papers/${id}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    
+    if (!res.ok) throw new Error('Failed to load paper');
+    
+    const data = await res.json();
+    paper = data.paper;
+    renderPaper();
+  } catch (err) {
+    console.error(err);
+    if(typeof showToast === 'function') showToast('Error loading paper', 'error');
+    else alert('Error loading paper: ' + err.message);
+  }
+}
+
+// Fallback to message-based transport
+window.addEventListener("message", (event) => {
+  paper = event.data || {};
+  renderPaper();
+});
+</script>
+<script src="/public/ui.js"></script>
+
+</body>
+</html>

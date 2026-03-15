@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login & Signup</title>
+
+<style>
+  :root {
+    --primary: #7b0000;
+    --bg: #f4f6f8;
+    --card: #fff;
+    --text: #111;
+    --muted: #555;
+    --border: #7b0000;
+  }
+  * {
+    margin:0; padding:0; box-sizing:border-box;
+    font-family:Segoe UI, system-ui, sans-serif;
+  }
+  body {
+    background:var(--bg);
+    height:100vh; display:flex; justify-content:center; align-items:center;
+  }
+  .container {
+    width:360px; background:var(--card); padding:22px;
+    border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,0.1);
+    border-top:4px solid var(--primary);
+  }
+  h2 { text-align:center; margin-bottom:18px; font-size:22px; }
+  .input-box { margin-bottom:14px; }
+  .input-box input {
+    width:100%; padding:12px; border:2px solid var(--border);
+    border-radius:10px; font-size:15px; outline:none;
+  }
+  .btn {
+    width:100%; padding:12px; background:var(--primary); border:none;
+    border-radius:10px; color:white; font-size:16px; cursor:pointer;
+    margin-top:6px;
+  }
+  .toggle {
+    text-align:center; margin-top:14px; font-size:14px; color:var(--muted);
+  }
+  .toggle span { color:var(--primary); cursor:pointer; font-weight:600; }
+  form { display:none; }
+  form.active { display:block; }
+
+  /* MOBILE RESPONSIVE */
+  @media (max-width:768px) {
+    body {
+      padding:16px;
+      height:auto;
+      min-height:100vh;
+    }
+    .container {
+      width:100%;
+      max-width:100%;
+      padding:18px;
+    }
+    h2 {
+      font-size:20px;
+    }
+    .input-box input {
+      padding:14px;
+      font-size:16px;
+    }
+    .btn {
+      padding:14px;
+      font-size:15px;
+    }
+  }
+
+  @media (max-width:480px) {
+    body {
+      padding:12px;
+    }
+    .container {
+      width:100%;
+      padding:16px;
+      border-radius:12px;
+    }
+    h2 {
+      font-size:18px;
+      margin-bottom:16px;
+    }
+    .input-box {
+      margin-bottom:12px;
+    }
+    .input-box input {
+      padding:12px;
+      border-radius:8px;
+      font-size:16px;
+    }
+    .btn {
+      padding:12px;
+      font-size:14px;
+      margin-top:8px;
+    }
+    .toggle {
+      font-size:13px;
+      margin-top:12px;
+    }
+  }
+</style>
+<link rel="stylesheet" href="/public/ui.css">
+</head>
+<body>
+
+  <div class="container">
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="active">
+      <h2>Login</h2>
+      <div class="input-box"><input id="loginEmail" type="email" placeholder="Enter Email" required></div>
+      <div class="input-box"><input id="loginPassword" type="password" placeholder="Enter Password" required></div>
+      <button type="submit" class="btn">Login</button>
+      <p class="toggle" style="margin-top:10px;">
+        <span onclick="forgotPassword()">Forgot Password?</span>
+      </p>
+      <p style="text-align:center; margin-top:15px; font-size:12px; color:#666;">Only authorized personnel can login.</p>
+    </form>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+
+    // FORGOT PASSWORD
+    window.forgotPassword = function() {
+      const html = `
+        <h3>Reset Password</h3>
+        <p style="color:#666; font-size:14px; margin-bottom:10px;">Enter your email address to receive a password reset link.</p>
+        <div class="input-box">
+          <input id="forgotEmail" type="email" placeholder="Enter your email">
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:15px;">
+          <button class="btn" style="background:#ccc; color:#333; width:auto; margin:0;" onclick="closeModal(this.closest('.modal-overlay'))">Cancel</button>
+          <button class="btn" style="width:auto; margin:0;" onclick="submitForgot()">Send Link</button>
+        </div>
+      `;
+      showModal(html);
+    }
+
+    window.submitForgot = async function() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      if(!email) return showToast('Please enter email', 'error');
+      
+      const btn = document.querySelector('.modal .btn:last-child');
+      const originalText = btn.innerText;
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+      
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        showToast(data.message, res.ok ? 'success' : 'error');
+        if(res.ok) closeModal(document.querySelector('.modal-overlay'));
+        else {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+      } catch(err) {
+        console.error(err);
+        showToast('Network error', 'error');
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // AUTH
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.message || 'Login failed', 'error'); return; }
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('userEmail', data.user.email || email);
+        localStorage.setItem('userRole', data.user.role);
+        showToast('Logged in', 'success');
+        
+        if (data.user.role === 'admin') {
+            window.location.href = '/admin.html';
+        } else if (data.user.role === 'external') {
+            window.location.href = '/externalhome.html';
+        } else {
+            window.location.href = '/dashboard.html';
+        }
+      } catch (err) { console.error(err); showToast('Network error', 'error'); }
+    });
+  </script>
+
+<script src="/public/ui.js"></script>
+</body>
+</html>

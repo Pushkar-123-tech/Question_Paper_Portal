@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>External Portal | View & Review Papers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="/public/ui.css">
+<style>
+:root {
+  --primary:#7b0000;
+  --sidebar:#1f2937;
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:8px;
+  --success:#16a34a;
+  --warning:#f59e0b;
+}
+
+html, body {
+  display: block !important;
+  visibility: visible !important;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:var(--bg);color:var(--text);}
+
+.college-header {
+  background:white;
+  border-bottom:4px solid var(--primary);
+  padding:12px 30px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+.header-row {
+  display:grid;
+  grid-template-columns:120px 1fr 120px;
+  align-items:center;
+}
+.header-logo img {
+  max-height:80px;
+}
+.header-center {
+  text-align:center;
+  color:var(--primary);
+}
+.header-center h1 {
+  font-family:"Times New Roman", serif;
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+.header-center p {
+  font-size:13px;
+  opacity:0.8;
+}
+
+.dashboard-container {
+  display:flex;
+  height:calc(100vh - 110px);
+}
+
+.sidebar {
+  width:260px;
+  background:var(--sidebar);
+  color:white;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sidebar h3 {
+  font-size:12px;
+  color:#d1d5db;
+  text-transform:uppercase;
+  margin-top:14px;
+  margin-bottom:4px;
+}
+.nav-btn {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border:none;
+  border-radius:6px;
+  background:transparent;
+  color:white;
+  text-align:left;
+  font-size:14px;
+  cursor:pointer;
+  border-left:3px solid transparent;
+  transition:0.3s;
+}
+.nav-btn:hover {
+  background:rgba(255,255,255,0.12);
+  transform:translateX(4px);
+  border-left:3px solid #ffb3b3;
+}
+.nav-btn.active {
+  background:rgba(255,255,255,0.15);
+  border-left:3px solid var(--primary);
+}
+.nav-btn.primary {
+  background:var(--primary);
+  color:white;
+  justify-content:center;
+  font-weight:600;
+  box-shadow:0 2px 10px rgba(123,0,0,0.3);
+  margin-top:auto;
+}
+.nav-btn.primary:hover {
+  transform:scale(1.04);
+  opacity:0.9;
+}
+
+.main {
+  flex:1;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  overflow-y:auto;
+}
+
+.card {
+  background:white;
+  padding:18px 22px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.04);
+  width:100%;
+  max-width:1200px;
+}
+.card:hover {
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.card h2 {
+  margin-bottom:10px;
+  color:var(--primary);
+}
+.card .muted {
+  font-size:14px;
+  color:var(--muted);
+}
+
+.stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  gap:14px;
+  width:100%;
+  max-width:1200px;
+}
+.stat-card {
+  background:white;
+  padding:18px;
+  border-radius:var(--radius);
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  transition:0.25s;
+}
+.stat-card:hover {
+  transform:scale(1.03);
+}
+.stat-card h3 {
+  font-size:28px;
+  color:var(--primary);
+  margin-bottom:2px;
+}
+.stat-card p {
+  font-size:13px;
+  color:var(--muted);
+}
+
+.paper-list {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:14px;
+}
+
+.paper-item {
+  border:1px solid #e5e7eb;
+  border-radius:var(--radius);
+  padding:16px;
+  background:#fafafa;
+  transition:0.3s;
+}
+.paper-item:hover {
+  border-color:var(--primary);
+  background:white;
+}
+.paper-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:10px;
+}
+.paper-title {
+  font-size:16px;
+  font-weight:600;
+  color:var(--text);
+}
+.paper-meta {
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+.paper-status {
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.status-draft { background:#fef3c7; color:#92400e; }
+.status-submitted { background:#dbeafe; color:#1d4ed8; }
+.status-pending { background:#fce7f3; color:#9d174d; }
+.status-finalized { background:#d1fae5; color:#065f46; }
+
+.paper-actions {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.btn {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  background:#e5e7eb;
+  color:black;
+  font-size:13px;
+  cursor:pointer;
+  transition:0.3s;
+}
+.btn:hover {
+  transform:scale(1.04);
+  opacity:0.9;
+}
+.btn.primary {
+  background:var(--primary);
+  color:white;
+  font-weight:600;
+}
+.btn.success {
+  background:var(--success);
+  color:white;
+}
+
+.comments-section {
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid #e5e7eb;
+}
+.comments-section h4 {
+  font-size:14px;
+  margin-bottom:10px;
+  color:var(--muted);
+}
+.comment-item {
+  background:white;
+  border:1px solid #e5e7eb;
+  border-radius:6px;
+  padding:10px;
+  margin-bottom:8px;
+}
+.comment-header {
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  margin-bottom:6px;
+}
+.comment-author {
+  font-weight:600;
+  color:var(--primary);
+}
+.comment-role {
+  background:#f1f5f9;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:10px;
+  text-transform:uppercase;
+}
+.comment-date {
+  color:var(--muted);
+}
+.comment-text {
+  font-size:13px;
+  line-height:1.5;
+}
+
+.comment-form {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+.comment-form textarea {
+  flex:1;
+  padding:10px;
+  border:1px solid #e5e7eb;
+  border-radius:6px;
+  resize:vertical;
+  min-height:60px;
+}
+.comment-form button {
+  align-self:flex-end;
+}
+
+.empty-state {
+  text-align:center;
+  padding:40px;
+  color:var(--muted);
+}
+.empty-state i {
+  font-size:48px;
+  margin-bottom:14px;
+  opacity:0.5;
+}
+
+.tab-buttons {
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+}
+.tab-btn {
+  padding:10px 20px;
+  border:none;
+  border-radius:6px;
+  background:#e5e7eb;
+  cursor:pointer;
+  font-size:14px;
+  transition:0.3s;
+}
+.tab-btn.active {
+  background:var(--primary);
+  color:white;
+}
+.tab-btn:hover {
+  opacity:0.85;
+}
+
+.filter-row {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.filter-row select, .filter-row input {
+  padding:8px 12px;
+  border:1px solid #e5e7eb;
+  border-radius:6px;
+  font-size:13px;
+}
+
+/* MOBILE RESPONSIVE */
+.sidebar-toggle {
+  display:none;
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:12px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:16px;
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:1001;
+  min-width:44px;
+  min-height:44px;
+}
+
+@media (max-width:1024px) {
+  .college-header {
+    padding:10px 16px;
+  }
+  .header-row {
+    grid-template-columns:80px 1fr 80px;
+  }
+  .header-logo img {
+    max-height:60px;
+  }
+  .header-center h1 {
+    font-size:22px;
+  }
+  .header-center p {
+    font-size:11px;
+  }
+  .main {
+    padding:20px 16px;
+    gap:14px;
+  }
+  .card {
+    padding:14px 16px;
+  }
+  .stat-card {
+    padding:12px;
+  }
+  .stat-card h3 {
+    font-size:24px;
+  }
+  .paper-item {
+    padding:12px;
+  }
+  .paper-title {
+    font-size:14px;
+  }
+  .btn {
+    padding:8px 12px;
+    font-size:12px;
+  }
+}
+
+@media (max-width:768px) {
+  .sidebar-toggle {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .dashboard-container {
+    height:calc(100vh - 50px);
+  }
+  .sidebar {
+    position:fixed;
+    left:-260px;
+    top:50px;
+    width:260px;
+    height:calc(100vh - 50px);
+    z-index:1000;
+    transition:left 0.3s ease;
+    overflow-y:auto;
+    border-right:1px solid #333;
+  }
+  .sidebar.active {
+    left:0;
+  }
+  .main {
+    width:100%;
+    padding:16px 12px;
+    margin-top:0;
+  }
+  .header-row {
+    grid-template-columns:70px 1fr 70px;
+  }
+  .header-logo img {
+    max-height:50px;
+  }
+  .header-center h1 {
+    font-size:18px;
+  }
+  .header-center p {
+    font-size:10px;
+  }
+  .college-header {
+    padding:8px 12px;
+  }
+  .card {
+    padding:12px;
+    margin-bottom:8px;
+  }
+  .card h2 {
+    font-size:18px;
+  }
+  .stat-card {
+    padding:10px;
+  }
+  .stat-card h3 {
+    font-size:18px;
+  }
+  .stat-card p {
+    font-size:11px;
+  }
+  .paper-item {
+    padding:10px;
+  }
+  .paper-header {
+    flex-direction:column;
+    gap:8px;
+  }
+  .paper-title {
+    font-size:13px;
+  }
+  .paper-meta {
+    font-size:11px;
+  }
+  .paper-actions {
+    gap:6px;
+  }
+  .btn {
+    padding:8px 10px;
+    font-size:12px;
+    flex:1;
+    min-width:80px;
+  }
+  .tab-buttons {
+    gap:6px;
+  }
+  .tab-btn {
+    padding:8px 12px;
+    font-size:12px;
+  }
+  .filter-row {
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .filter-row select, .filter-row input {
+    padding:8px 10px;
+    font-size:12px;
+  }
+  .nav-btn {
+    padding:12px;
+    font-size:13px;
+    min-height:44px;
+  }
+  .sidebar h3 {
+    font-size:11px;
+    margin-top:10px;
+  }
+}
+
+@media (max-width:480px) {
+  .header-row {
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .header-logo {
+    display:none;
+  }
+  .header-center {
+    grid-column:1;
+  }
+  .header-center h1 {
+    font-size:16px;
+    margin-bottom:3px;
+  }
+  .header-center p {
+    font-size:9px;
+    line-height:1.3;
+  }
+  .sidebar {
+    width:100%;
+    left:-100%;
+  }
+  .sidebar.active {
+    left:0;
+  }
+  .main {
+    padding:12px 8px;
+    gap:10px;
+  }
+  .card {
+    padding:10px;
+  }
+  .card h2 {
+    font-size:16px;
+    margin-bottom:6px;
+  }
+  .stat-card {
+    padding:8px;
+  }
+  .stat-card h3 {
+    font-size:16px;
+  }
+  .stat-card p {
+    font-size:10px;
+  }
+  .paper-list {
+    gap:10px;
+  }
+  .paper-item {
+    padding:8px;
+  }
+  .paper-header {
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .paper-title {
+    font-size:12px;
+  }
+  .paper-meta {
+    font-size:10px;
+  }
+  .paper-status {
+    padding:3px 8px;
+    font-size:9px;
+  }
+  .paper-actions {
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .btn {
+    padding:8px 10px;
+    font-size:11px;
+    flex:0 1 48%;
+  }
+  .tab-buttons {
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .tab-btn {
+    padding:8px 10px;
+    font-size:11px;
+    flex:1;
+    min-width:70px;
+  }
+  .filter-row {
+    gap:6px;
+    flex-direction:column;
+  }
+  .filter-row select, .filter-row input {
+    width:100%;
+    padding:10px;
+    font-size:13px;
+  }
+  .comments-section {
+    margin-top:10px;
+    padding-top:10px;
+  }
+  .comment-item {
+    padding:8px;
+    margin-bottom:6px;
+  }
+  .comment-form {
+    flex-direction:column;
+    gap:8px;
+  }
+  .comment-form textarea {
+    padding:10px;
+    min-height:50px;
+  }
+  .comment-form button {
+    align-self:stretch;
+  }
+  .nav-btn {
+    padding:10px 12px;
+    font-size:12px;
+  }
+  .sidebar h3 {
+    font-size:10px;
+  }
+}
+</style>
+</head>
+<body>
+
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+
+<header class="college-header">
+  <div class="header-row">
+    <div class="header-logo"><img src="/public/image1.png" alt="JSPM Logo"></div>
+    <div class="header-center">
+      <h1>JSPM's Rajarshi Shahu College of Engineering</h1>
+      <p>
+        Empowered Autonomous Institute • Affiliated to SPPU • Approved by AICTE<br/>
+        NBA (UG) • NAAC "A" Grade • NIRF 151–200
+      </p>
+    </div>
+    <div class="header-logo"><img src="/public/image2.png" alt="RSCOE Logo"></div>
+  </div>
+</header>
+
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <h3>External Panel</h3>
+    <button class="nav-btn active" onclick="showTab('papers')"><i class="fa-solid fa-file-lines"></i> View Papers</button>
+    <button class="nav-btn" onclick="showTab('mypapers')"><i class="fa-solid fa-folder-open"></i> My Papers</button>
+    <button class="nav-btn" onclick="window.location.href='/questionpaperform.html'"><i class="fa-solid fa-file-circle-plus"></i> Create Paper</button>
+    <button class="nav-btn" onclick="window.location.href='/dashboard.html'"><i class="fa-solid fa-gauge"></i> Full Dashboard</button>
+    <button class="nav-btn" onclick="showNotifications()"><i class="fa-solid fa-bell"></i> Notifications <span id="notifBadge" style="background:#ef4444;color:white;padding:3px 6px;border-radius:999px;font-size:12px;margin-left:8px;display:none">0</span></button>
+    <button class="nav-btn primary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>Welcome, External Reviewer</h2>
+      <p class="muted">Review question papers, add comments, and track paper status.</p>
+      <div style="margin-top:10px;">
+        <strong id="userName">External</strong>
+        <div style="font-size:12px;color:#6b7280;" id="userEmail">external@mail.com</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><h3 id="statTotal">0</h3><p>Total Papers</p></div>
+      <div class="stat-card"><h3 id="statPending">0</h3><p>Pending Review</p></div>
+      <div class="stat-card"><h3 id="statCommented">0</h3><p>Commented</p></div>
+      <div class="stat-card"><h3 id="statFinalized">0</h3><p>Finalized</p></div>
+    </div>
+
+    <div class="card" id="papersTab">
+      <h2>Papers for Review</h2>
+      <p class="muted">View and comment on question papers shared with you or submitted for review.</p>
+      
+      <div class="filter-row">
+        <select id="statusFilter" onchange="loadPapers()">
+          <option value="all">All Status</option>
+          <option value="draft">Draft</option>
+          <option value="submitted_to_dqca">Submitted to DQCA</option>
+          <option value="finalized">Finalized</option>
+          <option value="sent_to_external">Sent to Me</option>
+          <option value="approved_by_external">Approved</option>
+        </select>
+        <input type="text" id="searchFilter" placeholder="Search by title..." oninput="loadPapers()">
+        <button class="btn" onclick="loadPapers()"><i class="fa-solid fa-refresh"></i> Refresh</button>
+      </div>
+      
+      <div class="paper-list" id="papersList">
+        <div class="empty-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Loading papers...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="myPapersTab" style="display:none;">
+      <h2>My Created Papers</h2>
+      <p class="muted">Papers you have created.</p>
+      <div class="paper-list" id="myPapersList">
+        <div class="empty-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Loading your papers...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+let currentUser = null;
+let allPapers = [];
+
+async function init() {
+  // Ensure page is visible
+  document.documentElement.style.visibility = 'visible';
+  document.body.style.display = 'block';
+  
+  if (!token) { window.location.href = '/login.html?role=external'; return; }
+  
+  try {
+    const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) { 
+      console.error('Auth failed:', res.status);
+      logout(); 
+      return; 
+    }
+    const data = await res.json();
+    currentUser = data.user;
+    
+    if (currentUser.role !== 'external') {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+    
+    document.getElementById('userName').innerText = currentUser.name;
+    document.getElementById('userEmail').innerText = currentUser.email;
+    
+    loadPapers();
+    loadMyPapers();
+    loadStats();
+  } catch (err) {
+    console.error('Init error:', err);
+    showToast('Session expired', 'error');
+    logout();
+  }
+}
+
+async function loadPapers() {
+  const container = document.getElementById('papersList');
+  container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>';
+  
+  try {
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Failed to load papers');
+    const data = await res.json();
+    allPapers = data.papers || [];
+    
+    const statusFilter = document.getElementById('statusFilter').value;
+    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+    
+    let filtered = allPapers;
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(p => p.status === statusFilter);
+    }
+    if (searchFilter) {
+      filtered = filtered.filter(p => 
+        (p.paperTitle || '').toLowerCase().includes(searchFilter) ||
+        (p.courseName || '').toLowerCase().includes(searchFilter)
+      );
+    }
+    
+    updateStats(allPapers);
+    renderPapers(filtered, container);
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p>Failed to load papers</p></div>';
+  }
+}
+
+async function loadMyPapers() {
+  const container = document.getElementById('myPapersList');
+  container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>';
+  
+  try {
+    const res = await fetch('/api/papers', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Failed to load papers');
+    const data = await res.json();
+    // Filter to only show papers owned by the current user
+    const myPapers = (data.papers || []).filter(p => {
+      // If owner is an object, check its id property
+      if (typeof p.owner === 'object' && p.owner?.id) {
+        return String(p.owner.id) === String(currentUser.id);
+      }
+      // Otherwise treat owner as a string ID
+      return String(p.owner) === String(currentUser.id);
+    });
+    renderPapers(myPapers, container, true);
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p>Failed to load papers</p></div>';
+  }
+}
+
+function renderPapers(papers, container, isOwned = false) {
+  if (!papers || papers.length === 0) {
+    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No papers found</p></div>';
+    return;
+  }
+  
+  container.innerHTML = '';
+  papers.forEach(paper => {
+    const title = paper.paperTitle || paper.courseName || 'Untitled Paper';
+    const statusClass = getStatusClass(paper.status);
+    const statusText = (paper.status || 'draft').replace(/_/g, ' ').toUpperCase();
+    const date = new Date(paper.created_at || paper.createdAt || Date.now()).toLocaleDateString();
+    // Handle both owner as string (ID) and owner as object with name
+    let ownerName = 'Unknown';
+    if (typeof paper.owner === 'object' && paper.owner?.name) {
+      ownerName = paper.owner.name;
+    } else if (isOwned && currentUser) {
+      ownerName = currentUser.name;
+    } else if (paper.sharedBy) {
+      ownerName = paper.sharedBy;
+    }
+    const comments = paper.comments || [];
+    
+    const div = document.createElement('div');
+    div.className = 'paper-item';
+    div.innerHTML = `
+      <div class="paper-header">
+        <div>
+          <div class="paper-title">${title}</div>
+          <div class="paper-meta">
+            ${paper.program || ''} ${paper.courseCode ? '• ' + paper.courseCode : ''} • By: ${ownerName} • ${date}
+          </div>
+        </div>
+        <span class="paper-status ${statusClass}">${statusText}</span>
+      </div>
+      
+      <div class="paper-actions">
+        <button class="btn" onclick="viewPaper('${paper.id}')"><i class="fa-solid fa-eye"></i> View</button>
+        <button class="btn" onclick="downloadPaper('${paper.id}')"><i class="fa-solid fa-download"></i> Download</button>
+        <button class="btn primary" onclick="toggleComments('${paper.id}')"><i class="fa-solid fa-comment"></i> Comments (${comments.length})</button>
+        ${paper.status === 'sent_to_external' ? `<button class="btn success" onclick="approvePaper('${paper.id}')"><i class="fa-solid fa-check"></i> Approve Paper</button>` : ''}
+        ${isOwned && paper.status === 'draft' ? `<button class="btn success" onclick="submitPaper('${paper.id}')"><i class="fa-solid fa-paper-plane"></i> Submit</button>` : ''}
+        ${isOwned && paper.status === 'draft' ? `<button class="btn" onclick="editPaper('${paper.id}')"><i class="fa-solid fa-edit"></i> Edit</button>` : ''}
+      </div>
+      
+      <div class="comments-section" id="comments-${paper.id}" style="display:none;">
+        <h4><i class="fa-solid fa-comments"></i> Comments & Feedback</h4>
+        <div id="commentsList-${paper.id}">
+          ${renderComments(comments)}
+        </div>
+        <div class="comment-form">
+          <textarea id="commentInput-${paper.id}" placeholder="Add your comment or feedback..."></textarea>
+          <button class="btn primary" onclick="addComment('${paper.id}')"><i class="fa-solid fa-paper-plane"></i> Post</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderComments(comments) {
+  if (!comments || comments.length === 0) {
+    return '<div class="muted" style="padding:10px;text-align:center;">No comments yet</div>';
+  }
+  
+  return comments.map(c => `
+    <div class="comment-item">
+      <div class="comment-header">
+        <div>
+          <span class="comment-author">${c.userName || 'User'}</span>
+          <span class="comment-role">${c.role || 'user'}</span>
+        </div>
+          <span class="comment-date">${new Date(c.created_at || c.createdAt).toLocaleString()}</span>
+      </div>
+      <div class="comment-text">${c.text}</div>
+    </div>
+  `).join('');
+}
+
+function getStatusClass(status) {
+  const map = {
+    'draft': 'status-draft',
+    'submitted_to_dqca': 'status-submitted',
+    'finalized': 'status-finalized',
+    'sent_to_external': 'status-submitted',
+    'approved_by_external': 'status-finalized'
+  };
+  return map[status] || 'status-draft';
+}
+
+function updateStats(papers) {
+  const total = papers.length;
+  const pending = papers.filter(p => ['submitted_to_dqca', 'sent_to_external'].includes(p.status)).length;
+  const commented = papers.filter(p => (p.comments || []).some(c => c.user === currentUser?.id)).length;
+  const finalized = papers.filter(p => p.status === 'approved_by_external').length;
+  
+  document.getElementById('statTotal').innerText = total;
+  document.getElementById('statPending').innerText = pending;
+  document.getElementById('statCommented').innerText = commented;
+  document.getElementById('statFinalized').innerText = finalized;
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/papers/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) return;
+    const d = await res.json();
+    if (d.received > 0) {
+      const badge = document.getElementById('notifBadge');
+      badge.style.display = 'inline-block';
+      badge.innerText = d.received;
+    }
+  } catch (e) { console.error(e); }
+}
+
+function toggleComments(paperId) {
+  const section = document.getElementById('comments-' + paperId);
+  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addComment(paperId) {
+  const input = document.getElementById('commentInput-' + paperId);
+  const text = input.value.trim();
+  if (!text) { showToast('Enter a comment', 'warn'); return; }
+  
+  try {
+    const res = await fetch(`/api/papers/${paperId}/comment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error('Failed to add comment');
+    
+    showToast('Comment added', 'success');
+    input.value = '';
+    loadPapers();
+    loadMyPapers();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function viewPaper(id) {
+  try {
+    const res = await fetch('/api/papers/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Unable to load paper');
+    const d = await res.json();
+    sessionStorage.setItem('previewPaper', JSON.stringify(d.paper));
+    window.open('/template.html?preview=1', '_blank');
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function downloadPaper(id) {
+  try {
+    const res = await fetch('/api/papers/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Unable to load paper');
+    const d = await res.json();
+    sessionStorage.setItem('previewPaper', JSON.stringify(d.paper));
+    window.open('/template.html?preview=1&download=1', '_blank');
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function submitPaper(id) {
+  if (!confirm('Submit this paper to DQCA for review?')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/submit`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Submit failed');
+    showToast('Submitted to DQCA', 'success');
+    loadPapers();
+    loadMyPapers();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function approvePaper(id) {
+  if (!confirm('Approve this question paper? This will finalize the review process.')) return;
+  try {
+    const res = await fetch(`/api/papers/${id}/approve`, { 
+      method: 'POST', 
+      headers: { 'Authorization': 'Bearer ' + token } 
+    });
+    if (!res.ok) throw new Error('Approval failed');
+    showToast('Paper approved successfully', 'success');
+    loadPapers();
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+function editPaper(id) {
+  window.location.href = '/questionpaperform.html?edit=' + id;
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.nav-btn').classList.add('active');
+  
+  document.getElementById('papersTab').style.display = tab === 'papers' ? 'block' : 'none';
+  document.getElementById('myPapersTab').style.display = tab === 'mypapers' ? 'block' : 'none';
+}
+
+async function showNotifications() {
+  try {
+    const res = await fetch('/api/papers/notifications/all', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Failed to load');
+    const d = await res.json();
+    const list = d.notifications || [];
+    
+    if (!list.length) {
+      showModal('<h3>Notifications</h3><p class="muted">No notifications</p>');
+      return;
+    }
+    
+    let html = '<h3>Notifications</h3>';
+    list.forEach(n => {
+      const dt = new Date(n.created_at || n.createdAt).toLocaleString();
+      html += `<div style="border-bottom:1px solid #eee;padding:10px 0;">
+        <div><strong>${n.message}</strong></div>
+        <div class="muted" style="font-size:12px;">${dt}</div>
+      </div>`;
+    });
+    showModal(html);
+    document.getElementById('notifBadge').style.display = 'none';
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  window.location.href = '/login.html?role=external';
+}
+
+// Mobile sidebar toggle
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebar = document.querySelector('.sidebar');
+
+if (sidebarToggle) {
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  // Close sidebar when clicking a nav button
+  const navBtns = sidebar.querySelectorAll('.nav-btn');
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
+      }
+    });
+  });
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+      if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+<script src="/public/ui.js"></script>
+
+</body>
+</html>

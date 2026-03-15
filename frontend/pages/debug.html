@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug - Login Issues</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #7b0000; }
+    h2 { color: #333; font-size: 18px; }
+    .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button { padding: 10px 20px; background: #7b0000; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    pre { background: #f9f9f9; padding: 10px; overflow-x: auto; border: 1px solid #ddd; }
+    .test-btn { margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Login & Dashboard Debug</h1>
+  
+  <div class="card">
+    <h2>1. Check LocalStorage</h2>
+    <button class="test-btn" onclick="checkLocalStorage()">Check LocalStorage</button>
+    <div id="storageResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Test API Endpoints</h2>
+    <div>
+      <label>Email: <input id="testEmail" type="email" placeholder="test@example.com" value=""></label>
+      <label>Password: <input id="testPassword" type="password" placeholder="password" value=""></label>
+      <button class="test-btn" onclick="testLogin()">Test Login Endpoint</button>
+    </div>
+    <div id="loginResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. Test Auth/Me Endpoint</h2>
+    <button class="test-btn" onclick="testAuthMe()">Test /api/auth/me</button>
+    <div id="authMeResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Test Dashboard Load</h2>
+    <button class="test-btn" onclick="testDashboard()">Test Dashboard Navigation</button>
+    <div id="dashboardResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>5. Browser Console Logs</h2>
+    <p>Open your browser's Developer Tools (F12) and check the Console tab for any errors.</p>
+    <p>Check the Network tab to see API calls and their responses.</p>
+  </div>
+
+  <script>
+    function checkLocalStorage() {
+      const result = document.getElementById('storageResult');
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('userRole');
+      const name = localStorage.getItem('userName');
+      
+      result.innerHTML = `
+        <div class="status info">
+          <strong>Token:</strong> ${token ? '✓ Found' : '✗ Missing'}<br>
+          <strong>Role:</strong> ${role || '✗ Missing'}<br>
+          <strong>Name:</strong> ${name || '✗ Missing'}<br>
+          ${token ? `<pre>Token (first 50 chars): ${token.substring(0, 50)}...</pre>` : ''}
+        </div>
+      `;
+    }
+
+    async function testLogin() {
+      const result = document.getElementById('loginResult');
+      const email = document.getElementById('testEmail').value;
+      const password = document.getElementById('testPassword').value;
+      
+      if (!email || !password) {
+        result.innerHTML = '<div class="status error">Please enter email and password</div>';
+        return;
+      }
+
+      result.innerHTML = '<div class="status info">Testing...</div>';
+      
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userRole', data.user.role);
+          localStorage.setItem('userName', data.user.name);
+          result.innerHTML = `
+            <div class="status success">
+              ✓ Login successful!<br>
+              <strong>User:</strong> ${data.user.name}<br>
+              <strong>Role:</strong> ${data.user.role}<br>
+              <strong>Email:</strong> ${data.user.email}<br>
+              <button onclick="goToDashboard()">Go to Dashboard</button>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `<div class="status error">✗ Login failed: ${data.message}</div>`;
+        }
+      } catch (err) {
+        result.innerHTML = `<div class="status error">✗ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function testAuthMe() {
+      const result = document.getElementById('authMeResult');
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        result.innerHTML = '<div class="status error">No token found. Please login first.</div>';
+        return;
+      }
+
+      result.innerHTML = '<div class="status info">Testing...</div>';
+      
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          result.innerHTML = `
+            <div class="status success">
+              ✓ Auth check successful!<br>
+              <pre>${JSON.stringify(data.user, null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `<div class="status error">✗ Auth check failed: ${data.message}</div>`;
+        }
+      } catch (err) {
+        result.innerHTML = `<div class="status error">✗ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function testDashboard() {
+      const result = document.getElementById('dashboardResult');
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('userRole');
+      
+      if (!token) {
+        result.innerHTML = '<div class="status error">No token. Please login first.</div>';
+        return;
+      }
+
+      result.innerHTML = '<div class="status info">Checking dashboard access...</div>';
+      
+      let redirectUrl = '/login.html';
+      if (role === 'admin') redirectUrl = '/admin.html';
+      else if (role === 'external') redirectUrl = '/externalhome.html';
+      else redirectUrl = '/dashboard.html';
+
+      result.innerHTML = `
+        <div class="status success">
+          ✓ Should redirect to: ${redirectUrl}<br>
+          <button onclick="window.location.href='${redirectUrl}'">Go to ${redirectUrl}</button>
+        </div>
+      `;
+    }
+
+    function goToDashboard() {
+      const role = localStorage.getItem('userRole');
+      if (role === 'admin') window.location.href = '/admin.html';
+      else if (role === 'external') window.location.href = '/externalhome.html';
+      else window.location.href = '/dashboard.html';
+    }
+
+    // Check on page load
+    window.addEventListener('load', () => {
+      checkLocalStorage();
+    });
+  </script>
+</body>
+</html>
