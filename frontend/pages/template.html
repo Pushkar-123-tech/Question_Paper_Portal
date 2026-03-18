@@ -304,7 +304,7 @@ function renderPaper(){
   const setText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = (val ?? '')+''; };
   setText('pPRN', paper.prnNo || '');
   setText('pQPCode', paper.qpCode || '');
-  setText('pExam', paper.examination || '');
+  setText('pExam', paper.examination ? `Examination: ${paper.examination}` : 'Examination:');
   setText('pSemester', paper.semester || '');
   setText('pYear', paper.academicYear || '');
   setText('pProgram', paper.program || '');
@@ -394,29 +394,34 @@ function renderPaper(){
         if(q.subQuestions && q.subQuestions.length){
           // main question row
           const mainRow = document.createElement('tr');
-          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          const mainImg = q.image ? `<br/><img src="${q.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}${mainImg}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
           tbl.appendChild(mainRow);
           q.subQuestions.forEach((sq, sqIdx) => {
             const r = document.createElement('tr');
-            r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
+            const subImg = sq.image ? `<br/><img src="${sq.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+            r.innerHTML = `<td></td><td>${sq.label})</td><td>${sq.text||''}${subImg}</td><td>${sq.marks||''}</td><td>${sq.bl||''}</td><td>${sq.co||''}</td>`;
             tbl.appendChild(r);
           });
         } else if(q.orOptions && q.orOptions.length){
           // main question with OR options
           const mainRow = document.createElement('tr');
-          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          const mainImg = q.image ? `<br/><img src="${q.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+          mainRow.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}${mainImg}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
           tbl.appendChild(mainRow);
           q.orOptions.forEach((orOpt, orIdx) => {
             const orRow = document.createElement('tr');
-            orRow.innerHTML = `<td></td><td></td><td>OR</td><td></td><td></td><td></td>`;
+            orRow.innerHTML = `<td></td><td></td><td style="text-align:center;font-weight:bold;">OR</td><td></td><td></td><td></td>`;
             tbl.appendChild(orRow);
             const optRow = document.createElement('tr');
-            optRow.innerHTML = `<td></td><td>${orOpt.label})</td><td>${orOpt.text||''}</td><td>${orOpt.marks||''}</td><td>${orOpt.bl||''}</td><td>${orOpt.co||''}</td>`;
+            const optImg = orOpt.image ? `<br/><img src="${orOpt.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+            optRow.innerHTML = `<td></td><td>${orOpt.label})</td><td>${orOpt.text||''}${optImg}</td><td>${orOpt.marks||''}</td><td>${orOpt.bl||''}</td><td>${orOpt.co||''}</td>`;
             tbl.appendChild(optRow);
           });
         } else {
           const r = document.createElement('tr');
-          r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
+          const mainImg = q.image ? `<br/><img src="${q.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+          r.innerHTML = `<td>${q.qno}</td><td></td><td>${q.text||''}${mainImg}</td><td>${q.marks||''}</td><td>${q.bl||''}</td><td>${q.co||''}</td>`;
           tbl.appendChild(r);
         }
       });
@@ -437,25 +442,37 @@ async function downloadPDF(){
   if(btnContainer) btnContainer.classList.add('no-print');
 
   try {
-    const canvas = await html2canvas(content, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#ffffff"
-    });
-    
-    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({ orientation:"p", unit:"mm", format:"a4" });
     
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    
-    // Add image
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    
     const fileName = `Question_Paper_${paper.paperTitle || paper.courseName || Date.now()}.pdf`.replace(/[^a-z0-9_.-]/gi, '_');
-    pdf.save(fileName);
+    
+    const originalMargin = content.style.margin;
+    const originalBorder = content.style.border;
+    const originalBoxShadow = content.style.boxShadow;
+    const originalPadding = content.style.padding;
+    const originalWidth = content.style.width;
+    
+    content.style.margin = "0";
+    content.style.border = "none";
+    content.style.boxShadow = "none";
+    content.style.padding = "20px";
+    content.style.width = "750px"; // Slightly less than A4 to prevent cutoff when padding is reduced
+    
+    // Use jsPDF html method to handle multiple pages automatically
+    pdf.html(content, {
+      callback: function(pdf) {
+        content.style.margin = originalMargin;
+        content.style.border = originalBorder;
+        content.style.boxShadow = originalBoxShadow;
+        content.style.padding = originalPadding;
+        content.style.width = originalWidth;
+        pdf.save(fileName);
+      },
+      x: 10,
+      y: 10,
+      width: 190, // A4 width minus margins
+      windowWidth: 800 // Adjust based on content width
+    });
   } catch (err) {
     console.error('PDF generation failed:', err);
     if(typeof showToast === 'function') showToast('Download failed', 'error');

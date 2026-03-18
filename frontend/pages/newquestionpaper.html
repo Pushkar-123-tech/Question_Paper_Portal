@@ -440,7 +440,7 @@
         </section>
 
         <section class="exam-title">
-            <h2>Examination: End Semester Examination (ESE)</h2>
+            <h2 id="pExam">Examination: End Semester Examination (ESE)</h2>
         </section>
 
         <section class="mid-row">
@@ -645,7 +645,7 @@ let paperData = {};
 // Fill static template with dynamic data
 function fillPaper() {
   document.getElementById("pTitle").innerText = paperData.paperTitle || "";
-  document.getElementById("pExam").innerText = paperData.examination || "";
+  document.getElementById("pExam").innerText = paperData.examination ? `Examination: ${paperData.examination}` : "Examination:";
   document.getElementById("pSemester").innerText = paperData.semester || "";
   document.getElementById("pYear").innerText = paperData.academicYear || "";
   document.getElementById("pProgram").innerText = paperData.program || "";
@@ -701,9 +701,11 @@ function fillPaper() {
 
       // Add questions + sub questions
       (sec.questions || []).forEach(q => {
-        html += `<tr><td>${q.qno}</td><td></td><td>${q.text}</td><td>${q.marks}</td><td>${q.bl}</td><td>${q.co}</td></tr>`;
+        const qImg = q.image ? `<br/><img src="${q.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+        html += `<tr><td>${q.qno}</td><td></td><td>${q.text}${qImg}</td><td>${q.marks}</td><td>${q.bl}</td><td>${q.co}</td></tr>`;
         (q.subQuestions || []).forEach(sq => {
-          html += `<tr><td></td><td>${sq.label}) ${sq.text}</td><td>${sq.marks}</td><td>${sq.bl}</td><td>${sq.co}</td></tr>`;
+          const sqImg = sq.image ? `<br/><img src="${sq.image}" style="max-width: 100%; max-height: 200px; display: block; margin-top: 5px;"/>` : '';
+          html += `<tr><td></td><td>${sq.label}) ${sq.text}${sqImg}</td><td>${sq.marks}</td><td>${sq.bl}</td><td>${sq.co}</td></tr>`;
         });
       });
 
@@ -722,13 +724,23 @@ window.addEventListener("message", (event) => {
 // PDF Download function
 async function downloadPDF() {
   const { jsPDF } = window.jspdf;
-  const content = document.getElementById("pdfContent");
+  const content = document.querySelector(".a4") || document.getElementById("pdfContent");
+  
+  const originalBorder = content.style.border;
+  content.style.border = "none";
 
-  const canvas = await html2canvas(content);
+  const canvas = await html2canvas(content, { scale: 2 });
+  
+  content.style.border = originalBorder;
+  
   const imgData = canvas.toDataURL("image/png");
 
   const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
-  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+  
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  
+  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
   pdf.save("Generated_Question_Paper.pdf");
 }
 </script>

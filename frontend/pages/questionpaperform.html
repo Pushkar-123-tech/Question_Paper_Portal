@@ -377,6 +377,14 @@
         <h2>Examination Form</h2>
         <div class="flex-row">
           <div><label>Paper Title</label><input id="paperTitle" placeholder="Enter paper title" /></div>
+          <div><label>Exam Type</label>
+            <select id="examination">
+              <option value="">Select</option>
+              <option value="In Semester Examination (ISE)">In Semester Examination (ISE)</option>
+              <option value="Mid Semester Examination (MSE)">Mid Semester Examination (MSE)</option>
+              <option value="End Semester Examination (ESE)">End Semester Examination (ESE)</option>
+            </select>
+          </div>
           <div><label>Semester</label>
             <select id="semester">
               <option value="">Select</option>
@@ -512,6 +520,7 @@
     const CO_OPTIONS = ["CO1", "CO2", "CO3", "CO4", "CO5", "CO6"];
     let paperData = {
       paperTitle: '',
+      examination: '',
       semester: '',
       academicYear: '',
       program: '',
@@ -565,6 +574,7 @@
         const formData = {
           id: paperData.id || '',
           paperTitle: document.getElementById('paperTitle').value,
+          examination: document.getElementById('examination') ? document.getElementById('examination').value : '',
           semester: document.getElementById('semester').value,
           academicYear: document.getElementById('academicYear').value,
           program: document.getElementById('program').value,
@@ -601,6 +611,7 @@
           paperData.baseTitle = formData.baseTitle || '';
           paperData.setName = formData.setName || '';
           paperData.paperTitle = formData.paperTitle || '';
+          paperData.examination = formData.examination || '';
           paperData.semester = formData.semester || '';
           paperData.academicYear = formData.academicYear || '';
           paperData.program = formData.program || '';
@@ -621,6 +632,7 @@
 
           // Populate basic form fields in DOM
           document.getElementById('paperTitle').value = paperData.paperTitle;
+          if (document.getElementById('examination')) document.getElementById('examination').value = paperData.examination;
           document.getElementById('semester').value = paperData.semester;
           document.getElementById('academicYear').value = paperData.academicYear;
           document.getElementById('program').value = paperData.program;
@@ -655,6 +667,7 @@
 
           // Populate form fields
           document.getElementById('paperTitle').value = importedData.paperTitle || '';
+          if (document.getElementById('examination')) document.getElementById('examination').value = importedData.examination || '';
           document.getElementById('semester').value = importedData.semester || '';
           document.getElementById('academicYear').value = importedData.academicYear || '';
           document.getElementById('program').value = importedData.program || '';
@@ -668,6 +681,7 @@
 
           // Load data into paperData
           paperData.paperTitle = importedData.paperTitle || '';
+          paperData.examination = importedData.examination || '';
           paperData.semester = importedData.semester || '';
           paperData.academicYear = importedData.academicYear || '';
           paperData.program = importedData.program || '';
@@ -856,6 +870,17 @@
   oninput='paperData.sections[${sIdx}].questions[${qIdx}].text=this.value;saveFormData()'
 >${q.text || ''}</textarea>
 
+    ${!isSplit ? (q.image ? 
+      `<div style="margin-top: 5px; margin-bottom: 10px;">
+         <img src="${q.image}" style="max-height: 100px; max-width: 100%; border: 1px solid #ddd; object-fit: contain; border-radius: 4px;"/><br/>
+         <button class="btn small secondary" style="margin-top: 4px;" onclick="removeImage(${sIdx}, ${qIdx})">Remove Image</button>
+       </div>` : 
+      `<div style="margin-top: 5px; margin-bottom: 10px;">
+         <label class="btn small secondary" style="cursor:pointer; display: inline-flex; align-items: center; gap: 6px;">
+           <i class="fa-solid fa-image"></i> Add Image 
+           <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(event, ${sIdx}, ${qIdx})">
+         </label>
+       </div>`) : ''}
 
     <div class='row'>
       <input type='number' placeholder='Marks' value="${q.marks || ''}"
@@ -984,6 +1009,18 @@
         oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].text=this.value;saveFormData()'
       >${sq.text || ''}</textarea>
 
+      ${sq.image ? 
+        `<div style="margin-top: 5px; margin-bottom: 10px;">
+           <img src="${sq.image}" style="max-height: 100px; max-width: 100%; border: 1px solid #ddd; object-fit: contain; border-radius: 4px;"/><br/>
+           <button class="btn small secondary" style="margin-top: 4px;" onclick="removeImage(${sIdx}, ${qIdx}, ${i})">Remove Image</button>
+         </div>` : 
+        `<div style="margin-top: 5px; margin-bottom: 10px;">
+           <label class="btn small secondary" style="cursor:pointer; display: inline-flex; align-items: center; gap: 6px;">
+             <i class="fa-solid fa-image"></i> Add Image 
+             <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(event, ${sIdx}, ${qIdx}, ${i})">
+           </label>
+         </div>`}
+
       <div class='row'>
         <input type='number' placeholder='Marks' value='${sq.marks || ""}'
           oninput='paperData.sections[${sIdx}].questions[${qIdx}].subQuestions[${i}].marks=this.value;saveFormData()'/>
@@ -1016,6 +1053,32 @@
       saveFormData();
     }
 
+    function handleImageUpload(event, sIdx, qIdx, sqIdx = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        if (sqIdx !== null) {
+          paperData.sections[sIdx].questions[qIdx].subQuestions[sqIdx].image = e.target.result;
+        } else {
+          paperData.sections[sIdx].questions[qIdx].image = e.target.result;
+        }
+        saveFormData();
+        renderMainQuestions(sIdx);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage(sIdx, qIdx, sqIdx = null) {
+      if (sqIdx !== null) {
+        paperData.sections[sIdx].questions[qIdx].subQuestions[sqIdx].image = '';
+      } else {
+        paperData.sections[sIdx].questions[qIdx].image = '';
+      }
+      saveFormData();
+      renderMainQuestions(sIdx);
+    }
+
     function getCleanPaperData() {
       // Clone data
       const cleanData = JSON.parse(JSON.stringify(paperData));
@@ -1023,7 +1086,7 @@
 
       // Gather form data into the clone
       cleanData.paperTitle = document.getElementById('paperTitle').value || paperData.paperTitle || '';
-      cleanData.examination = '';
+      cleanData.examination = document.getElementById('examination') ? document.getElementById('examination').value : paperData.examination || '';
       cleanData.semester = document.getElementById('semester').value || '';
       cleanData.academicYear = document.getElementById('academicYear').value || '';
       cleanData.program = document.getElementById('program').value || '';
@@ -1260,6 +1323,7 @@
 
         // Load into paperData
         paperData.paperTitle = data.paperTitle || '';
+        paperData.examination = data.examination || '';
         paperData.semester = data.semester || '';
         paperData.academicYear = data.academicYear || '';
         paperData.program = data.program || '';
@@ -1282,6 +1346,7 @@
 
         // Populate form fields
         document.getElementById('paperTitle').value = paperData.paperTitle || '';
+        if (document.getElementById('examination')) document.getElementById('examination').value = paperData.examination || '';
         document.getElementById('semester').value = paperData.semester || '';
         document.getElementById('academicYear').value = paperData.academicYear || '';
         document.getElementById('program').value = paperData.program || '';
@@ -1425,6 +1490,7 @@
 
       // Populate form fields after navigation to ensure elements are visible
       document.getElementById('paperTitle').value = paperData.paperTitle || '';
+      if (document.getElementById('examination')) document.getElementById('examination').value = paperData.examination || '';
       document.getElementById('semester').value = paperData.semester || '';
       document.getElementById('academicYear').value = paperData.academicYear || '';
       document.getElementById('program').value = paperData.program || '';
