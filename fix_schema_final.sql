@@ -1,6 +1,18 @@
 -- 🚨 RUN THIS IN SUPABASE SQL EDITOR TO FIX THE SCHEMA 🚨
 -- This script renames old CamelCase columns to snake_case and adds missing columns.
 
+-- Create the account table required by signup, login, and admin seeding.
+CREATE TABLE IF NOT EXISTS public.users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    name text NOT NULL,
+    email text NOT NULL UNIQUE,
+    password text NOT NULL,
+    role text NOT NULL DEFAULT 'external',
+    reset_token text,
+    reset_token_expiry timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
 DO $$ 
 BEGIN
     -- Rename legacy CamelCase columns if they exist

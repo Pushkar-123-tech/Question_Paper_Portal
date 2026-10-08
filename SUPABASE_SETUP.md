@@ -6,7 +6,7 @@ All routes now use Supabase exclusively.
 
 ## 📋 Required Setup
 
-You need to create 2 tables in Supabase:
+You need to create the `users`, `papers`, and `shared` tables in Supabase:
 
 ### Step 1: Go to Supabase Dashboard
 1. Open https://app.supabase.com
@@ -17,6 +17,18 @@ You need to create 2 tables in Supabase:
 ### Step 2: Copy & Execute the SQL below
 
 ```sql
+-- Create users table (required for signup, login, and admin access)
+CREATE TABLE IF NOT EXISTS public.users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL UNIQUE,
+  password text NOT NULL,
+  role text NOT NULL DEFAULT 'external',
+  reset_token text,
+  reset_token_expiry timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Create papers table
 CREATE TABLE IF NOT EXISTS public.papers (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -55,6 +67,11 @@ CREATE INDEX IF NOT EXISTS idx_shared_recipient ON public.shared(recipient_email
 ### Step 3: Click "Run" button
 
 ## ✅ After Setup
+
+For Vercel, set `SUPABASE_URL` and `SUPABASE_SECRET_KEY` (or
+`SUPABASE_SERVICE_ROLE_KEY`) in **Project Settings → Environment Variables**, then
+redeploy. The backend needs a Supabase service-role key; do not expose it in the
+frontend or commit it to the repository.
 
 1. Commit your code:
 ```bash

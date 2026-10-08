@@ -54,7 +54,11 @@ router.post('/login', async (req, res) => {
       .eq('email', email)
       .single();
 
-    if (error || !user) return res.status(400).json({ message: 'Invalid credentials' });
+    if (error && error.code !== 'PGRST116') {
+      console.error('Login user lookup failed:', error);
+      return res.status(500).json({ message: 'Authentication service unavailable' });
+    }
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
