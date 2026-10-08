@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.101.0",
     "@vercel/analytics": "^1.6.1",
+    "dotenv": "^17.3.1",
     "pg": "^8.20.0"
   }
 }

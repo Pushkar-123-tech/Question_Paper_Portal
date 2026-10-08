@@ -1,0 +1,137 @@
+{
+  "paperTitle": "Database Management Systems - End Semester Examination",
+  "examination": "End Semester Examination",
+  "semester": "III",
+  "academicYear": "2025-26",
+  "program": "B.Tech Computer Engineering",
+  "courseCode": "CS2304T",
+  "courseName": "Database Management Systems",
+  "prnNo": "",
+  "qpCode": "CS2304T-ESE-2026",
+  "duration": "2 Hours",
+  "maxMarks": 50,
+  "totalQuestions": 6,
+  "courseOutcomes": [
+    "CO1: Explain database concepts, architecture, and data models",
+    "CO2: Design relational schemas using keys and constraints",
+    "CO3: Write SQL queries for data definition and manipulation",
+    "CO4: Analyze normalization and transaction management"
+  ],
+  "instructions": [
+    "Answer all questions",
+    "Assume suitable data wherever necessary",
+    "Write SQL queries using standard SQL syntax",
+    "Draw neat diagrams wherever necessary"
+  ],
+  "sections": [
+    {
+      "title": "A",
+      "questions": [
+        {
+          "qno": 1,
+          "text": "Explain the three-schema architecture of a database management system.",
+          "marks": "5",
+          "bl": "BL 2",
+          "co": "CO1",
+          "subQuestions": [],
+          "orOptions": []
+        },
+        {
+          "qno": 2,
+          "text": "Explain primary key, candidate key, foreign key, and referential integrity with examples.",
+          "marks": "5",
+          "bl": "BL 2",
+          "co": "CO2",
+          "subQuestions": [],
+          "orOptions": []
+        },
+        {
+          "qno": 3,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [
+            {
+              "label": "A",
+              "text": "Write an SQL query to display the names of students who scored more than 80 marks.",
+              "marks": "2.5",
+              "bl": "BL 3",
+              "co": "CO3"
+            },
+            {
+              "label": "B",
+              "text": "Write an SQL query to find the average marks for each course.",
+              "marks": "2.5",
+              "bl": "BL 3",
+              "co": "CO3"
+            }
+          ],
+          "orOptions": []
+        }
+      ]
+    },
+    {
+      "title": "B",
+      "questions": [
+        {
+          "qno": 4,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Explain the process of converting an ER diagram into relational tables.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO2"
+            },
+            {
+              "label": "B",
+              "text": "Explain functional dependency and normalize a relation up to Third Normal Form.",
+              "marks": "10",
+              "bl": "BL 4",
+              "co": "CO4"
+            }
+          ]
+        },
+        {
+          "qno": 5,
+          "text": "",
+          "marks": "",
+          "bl": "",
+          "co": "",
+          "subQuestions": [],
+          "orOptions": [
+            {
+              "label": "A",
+              "text": "Explain transaction states and the ACID properties of transactions.",
+              "marks": "10",
+              "bl": "BL 2",
+              "co": "CO4"
+            },
+            {
+              "label": "B",
+              "text": "Describe two-phase locking and explain how it prevents concurrency problems.",
+              "marks": "10",
+              "bl": "BL 3",
+              "co": "CO4"
+            }
+          ]
+        },
+        {
+          "qno": 6,
+          "text": "Design a relational database for a library system and list suitable tables, attributes, keys, and relationships.",
+          "marks": "10",
+          "bl": "BL 6",
+          "co": "CO2",
+          "subQuestions": [],
+          "orOptions": []
+        }
+      ]
+    }
+  ]
+}
