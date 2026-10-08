@@ -10,7 +10,7 @@ You need to create the `users`, `papers`, and `shared` tables in Supabase:
 
 ### Step 1: Go to Supabase Dashboard
 1. Open https://app.supabase.com
-2. Click your project (lyfmqbvbxuktypcvypff)
+2. Select the project whose URL matches `SUPABASE_URL` in the backend configuration.
 3. Click **SQL Editor** (left sidebar)
 4. Click **New Query**
 
